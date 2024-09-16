@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: vets-service
+  config:
+    import: configserver:${CONFIG_SERVER_URL}
+  cache:
+    cache-names: vets
+  profiles:
+    active: production

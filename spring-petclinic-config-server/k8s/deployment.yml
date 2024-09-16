@@ -1,0 +1,121 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: config-server
+  name: config-server
+  namespace: pet-clinic
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: config-server
+  template:
+    metadata:
+      labels:
+        app: config-server
+        azure.workload.identity/use: "true"
+    spec:
+      serviceAccountName: pet-clinic-config-service-account
+      containers:
+      - image: "$CONTAINER_IMAGE"
+        name: config-server
+        env:
+        - name: CONFIG_SERVER_URL
+          valueFrom:
+            configMapKeyRef:
+              name: config-server
+              key: CONFIG_SERVER_URL
+        - name: APPLICATIONINSIGHTS_CONNECTION_STRING
+          valueFrom:
+            secretKeyRef:
+              name: kv-secrets-pet-clinic-config-svc
+              key: APP-INSIGHTS-CONNECTION-STRING
+              optional: false
+        - name: APPINSIGHTS_INSTRUMENTATIONKEY
+          valueFrom:
+            secretKeyRef:
+              name: kv-secrets-pet-clinic-config-svc
+              key: APP-INSIGHTS-INSTRUMENTATION-KEY
+              optional: false
+        - name: APPLICATIONINSIGHTS_CONFIGURATION_CONTENT
+          value: >-
+            {
+                "role": {
+                    "name": "config-server"
+                  }
+            }
+        - name: GIT_CONFIG_REPO_URI
+          valueFrom:
+            secretKeyRef:
+              name: kv-secrets-pet-clinic-config-svc
+              key: GIT-REPO-URI
+        - name: GIT_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: kv-secrets-pet-clinic-config-svc
+              key: GIT-REPO-USERNAME
+        - name: GIT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: kv-secrets-pet-clinic-config-svc
+              key: GIT-REPO-PASSWORD
+        - name: ENVIRONMENT
+          value: AKS
+        imagePullPolicy: Always
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /actuator/health
+            port: 8888
+            scheme: HTTP
+          initialDelaySeconds: 180
+          successThreshold: 1
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /actuator/health
+            port: 8888
+            scheme: HTTP
+          initialDelaySeconds: 30
+          successThreshold: 1
+        ports:
+        - containerPort: 8888
+          name: http
+          protocol: TCP
+        - containerPort: 9779
+          name: prometheus
+          protocol: TCP
+        - containerPort: 8778
+          name: jolokia
+          protocol: TCP
+        securityContext:
+          privileged: false
+        volumeMounts:
+          - name: secrets-store01-inline
+            mountPath: /mnt/secrets-store
+            readOnly: true
+      volumes:
+        - name: secrets-store01-inline
+          csi: 
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: kv-secrets-pet-clinic-config-svc
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: config-server
+  name: config-server
+  namespace: pet-clinic
+spec:
+  ports:
+  - port: 8888
+    protocol: TCP
+    targetPort: 8888
+  selector:
+    app: config-server
+  type: ClusterIP

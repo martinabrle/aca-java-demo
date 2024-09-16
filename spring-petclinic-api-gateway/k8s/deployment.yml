@@ -1,0 +1,131 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: api-gateway
+  name: api-gateway
+  namespace: pet-clinic
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api-gateway
+  template:
+    metadata:
+      labels:
+        app: api-gateway
+        azure.workload.identity/use: "true"
+    spec:
+      serviceAccountName: pet-clinic-app-service-account
+      containers:
+      - image: "$CONTAINER_IMAGE"
+        name: api-gateway
+        env:
+        - name: CONFIG_SERVER_URL
+          valueFrom:
+            configMapKeyRef:
+              name: config-server
+              key: CONFIG_SERVER_URL
+        - name: APPLICATIONINSIGHTS_CONNECTION_STRING
+          valueFrom:
+            secretKeyRef:
+              name: kv-secrets-pet-clinic-app
+              key: APP-INSIGHTS-CONNECTION-STRING
+              optional: false
+        - name: APPINSIGHTS_INSTRUMENTATIONKEY
+          valueFrom:
+            secretKeyRef:
+              name: kv-secrets-pet-clinic-app
+              key: APP-INSIGHTS-INSTRUMENTATION-KEY
+              optional: false
+        - name: APPLICATIONINSIGHTS_CONFIGURATION_CONTENT
+          value: >-
+            {
+                "role": {
+                    "name": "api-gateway"
+                  }
+            }
+        - name: ENVIRONMENT
+          value: AKS
+        imagePullPolicy: Always
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /actuator/health
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 180
+          successThreshold: 1
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /actuator/health
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 30
+          successThreshold: 1
+        ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+        - containerPort: 9779
+          name: prometheus
+          protocol: TCP
+        - containerPort: 8778
+          name: jolokia
+          protocol: TCP
+        securityContext:
+          privileged: false
+        volumeMounts:
+          - name: secrets-store01-inline
+            mountPath: /mnt/secrets-store
+            readOnly: true
+      volumes:
+        - name: secrets-store01-inline
+          csi: 
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: kv-secrets-pet-clinic-app
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-gateway
+  namespace: pet-clinic
+spec:
+  selector:
+    app: api-gateway
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8080
+
+---
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: api-gateway
+  namespace: pet-clinic
+  annotations:
+    kubernetes.io/ingress.class: azure/application-gateway
+    appgw.ingress.kubernetes.io/appgw-ssl-certificate: appGatewaySslCertPetClinic
+    appgw.ingress.kubernetes.io/request-timeout: "90"
+    appgw.ingress.kubernetes.io/cookie-based-affinity: "true"
+    appgw.ingress.kubernetes.io/backend-path-prefix: "/"
+    appgw.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  rules:
+  - host: $HOST_NAME
+    http:
+      paths:
+      - path: /
+        backend:
+          service:
+            name: api-gateway
+            port:
+              number: 80
+        pathType: Exact

@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  annotations:
+    azure.workload.identity/client-id: ${CUSTS_SVC_CLIENT_ID}
+  name: pet-clinic-custs-service-account
+  namespace: pet-clinic

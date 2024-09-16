@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config-server
+  namespace: todo
+data:
+  # property-like keys; each key maps to a simple value
+  SPRING_DATASOURCE_SHOW_SQL: "true"

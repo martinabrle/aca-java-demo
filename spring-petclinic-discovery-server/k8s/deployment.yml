@@ -1,0 +1,106 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: discovery-server
+  name: discovery-server
+  namespace: pet-clinic
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: discovery-server
+  template:
+    metadata:
+      labels:
+        app: discovery-server
+        azure.workload.identity/use: "true"
+    spec:
+      serviceAccountName: pet-clinic-app-service-account
+      containers:
+      - image: "$CONTAINER_IMAGE"
+        name: discovery-server
+        env:
+        - name: CONFIG_SERVER_URL
+          valueFrom:
+            configMapKeyRef:
+              name: config-server
+              key: CONFIG_SERVER_URL
+        - name: APPLICATIONINSIGHTS_CONNECTION_STRING
+          valueFrom:
+            secretKeyRef:
+              name: kv-secrets-pet-clinic-app
+              key: APP-INSIGHTS-CONNECTION-STRING
+              optional: false
+        - name: APPINSIGHTS_INSTRUMENTATIONKEY
+          valueFrom:
+            secretKeyRef:
+              name: kv-secrets-pet-clinic-app
+              key: APP-INSIGHTS-INSTRUMENTATION-KEY
+              optional: false
+        - name: APPLICATIONINSIGHTS_CONFIGURATION_CONTENT
+          value: >-
+            {
+                "role": {
+                    "name": "discovery-service"
+                  }
+            }
+        - name: ENVIRONMENT
+          value: AKS
+        imagePullPolicy: Always
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /actuator/health
+            port: 8761
+            scheme: HTTP
+          initialDelaySeconds: 180
+          successThreshold: 1
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /actuator/health
+            port: 8761
+            scheme: HTTP
+          initialDelaySeconds: 30
+          successThreshold: 1
+        ports:
+        - containerPort: 8761
+          name: http
+          protocol: TCP
+        - containerPort: 9779
+          name: prometheus
+          protocol: TCP
+        - containerPort: 8778
+          name: jolokia
+          protocol: TCP
+        securityContext:
+          privileged: false
+        volumeMounts:
+          - name: secrets-store01-inline
+            mountPath: /mnt/secrets-store
+            readOnly: true
+      volumes:
+        - name: secrets-store01-inline
+          csi: 
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: kv-secrets-pet-clinic-app
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: discovery-server
+  name: discovery-server
+  namespace: pet-clinic
+spec:
+  ports:
+  - port: 8761
+    protocol: TCP
+    targetPort: 8761
+  selector:
+    app: discovery-server
+  type: ClusterIP

@@ -1,0 +1,221 @@
+name: 96-Continuous-Delivery-Pets-Custs-Svc
+
+on:
+  # release: - causes problem with az login with a federated identity - asterisk not supported
+  #   types: [released]
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
+  workflow_dispatch:
+    inputs:
+      version:
+        required: true
+        type: string
+        description: Full version tag (e.g. "v1.0.5")
+
+jobs:
+  deploy:
+    env:
+      SEMVER_NAMESPACE: spring-petclinic-customers-service
+      SEMVER_CHANGE_PATH: spring-petclinic-customers-service
+      ARTIFACT_NAME: spring-petclinic-customers-service
+      SRC_DIR: spring-petclinic-customers-service
+      JAVA_VERSION: 17
+      USER_IDENTITY_NAME: ${{secrets.AKS_NAME}}-pet-clinic-custs-identity
+      PGSQL_NAME: ${{secrets.PGSQL_NAME}}
+      DB: ${{secrets.PET_CLINIC_DB_NAME}}
+      DB_USER_NAME: ${{secrets.PET_CLINIC_CUSTS_SVC_DB_USER_NAME}}
+      DBA_GROUP_NAME: ${{secrets.DBA_GROUP_NAME}}
+      CONTAINER_REGISTRY_SUBSCRIPTION_ID: ${{secrets.CONTAINER_REGISTRY_SUBSCRIPTION_ID}}
+      CONTAINER_REGISTRY_NAME: ${{secrets.CONTAINER_REGISTRY_NAME}}
+      AKS_RESOURCE_GROUP: ${{secrets.AKS_RESOURCE_GROUP}}
+      AKS_NAME: ${{secrets.AKS_NAME}}
+      AKS_SUBSCRIPTION_ID: ${{secrets.AKS_SUBSCRIPTION_ID}}
+
+    # when called from another workflow directly, it inherits the event name from the caller workflow
+    # (push in this case when called from 10-continuous-integration.yml)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+      id-token: write
+    if: ${{ startsWith(github.ref, 'refs/tags/v') || ((github.event_name == 'workflow_dispatch' || github.event_name == 'workflow_call' || (github.event_name == 'push' && github.ref == 'refs/heads/main')) && startsWith(inputs.version,'v')) }} 
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Init version numbers
+        id: versions
+        run: |
+          releaseVersion=""
+          if [[ "${{github.event_name}}" == "workflow_dispatch" ]]; then
+            releaseVersion="${{inputs.version}}" 
+          elif [[ "${{github.event_name}}" == "workflow_call" ]]; then
+            releaseVersion="${{inputs.version}}" 
+          elif [[ "${{github.event_name}}" == "release" ]]; then
+            releaseVersion="${{github.event.release.tag_name}}" 
+          elif [[ "${{github.event_name}}" == "push" ]]; then
+            releaseVersion="${{inputs.version}}" 
+          else
+            echo "Unknown trigger: '${{github.event_name}}'"
+            exit 1
+          fi
+          echo "Release version to deploy: ${releaseVersion}"
+
+          if [[ ${releaseVersion::1} == "v" ]]; then
+            releaseVersionNumber="${releaseVersion:1}"
+          else
+            releaseVersionNumber="${releaseVersion}"
+          fi
+
+          echo "Release version number to deploy: ${releaseVersionNumber}"
+          echo "VERSION=${releaseVersionNumber}" >> $GITHUB_OUTPUT
+          echo "VERSION_TAG=v${releaseVersionNumber}-${{env.ARTIFACT_NAME}}" >> $GITHUB_OUTPUT
+          echo "RELEASE_DIR_NAME=${{env.ARTIFACT_NAME}}-${releaseVersionNumber}" >> $GITHUB_OUTPUT
+          echo "RELEASE_ARCHIVE_NAME=${{env.ARTIFACT_NAME}}-${releaseVersionNumber}.zip" >> $GITHUB_OUTPUT
+          echo "RELEASE_FILE_NAME=${{env.ARTIFACT_NAME}}-${releaseVersionNumber}.jar" >> $GITHUB_OUTPUT
+
+      - name: Download release
+        id: download_release
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION_TAG: ${{steps.versions.outputs.VERSION_TAG}}
+          RELEASE_ARCHIVE_NAME: ${{steps.versions.outputs.RELEASE_ARCHIVE_NAME}}
+        run: |
+            echo "RELEASE_EXISTS=false" >> $GITHUB_OUTPUT
+            gh release download ${{env.VERSION_TAG}} -D ./
+            echo "Unzipping the release archive file: ${{env.RELEASE_ARCHIVE_NAME}}"
+            unzip ${{env.RELEASE_ARCHIVE_NAME}}
+            echo "RELEASE_EXISTS=true" >> $GITHUB_OUTPUT
+
+      - name: Display parameters
+        id: params
+        run: |
+          echo "ARTIFACT_NAME=${{env.ARTIFACT_NAME}}"
+          echo "VERSION=${{steps.versions.outputs.VERSION}}"
+          echo "VERSION_TAG=${{steps.versions.outputs.VERSION_TAG}}"
+          echo "RELEASE_EXISTS=${{steps.download_release.outputs.RELEASE_EXISTS}}"
+          echo "RELEASE_ARCHIVE_NAME=${{steps.versions.outputs.RELEASE_ARCHIVE_NAME}}"
+          echo "RELEASE_DIR_NAME=${{steps.versions.outputs.RELEASE_DIR_NAME}}"
+          echo "RELEASE_FILE_NAME=${{steps.versions.outputs.RELEASE_FILE_NAME}}"
+          echo "JAVA_VERSION=${{env.JAVA_VERSION}}"
+          echo "DB=${{env.DB}}"
+
+          echo "GITHUB_SHA=${{github.sha}}"
+          echo "GITHUB_REF=${{github.ref}}"
+          echo "GITHUB_EVENT_NAME=${{github.event_name}}"
+
+          echo "DB_NAME=${{env.DB}}" >> "$GITHUB_OUTPUT"
+          echo "DB_NAME: ${{env.DB}}"
+          
+      - name: Fail if release does not exist
+        if: ${{ steps.download_release.outputs.RELEASE_EXISTS == 'false' }}
+        env:
+          VERSION: ${{steps.versions.outputs.VERSION}}
+        run: |
+            echo "Release '${{env.VERSION}}' does not exist."
+            exit 1
+
+      - name: Azure login in AKS Subscription # https://learn.microsoft.com/en-us/azure/developer/github/connect-from-azure
+        uses: azure/login@v2
+        with:
+          client-id: "${{secrets.AAD_CLIENT_ID}}"
+          tenant-id: "${{secrets.AAD_TENANT_ID}}"
+          subscription-id: "${{env.CONTAINER_REGISTRY_SUBSCRIPTION_ID}}"
+
+      - name: Check container exists in registry
+        id: check_container_exists
+        continue-on-error: true
+        env:
+          VERSION: ${{steps.versions.outputs.VERSION}}
+        run: |
+          echo "CONTAINER_EXISTS=false" >> $GITHUB_OUTPUT
+          az acr repository show --name ${{env.CONTAINER_REGISTRY_NAME}} --image "${{env.ARTIFACT_NAME}}:${{env.VERSION}}" --subscription "${{env.CONTAINER_REGISTRY_SUBSCRIPTION_ID}}"
+          echo "CONTAINER_EXISTS=true" >> $GITHUB_OUTPUT
+
+      - name: Publish container if it does not exist
+        if: ${{ steps.check_container_exists.outputs.CONTAINER_EXISTS == 'false' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{steps.versions.outputs.VERSION}}
+          RELEASE_ARCHIVE_NAME: ${{steps.versions.outputs.RELEASE_ARCHIVE_NAME}}
+          RELEASE_DIR_NAME: ${{steps.versions.outputs.RELEASE_DIR_NAME}}
+          RELEASE_FILE_NAME: ${{steps.versions.outputs.RELEASE_FILE_NAME}}
+        run: |
+          ls -la
+          if [[ ! -f "${{env.RELEASE_DIR_NAME}}/${{env.RELEASE_FILE_NAME}}" ]]; then
+            echo "'${{env.RELEASE_DIR_NAME}}/${{env.RELEASE_FILE_NAME}}' does not exist."
+            exit 1
+          fi
+          
+          cd ./${{env.RELEASE_DIR_NAME}}
+          mv ./Dockerfile ./Dockerfile.tmp
+          # Dockerfile syntax is driving me bonkers. This should work...
+          cat ./Dockerfile.tmp | ARTIFACT_NAME_ARG=${{env.ARTIFACT_NAME}} VERSION_ARG=${{env.VERSION}} VERSION_ARG=${{env.VERSION}} envsubst > ./Dockerfile
+          cat ./Dockerfile
+  
+          az acr build ./ -r ${{env.CONTAINER_REGISTRY_NAME}} -t "${{env.ARTIFACT_NAME}}:${{env.VERSION}}" --file ./Dockerfile --subscription "${{env.CONTAINER_REGISTRY_SUBSCRIPTION_ID}}"
+          cd ..
+  
+      - name: Synchronize DB Schema
+        if: ${{ env.DB != '' }}
+        env:
+          PGSQL_SERVER_NAME: '${{env.PGSQL_NAME}}.postgres.database.azure.com'
+        run: |
+          # Figure which service user to use and it's appId .. never know when to use id and when to use appId.
+          appClientId=`az ad sp list --display-name "${{env.USER_IDENTITY_NAME}}" --query "[?displayName=='${{env.USER_IDENTITY_NAME}}'].appId" --out tsv`
+        
+          echo "DB user: ${{env.DB_USER_NAME}}"
+          echo "Managed identity name: ${{env.USER_IDENTITY_NAME}}"
+          echo "Managed identity appClientId: ${appClientId}"
+            
+          # Retrieve PGSQL access token 
+          export PGPASSWORD=`az account get-access-token --resource-type oss-rdbms --query "[accessToken]" --output tsv`
+          echo "Token: ${PGPASSWORD}"
+            
+          # Create a new service user if needed
+          dbUserExists=`psql --set=sslmode=require -h ${{env.PGSQL_SERVER_NAME}} -p 5432 -d "${{env.DB}}" -U "${{env.DBA_GROUP_NAME}}" -tAc "SELECT 1 FROM pg_roles WHERE rolname='${{env.DB_USER_NAME}}';" -v ON_ERROR_STOP=1`
+          if [[ $dbUserExists -ne '1' ]]; then
+            echo "User '${{env.DB_USER_NAME}}' does not exist yet, creating the user"
+            psql --set=sslmode=require -h ${{env.PGSQL_SERVER_NAME}} -p 5432 -d "${{env.DB}}" -U "${{env.DBA_GROUP_NAME}}" -tAc "CREATE ROLE ${{env.DB_USER_NAME}} LOGIN;" -v ON_ERROR_STOP=1
+          else
+            echo "User '${{env.DB_USER_NAME}}' already exists, skipping the creation"
+          fi
+          psql --set=sslmode=require -h ${{env.PGSQL_SERVER_NAME}} -p 5432 -d "${{env.DB}}" -U "${{env.DBA_GROUP_NAME}}" -tAc "security label for pgaadauth on role ${{env.DB_USER_NAME}} is 'aadauth,oid=${appClientId},type=service';" -v ON_ERROR_STOP=1
+            
+          # Sync DB Schema
+          psql --set=sslmode=require -h "${{env.PGSQL_SERVER_NAME}}" -p 5432 -d "${{env.DB}}" -U "${{env.DBA_GROUP_NAME}}" --file=./${{env.ARTIFACT_NAME}}-${{steps.versions.outputs.VERSION}}/db/pgsql/schema.sql -v ON_ERROR_STOP=1
+          # Load (demo) data
+          psql --set=sslmode=require -h "${{env.PGSQL_SERVER_NAME}}" -p 5432 -d "${{env.DB}}" -U "${{env.DBA_GROUP_NAME}}" --file=./${{env.ARTIFACT_NAME}}-${{steps.versions.outputs.VERSION}}/db/pgsql/data.sql -v ON_ERROR_STOP=1
+            
+          # Grant the newly create service user all necessary rights
+          psql --set=sslmode=require -h "${{env.PGSQL_SERVER_NAME}}" -p 5432 -d "${{env.DB}}" -U "${{env.DBA_GROUP_NAME}}" -tAc "GRANT CONNECT ON DATABASE ${{env.DB}} TO ${{env.DB_USER_NAME}};" -v ON_ERROR_STOP=1
+          psql --set=sslmode=require -h "${{env.PGSQL_SERVER_NAME}}" -p 5432 -d "${{env.DB}}" -U "${{env.DBA_GROUP_NAME}}" -tAc "GRANT USAGE ON SCHEMA public TO ${{env.DB_USER_NAME}};" -v ON_ERROR_STOP=1
+          psql --set=sslmode=require -h "${{env.PGSQL_SERVER_NAME}}" -p 5432 -d "${{env.DB}}" -U "${{env.DBA_GROUP_NAME}}" -tAc "GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO ${{env.DB_USER_NAME}};" -v ON_ERROR_STOP=1
+
+    # - name: Test connection to AKS
+    #   run: |
+    #     az aks command invoke \
+    #       --resource-group ${{env.AKS_RESOURCE_GROUP}} \
+    #       --name ${{env.AKS_NAME}} \
+    #       --command "kubectl get ns" \
+    #       --subscription "${{env.AKS_SUBSCRIPTION_ID}}"
+
+      - name: Deploy app into AKS
+        env:
+          DEPLOYMENT_SUFFIX: ""
+          CONTAINER_IMAGE: ${{env.CONTAINER_REGISTRY_NAME}}.azurecr.io/${{env.ARTIFACT_NAME}}:${{steps.versions.outputs.VERSION}}
+          RELEASE_DIR_NAME: ${{steps.versions.outputs.RELEASE_DIR_NAME}}
+        run: |
+          cat ./${{env.RELEASE_DIR_NAME}}/k8s/deployment.yml | CONTAINER_IMAGE=${{env.CONTAINER_IMAGE}} DEPLOYMENT_SUFFIX=${{env.DEPLOYMENT_SUFFIX}} envsubst > ./deployment.yml.tmp
+          cat ./deployment.yml.tmp
+          az aks command invoke \
+            --resource-group ${{env.AKS_RESOURCE_GROUP}} \
+            --name ${{env.AKS_NAME}} \
+            --command "kubectl apply -f deployment.yml.tmp" \
+            --file deployment.yml.tmp \
+            --subscription "${{env.AKS_SUBSCRIPTION_ID}}"

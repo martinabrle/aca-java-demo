@@ -1,0 +1,231 @@
+name: 73-Continuous-Integration-Pets-Admin-Srv
+
+on:
+  push:
+   branches:
+     - main
+   paths:
+     - 'spring-petclinic-admin-server/**'
+
+  workflow_call:
+  
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+      id-token: write
+    env:
+      SEMVER_NAMESPACE: spring-petclinic-admin-server
+      SEMVER_CHANGE_PATH: spring-petclinic-admin-server
+      ARTIFACT_NAME: spring-petclinic-admin-server
+      SRC_DIR: spring-petclinic-admin-server
+      JAVA_VERSION: 17
+      DB: ''
+      USER_IDENTITY_NAME: ${{secrets.AKS_NAME}}-pet-clinic-app-identity
+      DB_USER_NAME: ''
+      CONTAINER_REGISTRY_SUBSCRIPTION_ID: ${{secrets.CONTAINER_REGISTRY_SUBSCRIPTION_ID}}
+      CONTAINER_REGISTRY_NAME: ${{secrets.CONTAINER_REGISTRY_NAME}}
+    outputs:
+      VERSION: ${{steps.versions.outputs.VERSION}}
+      VERSION_TAG: ${{steps.versions.outputs.VERSION_TAG}}
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Semver
+      uses: PaulHatch/semantic-version@v5.4.0
+      id: semver_version
+      with:
+        tag_prefix: "v"
+        major_pattern: "(MAJOR)"
+        major_regexp_flags: ""
+        minor_pattern: "(MINOR)"
+        minor_regexp_flags: ""
+        version_format: "${major}.${minor}.${patch}"
+        change_path: ${{env.SEMVER_CHANGE_PATH}}
+        namespace: ${{env.SEMVER_NAMESPACE}}
+        bump_each_commit: true
+        search_commit_body: true
+        user_format_type: "csv"
+
+    - name: Check release exists
+      id: check_release_exists
+      continue-on-error: true
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        echo "RELEASE_EXISTS=false" >> $GITHUB_OUTPUT
+        gh release view ${{steps.semver_version.outputs.version_tag}} -R ${{ github.repository }}
+        echo "RELEASE_EXISTS=true" >> $GITHUB_OUTPUT
+    
+    - name: Set versions
+      id: versions
+      run: |
+        echo "RELEASE_EXISTS=${{steps.check_release_exists.outputs.RELEASE_EXISTS}}" >> $GITHUB_OUTPUT
+        echo "VERSION=${{steps.semver_version.outputs.version}}" >> $GITHUB_OUTPUT
+        echo "VERSION_TAG=${{steps.semver_version.outputs.version_tag}}" >> $GITHUB_OUTPUT
+        echo "RELEASE_ARCHIVE_NAME=${{env.ARTIFACT_NAME}}-${{steps.semver_version.outputs.version}}.zip" >> $GITHUB_OUTPUT
+        echo "RELEASE_DIR_NAME=${{env.ARTIFACT_NAME}}-${{steps.semver_version.outputs.version}}" >> $GITHUB_OUTPUT
+        echo "RELEASE_FILE_NAME=${{env.ARTIFACT_NAME}}-${{steps.semver_version.outputs.version}}.jar" >> $GITHUB_OUTPUT
+
+    - name: Display parameters
+      id: params
+      run: |
+        echo "ARTIFACT_NAME=${{env.ARTIFACT_NAME}}"
+        echo "VERSION=${{steps.versions.outputs.VERSION}}"
+        echo "VERSION_TAG=${{steps.versions.outputs.VERSION_TAG}}"
+        echo "RELEASE_EXISTS=${{steps.versions.outputs.RELEASE_EXISTS}}"
+        echo "RELEASE_ARCHIVE_NAME=${{steps.versions.outputs.RELEASE_ARCHIVE_NAME}}"
+        echo "RELEASE_DIR_NAME=${{steps.versions.outputs.RELEASE_DIR_NAME}}"
+        echo "RELEASE_FILE_NAME=${{steps.versions.outputs.RELEASE_FILE_NAME}}"
+        echo "JAVA_VERSION=${{env.JAVA_VERSION}}"
+        echo "DB=${{env.DB}}"
+
+        echo "GITHUB_SHA=${{github.sha}}"
+        echo "GITHUB_REF=${{github.ref}}"
+        echo "GITHUB_EVENT_NAME=${{github.event_name}}"
+
+        echo "DB_NAME=${{env.DB}}" >> "$GITHUB_OUTPUT"
+        echo "DB_NAME: ${{env.DB}}"
+        
+    - name: Set up JDK
+      if: steps.versions.outputs.RELEASE_EXISTS == 'false'
+      uses: actions/setup-java@v3
+      with:
+        java-version: ${{env.JAVA_VERSION}}
+        distribution: 'microsoft'
+
+    - name: Set the release version
+      if: steps.versions.outputs.RELEASE_EXISTS == 'false'
+      working-directory: ${{env.SRC_DIR}}
+      env:
+        VERSION: ${{steps.versions.outputs.VERSION}}
+      run: |
+        mv ./pom.xml ./pom.xml.bak
+        ls -la
+        java ../scripts/deployment/utils/JavaUtils.java -update_pom_version ./pom.xml.bak ${{env.VERSION}} ./pom.xml
+
+    - name: Set the git commit id
+      if: steps.versions.outputs.RELEASE_EXISTS == 'false'
+      working-directory: ${{env.SRC_DIR}}
+      run: |
+        mv ./pom.xml ./pom.xml.bak
+        ls -la
+        java ../scripts/deployment/utils/JavaUtils.java -update_git_commit_id ./pom.xml.bak "${GITHUB_SHA}" ./pom.xml
+    
+    - name: Build the .jar
+      if: steps.versions.outputs.RELEASE_EXISTS == 'false'
+      working-directory: ${{env.SRC_DIR}}
+      run: |
+        export PORT=8080
+        export SPRING_PROFILES_ACTIVE=local
+        mvn clean package -DskipTests
+    
+    - name: Download Application Insights Agent
+      if: steps.versions.outputs.RELEASE_EXISTS == 'false'
+      working-directory: ${{env.SRC_DIR}}
+      run: |
+         wget -q -O ./ai.jar https://github.com/microsoft/ApplicationInsights-Java/releases/download/3.4.12/applicationinsights-agent-3.4.12.jar
+    
+    - name: Build release ZIP archive
+      if: steps.versions.outputs.RELEASE_EXISTS == 'false'
+      working-directory: ${{env.SRC_DIR}}
+      id: create_archive
+      env:
+        VERSION: ${{steps.versions.outputs.VERSION}}
+        RELEASE_ARCHIVE_NAME: ${{steps.versions.outputs.RELEASE_ARCHIVE_NAME}}
+        RELEASE_DIR_NAME: ${{steps.versions.outputs.RELEASE_DIR_NAME}}
+        RELEASE_FILE_NAME: ${{steps.versions.outputs.RELEASE_FILE_NAME}}
+      run: |
+        mkdir ./${{env.RELEASE_DIR_NAME}}
+        ls -la ./target
+        if [[ ! -f "./target/${{env.RELEASE_FILE_NAME}}" ]]; then
+          echo "File ./target/${{env.RELEASE_FILE_NAME}} does not exists. Check the build script."
+          exit 1
+        fi
+        mv ./target/${{env.RELEASE_FILE_NAME}} ./${{env.RELEASE_DIR_NAME}}
+        cp ./Dockerfile ./${{env.RELEASE_DIR_NAME}}/Dockerfile
+        cp -R ./k8s ./${{env.RELEASE_DIR_NAME}}/k8s
+        if [[ -d "./src/main/resources/db" ]]; then
+          cp -R ./src/main/resources/db ./${{env.RELEASE_DIR_NAME}}/db
+        fi
+        mv ./ai.jar ./${{env.RELEASE_DIR_NAME}}
+
+        zip -r ${{env.RELEASE_ARCHIVE_NAME}} ./${{env.RELEASE_DIR_NAME}}
+        ls -la
+        echo "RELEASE_NAME=${{env.RELEASE_DIR_NAME}}" >> $GITHUB_OUTPUT
+
+    # Only for troubleshooting, otherwise not needed, takes a lot of time
+    # - name: Upload build artifact
+    #   uses: actions/upload-artifact@v3
+    #   env:
+    #     RELEASE_ARCHIVE_NAME: ${{steps.versions.outputs.RELEASE_ARCHIVE_NAME}}
+    #   with:
+    #     name: ${{env.ARTIFACT_NAME}}-${{steps.versions.outputs.VERSION}}
+    #     path: ./${{env.RELEASE_ARCHIVE_NAME}}
+    #     if-no-files-found: error
+    #     retention-days: 1          
+
+    - name: Release build artifact
+      if: steps.versions.outputs.RELEASE_EXISTS == 'false'
+      working-directory: ${{env.SRC_DIR}}
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        VERSION: ${{steps.versions.outputs.VERSION}}
+        VERSION_TAG: ${{steps.versions.outputs.VERSION_TAG}}
+        RELEASE_ARCHIVE_NAME: ${{steps.versions.outputs.RELEASE_ARCHIVE_NAME}}
+      run: |
+        ls -la ./${{env.RELEASE_ARCHIVE_NAME}}
+        gh release create ${{env.VERSION_TAG}} ${{env.RELEASE_ARCHIVE_NAME}} --notes "Auto release ${{env.VERSION_TAG}}"
+    
+    - name: Azure login in AKS Subscription # https://learn.microsoft.com/en-us/azure/developer/github/connect-from-azure
+      uses: azure/login@v2
+      with:
+        client-id: "${{secrets.AAD_CLIENT_ID}}"
+        tenant-id: "${{secrets.AAD_TENANT_ID}}"
+        subscription-id: "${{env.CONTAINER_REGISTRY_SUBSCRIPTION_ID}}"
+
+    - name: Build a new container image
+      id: build_container
+      working-directory: ${{env.SRC_DIR}}
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        VERSION: ${{steps.versions.outputs.VERSION}}
+        VERSION_TAG: ${{steps.versions.outputs.VERSION_TAG}}
+        RELEASE_EXISTS: ${{steps.versions.outputs.RELEASE_EXISTS}}
+        RELEASE_ARCHIVE_NAME: ${{steps.versions.outputs.RELEASE_ARCHIVE_NAME}}
+        RELEASE_DIR_NAME: ${{steps.versions.outputs.RELEASE_DIR_NAME}}
+        RELEASE_FILE_NAME: ${{steps.versions.outputs.RELEASE_FILE_NAME}}
+      run: |
+        if [[ "${{env.RELEASE_EXISTS}}" == 'true' ]]; then
+          echo "Release was not created as it exists already, downloading the existing release..."
+          gh release download ${{env.VERSION_TAG}} -D ./
+          echo "Unzipping the release archive file: ${{env.RELEASE_ARCHIVE_NAME}}"
+          unzip ${{env.RELEASE_ARCHIVE_NAME}}
+          ls -la
+          if [[ ! -f "${{env.RELEASE_DIR_NAME}}/${{env.RELEASE_FILE_NAME}}" ]]; then
+            echo "'${{env.RELEASE_DIR_NAME}}/${{env.RELEASE_FILE_NAME}}' does not exist."
+            exit 1
+          fi
+        fi
+
+        cd ./${{env.RELEASE_DIR_NAME}}
+        mv ./Dockerfile ./Dockerfile.tmp
+        # Dockerfile syntax is driving me bonkers. This should work...
+        cat ./Dockerfile.tmp | ARTIFACT_NAME_ARG=${{env.ARTIFACT_NAME}} VERSION_ARG=${{env.VERSION}} VERSION_ARG=${{env.VERSION}} envsubst > ./Dockerfile
+        cat ./Dockerfile
+
+        az acr build ./ -r ${{env.CONTAINER_REGISTRY_NAME}} -t "${{env.ARTIFACT_NAME}}:${{env.VERSION}}" --file ./Dockerfile --subscription "${{env.CONTAINER_REGISTRY_SUBSCRIPTION_ID}}"
+        cd ..
+
+  deploy:
+    needs: [build]
+    uses: ./.github/workflows/93-continuous-delivery-pets-admin-srv.yml
+    with:
+      version: 'v${{needs.build.outputs.VERSION}}'
+    secrets: inherit

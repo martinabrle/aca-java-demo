@@ -1,0 +1,15 @@
+server.port: 8888
+spring:
+  cloud:
+    config:
+      server:
+        git:
+          uri: ${GIT_CONFIG_REPO_URI} # example: https://github.com/spring-petclinic/spring-petclinic-microservices-config
+          #todo: investigate if needed: searchPaths: spring-petclinic-config-server
+          username: ${GIT_USERNAME}
+          password: ${GIT_PASSWORD}
+          default-label: main
+        # Use the File System Backend to avoid git pulling. Enable "native" profile in the Config Server.
+        native:
+          searchLocations: file:///${GIT_REPO}
+

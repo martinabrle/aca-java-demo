@@ -1,0 +1,9 @@
+name: 00-Init-Repository-Todo-App
+
+on:
+  workflow_dispatch:
+
+jobs:
+    todo-app:
+        uses: ./.github/workflows/71-continuous-integration-todo-app.yml
+        secrets: inherit
