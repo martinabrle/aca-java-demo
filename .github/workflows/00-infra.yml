@@ -8,28 +8,25 @@ on:
 jobs:
   deploy_infra:
     runs-on: ubuntu-latest
-    permissions:
-        id-token: write
-        contents: read
     env:
-      AKS_NAME: ${{secrets.AKS_NAME}}
-      AKS_SUBSCRIPTION_ID: ${{secrets.AKS_SUBSCRIPTION_ID}}
-      AKS_RESOURCE_GROUP: ${{secrets.AKS_RESOURCE_GROUP}}
-      PGSQL_SUBSCRIPTION_ID: ${{secrets.PGSQL_SUBSCRIPTION_ID || secrets.AKS_SUBSCRIPTION_ID}}
-      PGSQL_RESOURCE_GROUP: ${{secrets.PGSQL_RESOURCE_GROUP || secrets.AKS_RESOURCE_GROUP}}
-      CONTAINER_REGISTRY_SUBSCRIPTION_ID: ${{secrets.CONTAINER_REGISTRY_SUBSCRIPTION_ID || secrets.AKS_SUBSCRIPTION_ID}}
-      CONTAINER_REGISTRY_RESOURCE_GROUP: ${{secrets.CONTAINER_REGISTRY_RESOURCE_GROUP || secrets.AKS_RESOURCE_GROUP}}
-      LOG_ANALYTICS_WRKSPC_SUBSCRIPTION_ID: ${{secrets.LOG_ANALYTICS_WRKSPC_SUBSCRIPTION_ID || secrets.AKS_SUBSCRIPTION_ID}}
-      LOG_ANALYTICS_WRKSPC_RESOURCE_GROUP: ${{secrets.LOG_ANALYTICS_WRKSPC_RESOURCE_GROUP || secrets.AKS_RESOURCE_GROUP}}
+      ACA_NAME: ${{secrets.ACA_NAME}}
+      ACA_SUBSCRIPTION_ID: ${{secrets.ACA_SUBSCRIPTION_ID}}
+      ACA_RESOURCE_GROUP: ${{secrets.ACA_RESOURCE_GROUP}}
+      PGSQL_SUBSCRIPTION_ID: ${{secrets.PGSQL_SUBSCRIPTION_ID || secrets.ACA_SUBSCRIPTION_ID}}
+      PGSQL_RESOURCE_GROUP: ${{secrets.PGSQL_RESOURCE_GROUP || secrets.ACA_RESOURCE_GROUP}}
+      CONTAINER_REGISTRY_SUBSCRIPTION_ID: ${{secrets.CONTAINER_REGISTRY_SUBSCRIPTION_ID || secrets.ACA_SUBSCRIPTION_ID}}
+      CONTAINER_REGISTRY_RESOURCE_GROUP: ${{secrets.CONTAINER_REGISTRY_RESOURCE_GROUP || secrets.ACA_RESOURCE_GROUP}}
+      LOG_ANALYTICS_WRKSPC_SUBSCRIPTION_ID: ${{secrets.LOG_ANALYTICS_WRKSPC_SUBSCRIPTION_ID || secrets.ACA_SUBSCRIPTION_ID}}
+      LOG_ANALYTICS_WRKSPC_RESOURCE_GROUP: ${{secrets.LOG_ANALYTICS_WRKSPC_RESOURCE_GROUP || secrets.ACA_RESOURCE_GROUP}}
     steps:
       - uses: actions/checkout@v4
       
-      - name: Azure login in AKS Subscription # https://learn.microsoft.com/en-us/azure/developer/github/connect-from-azure
+      - name: Azure login in ACA Subscription # https://learn.microsoft.com/en-us/azure/developer/github/connect-from-azure
         uses: azure/login@v2
         with:
           client-id: "${{secrets.AAD_CLIENT_ID}}"
           tenant-id: "${{secrets.AAD_TENANT_ID}}"
-          subscription-id: "${{env.AKS_SUBSCRIPTION_ID}}"
+          subscription-id: "${{env.ACA_SUBSCRIPTION_ID}}"
 
       - name: Create Azure resource group
         working-directory: ./scripts/deployment/templates/bicep/
@@ -38,8 +35,8 @@ jobs:
               -l "${{secrets.AZURE_LOCATION}}" \
               --template-file ./resource_groups.bicep \
               --parameters location="${{secrets.AZURE_LOCATION}}" \
-                           aksRG="${{env.AKS_RESOURCE_GROUP}}" \
-                           aksTags="${{vars.AKS_RESOURCE_TAGS}}" \
+                           acaRG="${{env.ACA_RESOURCE_GROUP}}" \
+                           acaTags="${{vars.ACA_RESOURCE_TAGS}}" \
                            containerRegistrySubscriptionId="${{env.CONTAINER_REGISTRY_SUBSCRIPTION_ID}}" \
                            containerRegistryRG="${{env.CONTAINER_REGISTRY_RESOURCE_GROUP}}" \
                            containerRegistryTags="${{vars.CONTAINER_REGISTRY_RESOURCE_TAGS}}" \
@@ -59,62 +56,23 @@ jobs:
             exit 1
           fi
 
-          if [[ -z "${{secrets.AKS_ADMIN_GROUP_NAME}}" ]]; then
-            echo "AKS Admin Group name is not set"
-            exit 1
-          fi
-
-          if [[ -z "${{secrets.TODO_APP_VIEW_AD_GROUP_NAME}}" ]]; then
-            echo "TODO_APP Viewer Group name is not set"
-            exit 1
-          fi
-
-          if [[ -z "${{secrets.TODO_APP_EDIT_AD_GROUP_NAME}}" ]]; then
-            echo "TODO_APP Admin Group name is not set"
-            exit 1
-          fi
-          if [[ -z "${{secrets.PET_CLINIC_APP_VIEW_AD_GROUP_NAME}}" ]]; then
-            echo "PET_CLINIC Viewer Group name is not set"
-            exit 1
-          fi
-
-          if [[ -z "${{secrets.PET_CLINIC_APP_EDIT_AD_GROUP_NAME}}" ]]; then
-            echo "PET_CLINIC Admin Group name is not set"
-            exit 1
-          fi
-
-          TODO_APP_VIEW_AD_GROUP_ID=`az ad group show --group "${{secrets.TODO_APP_VIEW_AD_GROUP_NAME}}" --query '[id]' -o tsv`
-          echo "TODO_APP_VIEW_AD_GROUP_ID=${TODO_APP_VIEW_AD_GROUP_ID}" >> $GITHUB_OUTPUT
-          
-          TODO_APP_EDIT_AD_GROUP_ID=`az ad group show --group "${{secrets.TODO_APP_EDIT_AD_GROUP_NAME}}" --query '[id]' -o tsv`
-          echo "TODO_APP_EDIT_AD_GROUP_ID=${TODO_APP_EDIT_AD_GROUP_ID}" >> $GITHUB_OUTPUT
-          
-          PET_CLINIC_APP_VIEW_AD_GROUP_ID=`az ad group show --group "${{secrets.PET_CLINIC_APP_VIEW_AD_GROUP_NAME}}" --query '[id]' -o tsv`
-          echo "PET_CLINIC_APP_VIEW_AD_GROUP_ID=${PET_CLINIC_APP_VIEW_AD_GROUP_ID}" >> $GITHUB_OUTPUT
-          
-          PET_CLINIC_APP_EDIT_AD_GROUP_ID=`az ad group show --group "${{secrets.PET_CLINIC_APP_EDIT_AD_GROUP_NAME}}" --query '[id]' -o tsv`
-          echo "PET_CLINIC_APP_EDIT_AD_GROUP_ID=${PET_CLINIC_APP_EDIT_AD_GROUP_ID}" >> $GITHUB_OUTPUT
-          
           dbaGroupId=`az ad group show --group "${{secrets.DBA_GROUP_NAME}}" --query '[id]' -o tsv`
           echo "DBA_GROUP_ID=${dbaGroupId}" >> $GITHUB_OUTPUT
-          aksGroupId=`az ad group show --group "${{secrets.AKS_ADMIN_GROUP_NAME}}" --query '[id]' -o tsv`
-          echo "AKS_ADMIN_GROUP_ID=${aksGroupId}" >> $GITHUB_OUTPUT
 
           echo "Deploying with the following parameters:"
           echo "DBA Group Name: '${{secrets.DBA_GROUP_NAME}}'"
           echo "DBA Group Id: $dbaGroupId"
-          echo "AKS Service name: '${{env.AKS_NAME}}'"
+          echo "ACA Service name: '${{env.ACA_NAME}}'"
           echo "Deployment client IP Address: '${clientIP}'"
           
           # As all is deployed using the template, I will not need an exception for the current
           # GH Runner IP Address
           export clientIP=""
           deploymentOutput=`az deployment group create \
-                                        --resource-group ${{env.AKS_RESOURCE_GROUP}} \
+                                        --resource-group ${{env.ACA_RESOURCE_GROUP}} \
                                         --template-file ./main.bicep \
-                                        --parameters aksName="${{env.AKS_NAME}}" \
-                                                     aksAdminGroupObjectId="${aksGroupId}" \
-                                                     aksTags="${{vars.AKS_RESOURCE_TAGS}}" \
+                                        --parameters acaName="${{env.ACA_NAME}}" \
+                                                     acaTags="${{vars.ACA_RESOURCE_TAGS}}" \
                                                      containerRegistryName="${{secrets.CONTAINER_REGISTRY_NAME}}" \
                                                      containerRegistrySubscriptionId="${{env.CONTAINER_REGISTRY_SUBSCRIPTION_ID}}" \
                                                      containerRegistryRG="${{env.CONTAINER_REGISTRY_RESOURCE_GROUP}}" \
@@ -124,6 +82,7 @@ jobs:
                                                      parentDnsZoneSubscriptionId="${{secrets.PARENT_DNS_SUBSCRIPTION_ID}}" \
                                                      parentDnsZoneRG="${{secrets.PARENT_DNS_ZONE_RESOURCE_GROUP}}" \
                                                      parentDnsZoneTags="${{vars.PARENT_DNS_ZONE_TAGS}}" \
+                                                     petClinicDnsZoneName="${{vars.PET_CLINIC_DNS_ZONE_NAME}}" \
                                                      pgsqlName="${{secrets.PGSQL_NAME}}" \
                                                      pgsqlAADAdminGroupName="${{secrets.DBA_GROUP_NAME}}" \
                                                      pgsqlAADAdminGroupObjectId="${dbaGroupId}" \
@@ -142,16 +101,7 @@ jobs:
                                                      logAnalyticsTags="${{vars.LOG_ANALYTICS_WRKSPC_RESOURCE_TAGS}}" \
                                                      petClinicGitConfigRepoUri="${{vars.PET_CLINIC_GIT_CONFIG_REPO_URI}}" \
                                                      petClinicGitConfigRepoUserName="${{secrets.PET_CLINIC_GIT_CONFIG_REPO_USERNAME}}" \
-                                                     petClinicGitConfigRepoPassword="${{secrets.PET_CLINIC_GIT_CONFIG_REPO_PASSWORD}}" \
-                                                     parentDnsZoneName="${{secrets.PARENT_DNS_ZONE_NAME}}" \
-                                                     todoAppDnsRecordName="${{vars.TODO_APP_DNS_RECORD_NAME}}" \
-                                                     petClinicDnsRecordName="${{vars.PET_CLINIC_DNS_RECORD_NAME}}" \
-                                                     sslCertKeyVaultSubscriptionId="${{secrets.SSL_CERT_KEYVAULT_SUBSCRIPTION_ID}}" \
-                                                     sslCertKeyVaultRG="${{secrets.SSL_CERT_KEYVAULT_RESOURCE_GROUP}}" \
-                                                     sslCertKeyVaultName="${{secrets.SSL_CERT_KEYVAULT_NAME}}" \
-                                                     sslCertKeyVaultToDoCertSecretName="${{secrets.SSL_CERT_KEYVAULT_TODO_CERT_SECRET_NAME}}" \
-                                                     sslCertKeyVaultPetClinicCertSecretName="${{secrets.SSL_CERT_KEYVAULT_PETCLINIC_CERT_SECRET_NAME}}" \
-                                                     location="${{secrets.AZURE_LOCATION}}"`
+                                                     petClinicGitConfigRepoPassword="${{secrets.PET_CLINIC_GIT_CONFIG_REPO_PASSWORD}}"
           
           #azurerm_kubernetes_cluster.aks.network_profile[0].load_balancer_profile[0].effective_outbound_ips
 
@@ -183,17 +133,10 @@ jobs:
           petClinicVisitsSvcUserManagedIdentityClientId=`echo $deploymentOutput|jq ".properties.outputs.petClinicVisitsSvcUserManagedIdentityClientId.value"`
           petClinicVisitsSvcDbUserName=`echo $deploymentOutput|jq ".properties.outputs.petClinicVisitsSvcDbUserName.value"`
 
-          appGatewayName=`echo $deploymentOutput|jq ".properties.outputs.appGatewayName.value"`
-
-          appGatewayIdentityResourceId=`echo $deploymentOutput|jq ".properties.outputs.appGatewayIdentityResourceId.value"`
-          appGatewayIdentityName=`echo $deploymentOutput|jq ".properties.outputs.appGatewayIdentityName.value"`
-          appGatewayIdentityPrincipalId=`echo $deploymentOutput|jq ".properties.outputs.appGatewayIdentityPrincipalId.value"`
-          appGatewayIdentityClientId=`echo $deploymentOutput|jq ".properties.outputs.appGatewayIdentityClientId.value"`
-
-          agicIdentityResourceId=`echo $deploymentOutput|jq ".properties.outputs.agicIdentityResourceId.value"`
-          agicIdentityName=`echo $deploymentOutput|jq ".properties.outputs.agicIdentityName.value"`
-          agicIdentityPrincipalId=`echo $deploymentOutput|jq ".properties.outputs.agicIdentityPrincipalId.value"`
-          agicIdentityClientId=`echo $deploymentOutput|jq ".properties.outputs.agicIdentityClientId.value"`
+          # agicIdentityResourceId=`echo $deploymentOutput|jq ".properties.outputs.agicIdentityResourceId.value"`
+          # agicIdentityName=`echo $deploymentOutput|jq ".properties.outputs.agicIdentityName.value"`
+          # agicIdentityPrincipalId=`echo $deploymentOutput|jq ".properties.outputs.agicIdentityPrincipalId.value"`
+          # agicIdentityClientId=`echo $deploymentOutput|jq ".properties.outputs.agicIdentityClientId.value"`
 
           echo "TODO_APP_USER_MI_NAME: ${todoAppUserManagedIdentityName}"
           echo "TODO_APP_USER_MI_NAME=${todoAppUserManagedIdentityName}" >> $GITHUB_OUTPUT
@@ -264,358 +207,3 @@ jobs:
           echo "AGIC_IDENTITY_PRINCIPAL_ID=${agicIdentityPrincipalId}" >> $GITHUB_OUTPUT
           echo "AGIC_IDENTITY_CLIENT_ID: ${agicIdentityClientId}"
           echo "AGIC_IDENTITY_CLIENT_ID=${agicIdentityClientId}" >> $GITHUB_OUTPUT
-
-      # Switch the subscription back to AKS subscription
-      - name: Azure re-login in AKS Subscription
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AAD_CLIENT_ID }}
-          tenant-id: ${{ secrets.AAD_TENANT_ID }}
-          subscription-id: ${{ env.AKS_SUBSCRIPTION_ID }}
-      
-      - name: Create federated identity for AGIC on AKS
-        env:
-          AGIC_IDENTITY_NAME: ${{steps.deployment.outputs.AGIC_IDENTITY_NAME}}
-          FEDERATED_IDENTITY_NAME: ${{env.AKS_NAME}}-fi-ingress-azure
-          SERVICE_ACCOUNT_NAMESPACE: "default"
-          SERVICE_ACCOUNT_NAME: "ingress-azure"
-        run: |
-            export AKS_OIDC_ISSUER="$(az aks show --resource-group ${{env.AKS_RESOURCE_GROUP}} --name ${{env.AKS_NAME}} --query "oidcIssuerProfile.issuerUrl" -o tsv)"
-            echo "AKS_OIDC_ISSUER: $AKS_OIDC_ISSUER"
-            az identity federated-credential create --name ${{env.FEDERATED_IDENTITY_NAME}} --identity-name ${{env.AGIC_IDENTITY_NAME}} --resource-group ${{env.AKS_RESOURCE_GROUP}} --issuer ${AKS_OIDC_ISSUER} --subject system:serviceaccount:${{env.SERVICE_ACCOUNT_NAMESPACE}}:${{env.SERVICE_ACCOUNT_NAME}} --audience api://AzureADTokenExchange
-
-      - name: Download AGIC helm-config.yaml
-        run: |
-          curl -o helm-config.yaml https://raw.githubusercontent.com/Azure/application-gateway-kubernetes-ingress/master/docs/examples/sample-helm-config.yaml
-          echo "helm-config.yaml:"
-          echo "-----------------"
-          cat helm-config.yaml
-
-      - name: Configure AGIC helm-config.yaml
-        env:
-          APP_GATEWAY_IDENTITY_NAME: ${{steps.deployment.outputs.APP_GATEWAY_IDENTITY_NAME}}
-          APP_GATEWAY_NAME: ${{steps.deployment.outputs.APP_GATEWAY_NAME}}
-          AGIC_IDENTITY_RESOURCE_ID: ${{steps.deployment.outputs.AGIC_IDENTITY_RESOURCE_ID}}
-          AGIC_IDENTITY_CLIENT_ID: ${{steps.deployment.outputs.AGIC_IDENTITY_CLIENT_ID}}
-        run: |
-          sed -i "s|<subscriptionId>|${{env.AKS_SUBSCRIPTION_ID}}|g" helm-config.yaml
-          sed -i "s|<resourceGroupName>|${{env.AKS_RESOURCE_GROUP}}|g" helm-config.yaml
-          sed -i "s|<applicationGatewayName>|${{env.APP_GATEWAY_NAME}}|g" helm-config.yaml
-          sed -i "s|<identityResourceId>|${{env.AGIC_IDENTITY_RESOURCE_ID}}|g" helm-config.yaml
-          sed -i "s|<identityClientId>|${{env.AGIC_IDENTITY_CLIENT_ID}}|g" helm-config.yaml
-          sed -i "s|aadPodIdentity|workloadIdentity|g" helm-config.yaml
-          
-          sed -i '/rbac:/,/^\s*$/s/enabled: false/enabled: true/' helm-config.yaml
-          echo "helm-config.yaml:"
-          echo "-----------------"
-          cat helm-config.yaml
-  
-      - name: Install AGIC
-        # https://learn.microsoft.com/en-us/azure/application-gateway/ingress-controller-install-new
-        # https://azure.github.io/application-gateway-kubernetes-ingress/how-tos/deploy-AGIC-with-Workload-Identity-using-helm/
-        run: |
-          az aks command invoke \
-              --resource-group ${{env.AKS_RESOURCE_GROUP}} \
-              --name ${{env.AKS_NAME}} \
-              --command "helm repo add application-gateway-kubernetes-ingress https://appgwingress.blob.core.windows.net/ingress-azure-helm-package/;helm repo update;helm upgrade --install ingress-azure -f helm-config.yaml application-gateway-kubernetes-ingress/ingress-azure --version 1.7.1" \
-              --file helm-config.yaml
-
-          # helm repo add application-gateway-kubernetes-ingress https://appgwingress.blob.core.windows.net/ingress-azure-helm-package/
-          # helm repo update
-          # helm install -f helm-config.yaml --generate-name application-gateway-kubernetes-ingress/ingress-azure
-      
-      - name: Remove AGIC helm-config.yaml
-        run:
-          rm helm-config.yaml
-      
-      - name: Create federated identity for TODO_APP on AKS
-        env:
-          TODO_APP_MI_NAME: ${{steps.deployment.outputs.TODO_APP_USER_MI_NAME}}
-          FEDERATED_IDENTITY_NAME: ${{env.AKS_NAME}}-fi-todo-app
-          SERVICE_ACCOUNT_NAMESPACE: "todo"
-          SERVICE_ACCOUNT_NAME: "todo-app-service-account"
-        run: |
-            export AKS_OIDC_ISSUER="$(az aks show --resource-group ${{env.AKS_RESOURCE_GROUP}} --name ${{env.AKS_NAME}} --query "oidcIssuerProfile.issuerUrl" -o tsv)"
-            echo "AKS_OIDC_ISSUER: $AKS_OIDC_ISSUER"
-            az identity federated-credential create --name ${{env.FEDERATED_IDENTITY_NAME}} --identity-name ${{env.TODO_APP_MI_NAME}} --resource-group ${{env.AKS_RESOURCE_GROUP}} --issuer ${AKS_OIDC_ISSUER} --subject system:serviceaccount:${{env.SERVICE_ACCOUNT_NAMESPACE}}:${{env.SERVICE_ACCOUNT_NAME}} --audience api://AzureADTokenExchange
-
-      - name: Create federated identity for PET_CLINIC_APP on AKS
-        env:
-          PET_CLINIC_APP_MI_NAME: ${{steps.deployment.outputs.PET_CLINIC_APP_USER_MI_NAME}}
-          FEDERATED_IDENTITY_NAME: ${{env.AKS_NAME}}-fi-pet-clinic-app
-          SERVICE_ACCOUNT_NAMESPACE: "pet-clinic"
-          SERVICE_ACCOUNT_NAME: "pet-clinic-app-service-account"
-        run: |
-            export AKS_OIDC_ISSUER="$(az aks show --resource-group ${{env.AKS_RESOURCE_GROUP}} --name ${{env.AKS_NAME}} --query "oidcIssuerProfile.issuerUrl" -o tsv)"
-            echo "AKS_OIDC_ISSUER: $AKS_OIDC_ISSUER"
-            az identity federated-credential create --name ${{env.FEDERATED_IDENTITY_NAME}} --identity-name ${{env.PET_CLINIC_APP_MI_NAME}} --resource-group ${{env.AKS_RESOURCE_GROUP}} --issuer ${AKS_OIDC_ISSUER} --subject system:serviceaccount:${{env.SERVICE_ACCOUNT_NAMESPACE}}:${{env.SERVICE_ACCOUNT_NAME}} --audience api://AzureADTokenExchange
-
-      - name: Create federated identity for PET_CLINIC_CONFIG_SVC on AKS
-        env:
-          PET_CLINIC_CONFIG_SVC_MI_NAME: ${{steps.deployment.outputs.PET_CLINIC_CONFIG_SVC_USER_MI_NAME}}
-          FEDERATED_IDENTITY_NAME: ${{env.AKS_NAME}}-fi-pet-clinic-config-svc
-          SERVICE_ACCOUNT_NAMESPACE: "pet-clinic"
-          SERVICE_ACCOUNT_NAME: "pet-clinic-config-service-account"
-        run: |
-            export AKS_OIDC_ISSUER="$(az aks show --resource-group ${{env.AKS_RESOURCE_GROUP}} --name ${{env.AKS_NAME}} --query "oidcIssuerProfile.issuerUrl" -o tsv)"
-            echo "AKS_OIDC_ISSUER: $AKS_OIDC_ISSUER"
-            az identity federated-credential create --name ${{env.FEDERATED_IDENTITY_NAME}} --identity-name ${{env.PET_CLINIC_CONFIG_SVC_MI_NAME}} --resource-group ${{env.AKS_RESOURCE_GROUP}} --issuer ${AKS_OIDC_ISSUER} --subject system:serviceaccount:${{env.SERVICE_ACCOUNT_NAMESPACE}}:${{env.SERVICE_ACCOUNT_NAME}} --audience api://AzureADTokenExchange
-
-      - name: Create federated identity for PET_CLINIC_CUSTS_SVC on AKS
-        env:
-          PET_CLINIC_CUSTS_SVC_MI_NAME: ${{steps.deployment.outputs.PET_CLINIC_CUSTS_SVC_USER_MI_NAME}}
-          FEDERATED_IDENTITY_NAME: ${{env.AKS_NAME}}-fi-pet-clinic-custs-svc
-          SERVICE_ACCOUNT_NAMESPACE: "pet-clinic"
-          SERVICE_ACCOUNT_NAME: "pet-clinic-custs-service-account"
-        run: |
-            export AKS_OIDC_ISSUER="$(az aks show --resource-group ${{env.AKS_RESOURCE_GROUP}} --name ${{env.AKS_NAME}} --query "oidcIssuerProfile.issuerUrl" -o tsv)"
-            echo "AKS_OIDC_ISSUER: $AKS_OIDC_ISSUER"
-            az identity federated-credential create --name ${{env.FEDERATED_IDENTITY_NAME}} --identity-name ${{env.PET_CLINIC_CUSTS_SVC_MI_NAME}} --resource-group ${{env.AKS_RESOURCE_GROUP}} --issuer ${AKS_OIDC_ISSUER} --subject system:serviceaccount:${{env.SERVICE_ACCOUNT_NAMESPACE}}:${{env.SERVICE_ACCOUNT_NAME}} --audience api://AzureADTokenExchange
-
-      - name: Create federated identity for PET_CLINIC_VETS_SVC on AKS
-        env:
-          PET_CLINIC_VETS_SVC_MI_NAME: ${{steps.deployment.outputs.PET_CLINIC_VETS_SVC_USER_MI_NAME}}
-          FEDERATED_IDENTITY_NAME: ${{env.AKS_NAME}}-fi-pet-clinic-vets-svc
-          SERVICE_ACCOUNT_NAMESPACE: "pet-clinic"
-          SERVICE_ACCOUNT_NAME: "pet-clinic-vets-service-account"
-        run: |
-            export AKS_OIDC_ISSUER="$(az aks show --resource-group ${{env.AKS_RESOURCE_GROUP}} --name ${{env.AKS_NAME}} --query "oidcIssuerProfile.issuerUrl" -o tsv)"
-            echo "AKS_OIDC_ISSUER: $AKS_OIDC_ISSUER"
-            az identity federated-credential create --name ${{env.FEDERATED_IDENTITY_NAME}} --identity-name ${{env.PET_CLINIC_VETS_SVC_MI_NAME}} --resource-group ${{env.AKS_RESOURCE_GROUP}} --issuer ${AKS_OIDC_ISSUER} --subject system:serviceaccount:${{env.SERVICE_ACCOUNT_NAMESPACE}}:${{env.SERVICE_ACCOUNT_NAME}} --audience api://AzureADTokenExchange
-
-      - name: Create federated identity for PET_CLINIC_VISITS_SVC on AKS
-        env:
-          PET_CLINIC_VISITS_SVC_MI_NAME: ${{steps.deployment.outputs.PET_CLINIC_VISITS_SVC_USER_MI_NAME}}
-          FEDERATED_IDENTITY_NAME: ${{env.AKS_NAME}}-fi-pet-clinic-visits-svc
-          SERVICE_ACCOUNT_NAMESPACE: "pet-clinic"
-          SERVICE_ACCOUNT_NAME: "pet-clinic-visits-service-account"
-        run: |
-            export AKS_OIDC_ISSUER="$(az aks show --resource-group ${{env.AKS_RESOURCE_GROUP}} --name ${{env.AKS_NAME}} --query "oidcIssuerProfile.issuerUrl" -o tsv)"
-            echo "AKS_OIDC_ISSUER: $AKS_OIDC_ISSUER"
-            az identity federated-credential create --name ${{env.FEDERATED_IDENTITY_NAME}} --identity-name ${{env.PET_CLINIC_VISITS_SVC_MI_NAME}} --resource-group ${{env.AKS_RESOURCE_GROUP}} --issuer ${AKS_OIDC_ISSUER} --subject system:serviceaccount:${{env.SERVICE_ACCOUNT_NAMESPACE}}:${{env.SERVICE_ACCOUNT_NAME}} --audience api://AzureADTokenExchange
-                    
-      - name: Deploy Namespaces
-        working-directory: ./scripts/deployment/templates/k8s/
-        run: |
-            cat ./01-namespaces.yml
-            az aks command invoke \
-              --resource-group ${{env.AKS_RESOURCE_GROUP}} \
-              --name ${{env.AKS_NAME}} \
-              --command "kubectl apply -f ./01-namespaces.yml" \
-              --file ./01-namespaces.yml
-
-      - name: Deploy TODO_APP workload identity manifest
-        working-directory: ./scripts/deployment/templates/k8s/
-        env:
-          TODO_APP_CLIENT_ID: ${{steps.deployment.outputs.TODO_APP_USER_MI_CLIENT_ID}}
-        run: |
-            cat ./06a-workload-identity-todo-app.yml | TODO_APP_CLIENT_ID=${{env.TODO_APP_CLIENT_ID}} envsubst > ./06a-workload-identity-todo-app.yml.tmp
-            cat ./06a-workload-identity-todo-app.yml.tmp
-            az aks command invoke \
-              --resource-group ${{env.AKS_RESOURCE_GROUP}} \
-              --name ${{env.AKS_NAME}} \
-              --command "kubectl apply -f ./06a-workload-identity-todo-app.yml.tmp" \
-              --file ./06a-workload-identity-todo-app.yml.tmp
-
-      - name: Deploy PET_CLINIC_APP workload identity manifest
-        working-directory: ./scripts/deployment/templates/k8s/
-        env:
-          PET_CLINIC_APP_CLIENT_ID: ${{steps.deployment.outputs.PET_CLINIC_APP_USER_MI_CLIENT_ID}}
-        run: |
-            cat ./06b-workload-identity-pet-clinic-app.yml | PET_CLINIC_APP_CLIENT_ID=${{env.PET_CLINIC_APP_CLIENT_ID}}  envsubst > ./06b-workload-identity-pet-clinic-app.yml.tmp
-            cat ./06b-workload-identity-pet-clinic-app.yml.tmp
-            az aks command invoke \
-              --resource-group ${{env.AKS_RESOURCE_GROUP}} \
-              --name ${{env.AKS_NAME}} \
-              --command "kubectl apply -f ./06b-workload-identity-pet-clinic-app.yml.tmp" \
-              --file ./06b-workload-identity-pet-clinic-app.yml.tmp
-
-      - name: Deploy PET_CLINIC_CONFIG_SVC workload identity manifest
-        working-directory: ./scripts/deployment/templates/k8s/
-        env:
-          CONFIG_SVC_CLIENT_ID: ${{steps.deployment.outputs.PET_CLINIC_CONFIG_SVC_USER_MI_CLIENT_ID}}
-        run: |
-            cat ./06c-workload-identity-pet-clinic-config-svc.yml | CONFIG_SVC_CLIENT_ID=${{env.CONFIG_SVC_CLIENT_ID}} envsubst > ./06c-workload-identity-pet-clinic-config-svc.yml.tmp
-            cat ./06c-workload-identity-pet-clinic-config-svc.yml.tmp
-            az aks command invoke \
-              --resource-group ${{env.AKS_RESOURCE_GROUP}} \
-              --name ${{env.AKS_NAME}} \
-              --command "kubectl apply -f ./06c-workload-identity-pet-clinic-config-svc.yml.tmp" \
-              --file ./06c-workload-identity-pet-clinic-config-svc.yml.tmp
-
-      - name: Deploy PET_CLINIC_CUSTS_SVC workload identity manifest
-        working-directory: ./scripts/deployment/templates/k8s/
-        env:
-          CUSTS_SVC_CLIENT_ID: ${{steps.deployment.outputs.PET_CLINIC_CUSTS_SVC_USER_MI_CLIENT_ID}}
-        run: |
-            cat ./06d-workload-identity-pet-clinic-custs-svc.yml | CUSTS_SVC_CLIENT_ID=${{env.CUSTS_SVC_CLIENT_ID}} envsubst > ./06d-workload-identity-pet-clinic-custs-svc.yml.tmp
-            cat ./06d-workload-identity-pet-clinic-custs-svc.yml.tmp
-            az aks command invoke \
-              --resource-group ${{env.AKS_RESOURCE_GROUP}} \
-              --name ${{env.AKS_NAME}} \
-              --command "kubectl apply -f ./06d-workload-identity-pet-clinic-custs-svc.yml.tmp" \
-              --file ./06d-workload-identity-pet-clinic-custs-svc.yml.tmp
-
-      - name: Deploy PET_CLINIC_VETS_SVC workload identity manifest
-        working-directory: ./scripts/deployment/templates/k8s/
-        env:
-          VETS_SVC_CLIENT_ID: ${{steps.deployment.outputs.PET_CLINIC_VETS_SVC_USER_MI_CLIENT_ID}}
-        run: |
-            cat ./06e-workload-identity-pet-clinic-vets-svc.yml | VETS_SVC_CLIENT_ID=${{env.VETS_SVC_CLIENT_ID}} envsubst > ./06e-workload-identity-pet-clinic-vets-svc.yml.tmp
-            cat ./06e-workload-identity-pet-clinic-vets-svc.yml.tmp
-            az aks command invoke \
-              --resource-group ${{env.AKS_RESOURCE_GROUP}} \
-              --name ${{env.AKS_NAME}} \
-              --command "kubectl apply -f ./06e-workload-identity-pet-clinic-vets-svc.yml.tmp" \
-              --file ./06e-workload-identity-pet-clinic-vets-svc.yml.tmp
-
-      - name: Deploy PET_CLINIC_VISITS_SVC workload identity manifest
-        working-directory: ./scripts/deployment/templates/k8s/
-        env:
-          VISITS_SVC_CLIENT_ID: ${{steps.deployment.outputs.PET_CLINIC_VISITS_SVC_USER_MI_CLIENT_ID}}
-        run: |
-            cat ./06f-workload-identity-pet-clinic-visits-svc.yml | VISITS_SVC_CLIENT_ID=${{env.VISITS_SVC_CLIENT_ID}} envsubst > ./06f-workload-identity-pet-clinic-visits-svc.yml.tmp
-            cat ./06f-workload-identity-pet-clinic-visits-svc.yml.tmp
-            az aks command invoke \
-              --resource-group ${{env.AKS_RESOURCE_GROUP}} \
-              --name ${{env.AKS_NAME}} \
-              --command "kubectl apply -f ./06f-workload-identity-pet-clinic-visits-svc.yml.tmp" \
-              --file ./06f-workload-identity-pet-clinic-visits-svc.yml.tmp
-                    
-      - name: Deploy Config Maps for TODO_APP
-        working-directory: ./scripts/deployment/templates/k8s/
-        run: |
-            cat ./07a-config-map-todo-app.yml
-            az aks command invoke \
-              --resource-group ${{env.AKS_RESOURCE_GROUP}} \
-              --name ${{env.AKS_NAME}} \
-              --command "kubectl apply -f ./07a-config-map-todo-app.yml" \
-              --file ./07a-config-map-todo-app.yml
-
-      - name: Deploy Config Maps for PET_CLINIC_APP
-        working-directory: ./scripts/deployment/templates/k8s/
-        run: |
-            cat ./07b-config-map-pet-clinic-app.yml
-            az aks command invoke \
-              --resource-group ${{env.AKS_RESOURCE_GROUP}} \
-              --name ${{env.AKS_NAME}} \
-              --command "kubectl apply -f ./07b-config-map-pet-clinic-app.yml" \
-              --file ./07b-config-map-pet-clinic-app.yml
-
-      - name: Deploy K8S role bindings for TODO_APP
-        working-directory: ./scripts/deployment/templates/k8s/
-        env:
-          TODO_APP_VIEW_AD_GROUP_ID: ${{steps.deployment.outputs.TODO_APP_VIEW_AD_GROUP_ID}}
-          TODO_APP_EDIT_AD_GROUP_ID: ${{steps.deployment.outputs.TODO_APP_EDIT_AD_GROUP_ID}}
-        run: |
-            cat ./02a-rolebinding-todo.yml | TODO_APP_EDIT_AD_GROUP_ID=${{env.TODO_APP_EDIT_AD_GROUP_ID}} TODO_APP_VIEW_AD_GROUP_ID=${{env.TODO_APP_VIEW_AD_GROUP_ID}} envsubst > ./02a-rolebinding-todo.yml.tmp
-            cat ./02a-rolebinding-todo.yml.tmp
-            az aks command invoke \
-              --resource-group ${{env.AKS_RESOURCE_GROUP}} \
-              --name ${{env.AKS_NAME}} \
-              --command "kubectl apply -f ./02a-rolebinding-todo.yml.tmp" \
-              --file ./02a-rolebinding-todo.yml.tmp
-
-      - name: Deploy K8S role bindings for PET_CLINIC_APP
-        working-directory: ./scripts/deployment/templates/k8s/
-        env:
-          PET_CLINIC_APP_VIEW_AD_GROUP_ID: ${{steps.deployment.outputs.PET_CLINIC_APP_VIEW_AD_GROUP_ID}}
-          PET_CLINIC_APP_EDIT_AD_GROUP_ID: ${{steps.deployment.outputs.PET_CLINIC_APP_EDIT_AD_GROUP_ID}}
-        run: |
-            cat ./02b-rolebinding-pet-clinic.yml | PET_CLINIC_APP_EDIT_AD_GROUP_ID=${{env.PET_CLINIC_APP_EDIT_AD_GROUP_ID}} PET_CLINIC_APP_VIEW_AD_GROUP_ID=${{env.PET_CLINIC_APP_VIEW_AD_GROUP_ID}} envsubst > ./02b-rolebinding-pet-clinic.yml.tmp
-            cat ./02b-rolebinding-pet-clinic.yml.tmp
-            az aks command invoke \
-              --resource-group ${{env.AKS_RESOURCE_GROUP}} \
-              --name ${{env.AKS_NAME}} \
-              --command "kubectl apply -f ./02b-rolebinding-pet-clinic.yml.tmp" \
-              --file ./02b-rolebinding-pet-clinic.yml.tmp
-
-      - name: Deploy TODO_APP KV Secrets manifest
-        working-directory: ./scripts/deployment/templates/k8s/
-        env:
-          KEYVAULT_NAME: ${{env.AKS_NAME}}-kv
-          TODO_APP_CLIENT_ID: ${{steps.deployment.outputs.TODO_APP_USER_MI_CLIENT_ID}}
-          TENANT_ID: ${{secrets.AAD_TENANT_ID}}
-        run: |
-            cat ./04a-kv-secrets-todo-app.yml | KEYVAULT_NAME=${{env.KEYVAULT_NAME}} TODO_APP_CLIENT_ID=${{env.TODO_APP_CLIENT_ID}} TENANT_ID=${{env.TENANT_ID}} envsubst > ./04a-kv-secrets-todo-app.yml.tmp
-            cat ./04a-kv-secrets-todo-app.yml.tmp
-            az aks command invoke \
-              --resource-group ${{env.AKS_RESOURCE_GROUP}} \
-              --name ${{env.AKS_NAME}} \
-              --command "kubectl apply -f ./04a-kv-secrets-todo-app.yml.tmp" \
-              --file ./04a-kv-secrets-todo-app.yml.tmp
-
-      - name: Deploy PET_CLINIC_APP General KV Secrets manifest
-        working-directory: ./scripts/deployment/templates/k8s/
-        env:
-          KEYVAULT_NAME: ${{env.AKS_NAME}}-kv
-          PET_CLINIC_APP_CLIENT_ID: ${{steps.deployment.outputs.PET_CLINIC_APP_USER_MI_CLIENT_ID}}
-          TENANT_ID: ${{secrets.AAD_TENANT_ID}}
-        run: |
-            cat ./04b-kv-secrets-pet-clinic-app.yml | KEYVAULT_NAME=${{env.KEYVAULT_NAME}} PET_CLINIC_APP_CLIENT_ID=${{env.PET_CLINIC_APP_CLIENT_ID}} TENANT_ID=${{env.TENANT_ID}} envsubst > ./04b-kv-secrets-pet-clinic-app.yml.tmp
-            cat ./04b-kv-secrets-pet-clinic-app.yml.tmp
-            az aks command invoke \
-              --resource-group ${{env.AKS_RESOURCE_GROUP}} \
-              --name ${{env.AKS_NAME}} \
-              --command "kubectl apply -f ./04b-kv-secrets-pet-clinic-app.yml.tmp" \
-              --file ./04b-kv-secrets-pet-clinic-app.yml.tmp
-      
-      - name: Deploy PET_CLINIC_CONFIG_SVC KV Secrets manifest
-        working-directory: ./scripts/deployment/templates/k8s/
-        env:
-          KEYVAULT_NAME: ${{env.AKS_NAME}}-kv
-          CONFIG_SVC_CLIENT_ID: ${{steps.deployment.outputs.PET_CLINIC_CONFIG_SVC_USER_MI_CLIENT_ID}}
-          TENANT_ID: ${{secrets.AAD_TENANT_ID}}
-        run: |
-            cat ./04c-kv-secrets-pet-clinic-config-svc.yml | KEYVAULT_NAME=${{env.KEYVAULT_NAME}} CONFIG_SVC_CLIENT_ID=${{env.CONFIG_SVC_CLIENT_ID}} TENANT_ID=${{env.TENANT_ID}} envsubst > ./04c-kv-secrets-pet-clinic-config-svc.yml.tmp
-            cat ./04c-kv-secrets-pet-clinic-config-svc.yml.tmp
-            az aks command invoke \
-              --resource-group ${{env.AKS_RESOURCE_GROUP}} \
-              --name ${{env.AKS_NAME}} \
-              --command "kubectl apply -f ./04c-kv-secrets-pet-clinic-config-svc.yml.tmp" \
-              --file ./04c-kv-secrets-pet-clinic-config-svc.yml.tmp
-
-      - name: Deploy PET_CLINIC_CUSTS_SVC KV Secrets manifest
-        working-directory: ./scripts/deployment/templates/k8s/
-        env:
-          KEYVAULT_NAME: ${{env.AKS_NAME}}-kv
-          CUSTS_SVC_CLIENT_ID: ${{steps.deployment.outputs.PET_CLINIC_CUSTS_SVC_USER_MI_CLIENT_ID}}
-          TENANT_ID: ${{secrets.AAD_TENANT_ID}}
-        run: |
-            cat ./04d-kv-secrets-pet-clinic-custs-svc.yml | KEYVAULT_NAME=${{env.KEYVAULT_NAME}} CUSTS_SVC_CLIENT_ID=${{env.CUSTS_SVC_CLIENT_ID}} TENANT_ID=${{env.TENANT_ID}} envsubst > ./04d-kv-secrets-pet-clinic-custs-svc.yml.tmp
-            cat ./04d-kv-secrets-pet-clinic-custs-svc.yml.tmp
-            az aks command invoke \
-              --resource-group ${{env.AKS_RESOURCE_GROUP}} \
-              --name ${{env.AKS_NAME}} \
-              --command "kubectl apply -f ./04d-kv-secrets-pet-clinic-custs-svc.yml.tmp" \
-              --file ./04d-kv-secrets-pet-clinic-custs-svc.yml.tmp
-
-      - name: Deploy PET_CLINIC_VETS_SVC KV Secrets manifest
-        working-directory: ./scripts/deployment/templates/k8s/
-        env:
-          KEYVAULT_NAME: ${{env.AKS_NAME}}-kv
-          VETS_SVC_CLIENT_ID: ${{steps.deployment.outputs.PET_CLINIC_VETS_SVC_USER_MI_CLIENT_ID}}
-          TENANT_ID: ${{secrets.AAD_TENANT_ID}}
-        run: |
-            cat ./04e-kv-secrets-pet-clinic-vets-svc.yml | KEYVAULT_NAME=${{env.KEYVAULT_NAME}} VETS_SVC_CLIENT_ID=${{env.VETS_SVC_CLIENT_ID}} TENANT_ID=${{env.TENANT_ID}} envsubst > ./04e-kv-secrets-pet-clinic-vets-svc.yml.tmp
-            cat ./04e-kv-secrets-pet-clinic-vets-svc.yml.tmp
-            az aks command invoke \
-              --resource-group ${{env.AKS_RESOURCE_GROUP}} \
-              --name ${{env.AKS_NAME}} \
-              --command "kubectl apply -f ./04e-kv-secrets-pet-clinic-vets-svc.yml.tmp" \
-              --file ./04e-kv-secrets-pet-clinic-vets-svc.yml.tmp
-            
-      - name: Deploy PET_CLINIC_VISITS_SVC KV Secrets manifest
-        working-directory: ./scripts/deployment/templates/k8s/
-        env:
-          KEYVAULT_NAME: ${{env.AKS_NAME}}-kv
-          VISITS_SVC_CLIENT_ID: ${{steps.deployment.outputs.PET_CLINIC_VISITS_SVC_USER_MI_CLIENT_ID}}
-          TENANT_ID: ${{secrets.AAD_TENANT_ID}}
-        run: |
-            cat ./04f-kv-secrets-pet-clinic-visits-svc.yml | KEYVAULT_NAME=${{env.KEYVAULT_NAME}} VISITS_SVC_CLIENT_ID=${{env.VISITS_SVC_CLIENT_ID}} TENANT_ID=${{env.TENANT_ID}} envsubst > ./04f-kv-secrets-pet-clinic-visits-svc.yml.tmp
-            cat ./04f-kv-secrets-pet-clinic-visits-svc.yml.tmp
-            az aks command invoke \
-              --resource-group ${{env.AKS_RESOURCE_GROUP}} \
-              --name ${{env.AKS_NAME}} \
-              --command "kubectl apply -f ./04f-kv-secrets-pet-clinic-visits-svc.yml.tmp" \
-              --file ./04f-kv-secrets-pet-clinic-visits-svc.yml.tmp
