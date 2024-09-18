@@ -2,9 +2,8 @@ using 'main.bicep'
 
 param location = 'eastus'
 
-param aksName = 'aks-development'
-param aksAdminGroupObjectId = '00000000-0000-0000-0000-000000000000'
-param aksTags = '{ "CostCentre": "DEV", "Department": "RESEARCH", "WorkloadType": "TEST", "DeleteNightly": "true", "ArchitectureType": "AKS" }'
+param acaName = 'aca-development'
+param acaTags = '{ "CostCentre": "DEV", "Department": "RESEARCH", "WorkloadType": "TEST", "DeleteNightly": "true", "ArchitectureType": "ACA" }'
 
 param pgsqlName = 'martinabrle'
 param pgsqlAADAdminGroupName = 'PGSQL-Admins'
