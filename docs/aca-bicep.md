@@ -46,8 +46,8 @@
         -l "${{secrets.AZURE_LOCATION}}" \
         --template-file ./resource_groups.bicep \
         --parameters location="${{secrets.AZURE_LOCATION}}" \
-                    aksRG="${{secrets.AKS_RESOURCE_GROUP}}" \
-                    aksTags="${{vars.AKS_RESOURCE_TAGS}}" \
+                    acaRG="${{secrets.AKS_RESOURCE_GROUP}}" \
+                    acaTags="${{vars.AKS_RESOURCE_TAGS}}" \
                     containerRegistrySubscriptionId="${{secrets.CONTAINER_REGISTRY_SUBSCRIPTION_ID}}" \
                     containerRegistryRG="${{secrets.CONTAINER_REGISTRY_RESOURCE_GROUP}}" \
                     containerRegistryTags="${{vars.CONTAINER_REGISTRY_RESOURCE_TAGS}}" \
