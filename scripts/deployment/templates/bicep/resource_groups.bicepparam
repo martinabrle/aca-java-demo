@@ -2,8 +2,8 @@ using 'resource_groups.bicep'
 
 param location = 'eastus'
 
-param aksRG = 'aks_development_rg'
-param aksTags = '{ "CostCentre": "DEV", "Department": "RESEARCH", "WorkloadType": "TEST", "DeleteNightly": "true", "ArchitectureType": "AKS" }'
+param acaRG = 'aca_development_rg'
+param acaTags = '{ "CostCentre": "DEV", "Department": "RESEARCH", "WorkloadType": "TEST", "DeleteNightly": "true", "ArchitectureType": "ACA" }'
 
 param containerRegistryRG = 'container_registry_rg'
 param containerRegistryTags = '{ "CostCentre": "DEV", "Department": "RESEARCH", "WorkloadType": "TEST", "DeleteNightly": "false", "ArchitectureType": "CONTAINER_REGISTRY" }'
