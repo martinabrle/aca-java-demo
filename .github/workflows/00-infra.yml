@@ -32,7 +32,7 @@ jobs:
           tenant-id: "${{secrets.AAD_TENANT_ID}}"
           subscription-id: "${{env.ACA_SUBSCRIPTION_ID}}"
 
-      - name: Create Azure resource group
+      - name: Create Azure resource groups
         working-directory: ./scripts/deployment/templates/bicep/
         run: |
             az deployment sub create \
