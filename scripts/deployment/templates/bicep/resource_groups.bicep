@@ -1,7 +1,7 @@
 param location string = deployment().location
 
-param aksRG string
-param aksTags string
+param acaRG string
+param acaTags string
 
 param containerRegistrySubscriptionId string
 param containerRegistryRG string
@@ -15,7 +15,7 @@ param pgsqlSubscriptionId string
 param pgsqlRG string
 param pgsqlTags string
 
-var aksTagsArray = json(aksTags)
+var acaTagsArray = json(acaTags)
 var containerRegistryTagsArray = json(containerRegistryTags)
 var logAnalyticsTagsArray = json(logAnalyticsTags)
 var pgsqlTagsArray = json(pgsqlTags)
@@ -52,11 +52,11 @@ module containerRegistryResourceGroup 'components/rg.bicep' = {
   }
 }
 
-module aksResourceGroup 'components/rg.bicep' = {
-  name: 'aks-rg'
+module acaResourceGroup 'components/rg.bicep' = {
+  name: 'aca-rg'
   params: {
-    name: aksRG
+    name: acaRG
     location: location
-    tagsArray: aksTagsArray
+    tagsArray: acaTagsArray
   }
 }
