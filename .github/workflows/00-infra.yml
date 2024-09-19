@@ -105,7 +105,8 @@ jobs:
                                                      logAnalyticsTags="${{vars.LOG_ANALYTICS_WRKSPC_RESOURCE_TAGS}}" \
                                                      petClinicGitConfigRepoUri="${{vars.PET_CLINIC_GIT_CONFIG_REPO_URI}}" \
                                                      petClinicGitConfigRepoUserName="${{secrets.PET_CLINIC_GIT_CONFIG_REPO_USERNAME}}" \
-                                                     petClinicGitConfigRepoPassword="${{secrets.PET_CLINIC_GIT_CONFIG_REPO_PASSWORD}}"`
+                                                     petClinicGitConfigRepoPassword="${{secrets.PET_CLINIC_GIT_CONFIG_REPO_PASSWORD}}" \
+                                                     location="${{secrets.AZURE_LOCATION}}" `
           
           #azurerm_kubernetes_cluster.aks.network_profile[0].load_balancer_profile[0].effective_outbound_ips
 
