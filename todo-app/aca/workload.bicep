@@ -9,6 +9,7 @@ param pgsqlName string = '${replace(acaName,'_','-')}-pgsql'
 param pgsqlAADAdminGroupName string
 param pgsqlAADAdminGroupObjectId string
 param pgsqlTodoAppDbName string
+param todoAppDbUserName string // = 'todo_app' - moved to GH secrets
 param pgsqlPetClinicDbName string
 param petClinicCustsSvcDbUserName string // = 'pet_clinic_custs_svc'
 param petClinicVetsSvcDbUserName string // = 'pet_clinic_vets_svc'
@@ -18,6 +19,7 @@ param pgsqlSubscriptionId string = subscription().id
 param pgsqlRG string = resourceGroup().name
 param pgsqlTags string = acaTags
 
+param todoAppUserManagedIdentityName string = '${acaName}-todo-app-identity'
 param petClinicAppUserManagedIdentityName string = '${acaName}-pet-clinic-app-identity'
 param petClinicConfigSvcUserManagedIdentityName string = '${acaName}-pet-clinic-config-identity'
 param petClinicCustsSvcUserManagedIdentityName string = '${acaName}-pet-clinic-custs-identity'
@@ -81,6 +83,12 @@ var aksSubnetName = 'aks-default'
 var appGatewaySubnetName = 'appgw-subnet'
 
 param location string
+
+resource todoAppUserManagedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
+  name: todoAppUserManagedIdentityName
+  location: location
+  tags: aksTagsArray
+}
 
 resource petClinicAppUserManagedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
   name: petClinicAppUserManagedIdentityName
@@ -175,6 +183,42 @@ module keyVault 'components/kv.bicep' = {
     location: location
     tagsArray: aksTagsArray
     logAnalyticsWorkspaceId: logAnalytics.outputs.logAnalyticsWorkspaceId
+  }
+}
+
+module kvSecretTodoAppSpringDSURI 'components/kv-secret.bicep' = {
+  name: 'kv-secret-todo-app-ds-uri'
+  params: {
+    keyVaultName: keyVault.outputs.keyVaultName
+    secretName: 'TODO-SPRING-DATASOURCE-URL'
+    secretValue: 'jdbc:postgresql://${pgsqlName}.postgres.database.azure.com:5432/${pgsqlTodoAppDbName}'
+  }
+}
+
+module kvSecretTodoAppDbUserName 'components/kv-secret.bicep' = {
+  name: 'kv-secret-todo-app-ds-username'
+  params: {
+    keyVaultName: keyVault.outputs.keyVaultName
+    secretName: 'TODO-SPRING-DATASOURCE-USERNAME'
+    secretValue: todoAppDbUserName
+  }
+}
+
+module kvSecretTodoAppInsightsConnectionString 'components/kv-secret.bicep' = {
+  name: 'kv-secret-todo-app-ai-connection-string'
+  params: {
+    keyVaultName: keyVault.outputs.keyVaultName
+    secretName: 'TODO-APP-INSIGHTS-CONNECTION-STRING'
+    secretValue: todoAppInsights.outputs.appInsightsConnectionString
+  }
+}
+
+module kvSecretTodoAppInsightsInstrumentationKey 'components/kv-secret.bicep' = {
+  name: 'kv-secret-todo-app-ai-instrumentation-key'
+  params: {
+    keyVaultName: keyVault.outputs.keyVaultName
+    secretName: 'TODO-APP-INSIGHTS-INSTRUMENTATION-KEY'
+    secretValue: todoAppInsights.outputs.appInsightsInstrumentationKey
   }
 }
 
@@ -290,6 +334,62 @@ module acaEnvironment 'components/aca-environment.bicep' = {
 //     roleDefinitionId: acrPullRole.id
 //     principalId: aks.outputs.aksNodePoolIdentityPrincipalId //.aksSecretsProviderIdentityPrincipalId
 //     roleAssignmentNameGuid: guid(aks.outputs.aksNodePoolIdentityPrincipalId, containerRegistry.outputs.containerRegistryId, acrPullRole.id)
+//   }
+// }
+
+// module rbacKV 'components/role-assignment-kv.bicep' = {
+//   name: 'rbac-kv-aks-service'
+//   scope: resourceGroup()
+//   params: {
+//     kvName: keyVault.outputs.keyVaultName
+//     roleAssignmentNameGuid: guid(aks.outputs.aksSecretsProviderIdentityPrincipalId, keyVault.outputs.keyVaultId, keyVaultSecretsUser.id)
+//     roleDefinitionId: keyVaultSecretsUser.id
+//     principalId: aks.outputs.aksSecretsProviderIdentityPrincipalId
+//   }
+// }
+
+
+// module rbacKVSecretTodoDSUri './components/role-assignment-kv-secret.bicep' = {
+//   name: 'rbac-kv-secret-todo-ds-url'
+//   params: {
+//     roleDefinitionId: keyVaultSecretsUser.id
+//     principalId: todoAppUserManagedIdentity.properties.principalId
+//     roleAssignmentNameGuid: guid(todoAppUserManagedIdentity.properties.principalId, kvSecretTodoAppSpringDSURI.outputs.kvSecretId, keyVaultSecretsUser.id)
+//     kvName: keyVault.outputs.keyVaultName
+//     kvSecretName: kvSecretTodoAppSpringDSURI.outputs.kvSecretName
+//   }
+// }
+
+// module rbacKVSecretTodoAppDbUserName './components/role-assignment-kv-secret.bicep' = {
+//   name: 'rbac-kv-secret-todo-app-db-user'
+//   params: {
+//     roleDefinitionId: keyVaultSecretsUser.id
+//     principalId: todoAppUserManagedIdentity.properties.principalId
+//     roleAssignmentNameGuid: guid(todoAppUserManagedIdentity.properties.principalId, kvSecretTodoAppDbUserName.outputs.kvSecretId, keyVaultSecretsUser.id)
+//     kvName: keyVault.outputs.keyVaultName
+//     kvSecretName: kvSecretTodoAppDbUserName.outputs.kvSecretName
+//   }
+// }
+
+// module rbacKVSecretTodoAppAppInsightsConStr './components/role-assignment-kv-secret.bicep' = {
+//   name: 'rbac-kv-secret-todo-app-insights-con-str'
+//   params: {
+//     roleDefinitionId: keyVaultSecretsUser.id
+//     principalId: todoAppUserManagedIdentity.properties.principalId
+//     roleAssignmentNameGuid: guid(todoAppUserManagedIdentity.properties.principalId, kvSecretTodoAppInsightsConnectionString.outputs.kvSecretId, keyVaultSecretsUser.id)
+//     kvName: keyVault.outputs.keyVaultName
+//     kvSecretName: kvSecretTodoAppInsightsConnectionString.outputs.kvSecretName
+//   }
+// }
+
+// module rbacKVSecretTodoAppAppInsightsInstrKey './components/role-assignment-kv-secret.bicep' = {
+//   name: 'rbac-kv-secret-todo-app-insights-instr-key'
+//   params: {
+//     roleDefinitionId: keyVaultSecretsUser.id
+//     principalId: todoAppUserManagedIdentity.properties.principalId
+//     roleAssignmentNameGuid: guid(todoAppUserManagedIdentity.properties.principalId, kvSecretTodoAppInsightsInstrumentationKey.outputs.kvSecretId, keyVaultSecretsUser.id)
+//     kvName: keyVault.outputs.keyVaultName
+//     kvSecretName: kvSecretTodoAppInsightsInstrumentationKey.outputs.kvSecretName
 //   }
 // }
 
@@ -561,6 +661,11 @@ module dnsZonePetCloinic 'components/dns-zone.bicep' = if (!empty(dnsZoneName) &
 //   scope: resourceGroup()
 //   name: 'b12aa53e-6015-4669-85d0-8515ebb3ae7f'
 // }
+
+output todoAppUserManagedIdentityName string = todoAppUserManagedIdentity.name
+output todoAppUserManagedIdentityPrincipalId string = todoAppUserManagedIdentity.properties.principalId
+output todoAppUserManagedIdentityClientId string = todoAppUserManagedIdentity.properties.clientId
+output todoAppDbUserName string = todoAppDbUserName
 
 output petClinicAppUserManagedIdentityName string = petClinicAppUserManagedIdentity.name
 output petClinicAppUserManagedIdentityPrincipalId string = petClinicAppUserManagedIdentity.properties.principalId

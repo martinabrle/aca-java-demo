@@ -25,7 +25,7 @@ jobs:
       SRC_DIR: todo-app
       JAVA_VERSION: 11
       DB: ${{secrets.TODO_APP_DB_NAME}}
-      USER_IDENTITY_NAME: ${{secrets.AKS_NAME}}-todo-app-identity
+      USER_IDENTITY_NAME: ${{secrets.ACA_NAME}}-todo-app-identity
       DB_USER_NAME: ${{secrets.TODO_APP_DB_USER_NAME}}
       CONTAINER_REGISTRY_SUBSCRIPTION_ID: ${{secrets.CONTAINER_REGISTRY_SUBSCRIPTION_ID}}
       CONTAINER_REGISTRY_NAME: ${{secrets.CONTAINER_REGISTRY_NAME}}
@@ -183,7 +183,7 @@ jobs:
         ls -la ./${{env.RELEASE_ARCHIVE_NAME}}
         gh release create ${{env.VERSION_TAG}} ${{env.RELEASE_ARCHIVE_NAME}} --notes "Auto release ${{env.VERSION_TAG}}"
     
-    - name: Azure login in AKS Subscription # https://learn.microsoft.com/en-us/azure/developer/github/connect-from-azure
+    - name: Azure login in Container Registry Subscription # https://learn.microsoft.com/en-us/azure/developer/github/connect-from-azure
       uses: azure/login@v2
       with:
         client-id: "${{secrets.AAD_CLIENT_ID}}"
