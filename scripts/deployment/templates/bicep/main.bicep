@@ -78,7 +78,6 @@ var containerRegistryTagsArray = json(containerRegistryTagsVar)
 var logAnalyticsTagsArray = json(logAnalyticsTagsVar)
 var parentDnsZoneTagsArray = json(parentDnsZoneTagsVar)
 
-var appGatewayName = '${acaName}-appgw'
 var vnetName = '${acaName}-vnet'
 var aksSubnetName = 'aks-default'
 var appGatewaySubnetName = 'appgw-subnet'

@@ -138,11 +138,6 @@ jobs:
           petClinicVisitsSvcUserManagedIdentityClientId=`echo $deploymentOutput|jq ".properties.outputs.petClinicVisitsSvcUserManagedIdentityClientId.value"`
           petClinicVisitsSvcDbUserName=`echo $deploymentOutput|jq ".properties.outputs.petClinicVisitsSvcDbUserName.value"`
 
-          # agicIdentityResourceId=`echo $deploymentOutput|jq ".properties.outputs.agicIdentityResourceId.value"`
-          # agicIdentityName=`echo $deploymentOutput|jq ".properties.outputs.agicIdentityName.value"`
-          # agicIdentityPrincipalId=`echo $deploymentOutput|jq ".properties.outputs.agicIdentityPrincipalId.value"`
-          # agicIdentityClientId=`echo $deploymentOutput|jq ".properties.outputs.agicIdentityClientId.value"`
-
           echo "TODO_APP_USER_MI_NAME: ${todoAppUserManagedIdentityName}"
           echo "TODO_APP_USER_MI_NAME=${todoAppUserManagedIdentityName}" >> $GITHUB_OUTPUT
           echo "TODO_APP_USER_MI_PRINCIPAL_ID: ${todoAppUserManagedIdentityPrincipalId}"
@@ -192,23 +187,4 @@ jobs:
           echo "PET_CLINIC_VISITS_SVC_USER_MI_CLIENT_ID=${petClinicVisitsSvcUserManagedIdentityClientId}" >> $GITHUB_OUTPUT
           echo "PET_CLINIC_VISITS_SVC_DB_USER_NAME: ${petClinicVisitsSvcDbUserName}"
           echo "PET_CLINIC_VISITS_SVC_DB_USER_NAME=${petClinicVisitsSvcDbUserName}" >> $GITHUB_OUTPUT
-      
-          echo "APP_GATEWAY_NAME: ${appGatewayName}"
-          echo "APP_GATEWAY_NAME=${appGatewayName}" >> $GITHUB_OUTPUT
-          echo "APP_GATEWAY_IDENTITY_RESOURCE_ID: ${appGatewayIdentityResourceId}"
-          echo "APP_GATEWAY_IDENTITY_RESOURCE_ID=${appGatewayIdentityResourceId}" >> $GITHUB_OUTPUT
-          echo "APP_GATEWAY_IDENTITY_NAME: ${appGatewayIdentityName}"
-          echo "APP_GATEWAY_IDENTITY_NAME=${appGatewayIdentityName}" >> $GITHUB_OUTPUT
-          echo "APP_GATEWAY_IDENTITY_PRINCIPAL_ID: ${appGatewayIdentityPrincipalId}"
-          echo "APP_GATEWAY_IDENTITY_PRINCIPAL_ID=${appGatewayIdentityPrincipalId}" >> $GITHUB_OUTPUT
-          echo "APP_GATEWAY_IDENTITY_CLIENT_ID: ${appGatewayIdentityClientId}"
-          echo "APP_GATEWAY_IDENTITY_CLIENT_ID=${appGatewayIdentityClientId}" >> $GITHUB_OUTPUT
 
-          echo "AGIC_IDENTITY_RESOURCE_ID: ${agicIdentityResourceId}"
-          echo "AGIC_IDENTITY_RESOURCE_ID=${agicIdentityResourceId}" >> $GITHUB_OUTPUT
-          echo "AGIC_IDENTITY_NAME: ${agicIdentityName}"
-          echo "AGIC_IDENTITY_NAME=${agicIdentityName}" >> $GITHUB_OUTPUT
-          echo "AGIC_IDENTITY_PRINCIPAL_ID: ${agicIdentityPrincipalId}"
-          echo "AGIC_IDENTITY_PRINCIPAL_ID=${agicIdentityPrincipalId}" >> $GITHUB_OUTPUT
-          echo "AGIC_IDENTITY_CLIENT_ID: ${agicIdentityClientId}"
-          echo "AGIC_IDENTITY_CLIENT_ID=${agicIdentityClientId}" >> $GITHUB_OUTPUT
