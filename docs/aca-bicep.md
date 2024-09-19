@@ -4,7 +4,7 @@
 
 ![Architecture Diagram](./aks-java-demo-architecture.drawio.png)
 
-* Start the command line, clone the repo using ```git clone https://github.com/martinabrle/aks-java-demo.git``` and change your current directory to ```aks-java-demo/scripts``` directory:
+* Start the command line, clone the repo using ```git clone https://github.com/martinabrle/aca-java-demo.git``` and change your current directory to ```aks-java-demo/scripts``` directory:
     ```
     cd ./aks-java-demo/scripts
     ```

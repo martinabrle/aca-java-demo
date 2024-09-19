@@ -49,7 +49,7 @@ PET_CLINIC_GIT_CONFIG_REPO_URI
 PGSQL_RESOURCE_TAGS
 ```
 
-* Register a Microsoft Entra application in Azure and add federated credentials in order for GitHub actions to deploy resources into Azure ([link](https://learn.microsoft.com/en-us/azure/developer/github/connect-from-azure?tabs=azure-cli%2Cwindows#use-the-azure-login-action-with-openid-connect)). You will need to assign *Key Vault Administrator*, *Contributor* and *Owner* role to the newly created SP for every subscription you are deploying into. The service principal will also need to have "Directory.Read" role assigned to it for the workflow to work.
+* Register a Microsoft Entra application in Azure and add federated credentials in order for GitHub actions to deploy resources into Azure ([link](https://learn.microsoft.com/en-us/azure/developer/github/connect-from-azure?tabs=azure-cli%2Cwindows#use-the-azure-login-action-with-openid-connect)). You will need to assign *Key Vault Administrator*, *Contributor* and *Owner* role to the newly created SP for every subscription you are deploying into. The service principal will also need to have "Directory.Read" role assigned to it for the workflow to work. If you are integrating with a DNS Zone, this newly created SP will also need *DNS Zone Contributor role* assigned to it.
 ```
 az ad sp create-for-rbac --name {YOUR_DEPLOYMENT_PRINCIPAL_NAME} --role "Key Vault Administrator" --scopes /subscriptions/{AZURE_SUBSCRIPTION_ID} --sdk-auth
 az ad sp create-for-rbac --name {YOUR_DEPLOYMENT_PRINCIPAL_NAME} --role contributor --scopes /subscriptions/{AZURE_SUBSCRIPTION_ID} --sdk-auth

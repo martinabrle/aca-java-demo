@@ -657,6 +657,12 @@ module dnsZonePetCloinic 'components/dns-zone.bicep' = if (!empty(dnsZoneName) &
 //   name: 'f1a07417-d97a-45cb-824c-7a7467783830'
 // }
 
+// @description('This is the built-in DNS Zone Contributor role. See https://learn.microsoft.com/en-gb/azure/role-based-access-control/built-in-roles/networking#dns-zone-contributor')
+// resource managedIdentityOperator 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
+//   scope: resourceGroup()
+//   name: 'b12aa53e-6015-4669-85d0-8515ebb3ae7f'
+// }
+
 output todoAppUserManagedIdentityName string = todoAppUserManagedIdentity.name
 output todoAppUserManagedIdentityPrincipalId string = todoAppUserManagedIdentity.properties.principalId
 output todoAppUserManagedIdentityClientId string = todoAppUserManagedIdentity.properties.clientId
