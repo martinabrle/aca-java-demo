@@ -124,7 +124,7 @@ module rbacContainerRegistryACRPull 'components/role-assignment-container-regist
     containerRegistryName: containerRegistryName
     roleDefinitionId: acrPullRole.id
     principalId: todoAppUserManagedIdentity.properties.principalId
-    roleAssignmentNameGuid: guid(todoAppUserManagedIdentity.properties.principalId, containerRegistry.outputs.containerRegistryId, acrPullRole.id)
+    roleAssignmentNameGuid: guid(todoAppUserManagedIdentity.properties.principalId, containerRegistry.id, acrPullRole.id)
   }
 }
 
