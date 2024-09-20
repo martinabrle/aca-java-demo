@@ -96,36 +96,3 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
     }
     location: location
 }
-
-output todoAppUserManagedIdentityName string = todoAppUserManagedIdentity.name
-output todoAppUserManagedIdentityPrincipalId string = todoAppUserManagedIdentity.properties.principalId
-output todoAppUserManagedIdentityClientId string = todoAppUserManagedIdentity.properties.clientId
-output todoAppDbUserName string = todoAppDbUserName
-
-output petClinicAppUserManagedIdentityName string = petClinicAppUserManagedIdentity.name
-output petClinicAppUserManagedIdentityPrincipalId string = petClinicAppUserManagedIdentity.properties.principalId
-output petClinicAppUserManagedIdentityClientId string = petClinicAppUserManagedIdentity.properties.clientId
-
-output petClinicConfigSvcUserManagedIdentityName string = petClinicConfigSvcUserManagedIdentity.name
-output petClinicConfigSvcUserManagedIdentityPrincipalId string = petClinicConfigSvcUserManagedIdentity.properties.principalId
-output petClinicConfigSvcUserManagedIdentityClientId string = petClinicConfigSvcUserManagedIdentity.properties.clientId
-
-output petClinicCustsSvcUserManagedIdentityName string = petClinicCustsSvcUserManagedIdentity.name
-output petClinicCustsSvcUserManagedIdentityPrincipalId string = petClinicCustsSvcUserManagedIdentity.properties.principalId
-output petClinicCustsSvcUserManagedIdentityClientId string = petClinicCustsSvcUserManagedIdentity.properties.clientId
-output petClinicCustsSvcDbUserName string = petClinicCustsSvcDbUserName
-
-output petClinicVetsSvcUserManagedIdentityName string = petClinicVetsSvcUserManagedIdentity.name
-output petClinicVetsSvcUserManagedIdentityPrincipalId string = petClinicVetsSvcUserManagedIdentity.properties.principalId
-output petClinicVetsSvcUserManagedIdentityClientId string = petClinicVetsSvcUserManagedIdentity.properties.clientId
-output petClinicVetsSvcDbUserName string = petClinicVetsSvcDbUserName
-
-output petClinicVisitsSvcUserManagedIdentityName string = petClinicVisitsSvcUserManagedIdentity.name
-output petClinicVisitsSvcUserManagedIdentityPrincipalId string = petClinicVisitsSvcUserManagedIdentity.properties.principalId
-output petClinicVisitsSvcUserManagedIdentityClientId string = petClinicVisitsSvcUserManagedIdentity.properties.clientId
-output petClinicVisitsSvcDbUserName string = petClinicVisitsSvcDbUserName
-
-// output agicIdentityName string = aks.outputs.agicIdentityName
-// output agicIdentityPrincipalId string = aks.outputs.agicIdentityPrincipalId
-// output agicIdentityClientId string = aks.outputs.agicIdentityClientId
-// output agicIdentityResourceId string = aks.outputs.agicIdentityResourceId
