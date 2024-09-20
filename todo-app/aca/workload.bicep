@@ -88,7 +88,7 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
               ]
               resources: {
                  cpu: 1
-                 memory: '250Mb'
+                 memory: '0.25Gi'
               }
             }
           ]
