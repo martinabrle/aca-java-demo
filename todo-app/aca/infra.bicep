@@ -36,6 +36,7 @@ resource containerRegistry 'Microsoft.ContainerRegistry/registries@2023-11-01-pr
   name: containerRegistryName
   scope: resourceGroup(containerRegistrySubscriptionIdVar, containerRegistryRGVar)
 }
+
 module kvSecretTodoAppSpringDSURI 'components/kv-secret.bicep' = {
   name: 'kv-secret-todo-app-ds-uri'
   params: {

@@ -164,10 +164,12 @@ jobs:
   
       - name: Deploy app specific infrastructure (managed identities, RBACK etc.)
         id: deployment
+        env:
+          RELEASE_DIR_NAME: ${{steps.versions.outputs.RELEASE_DIR_NAME}}
         run: |
           deploymentOutput=`az deployment group create \
                                         --resource-group ${{env.ACA_RESOURCE_GROUP}} \
-                                        --template-file ./aca/infra.bicep \
+                                        --template-file ./${{env.RELEASE_DIR_NAME}}/aca/infra.bicep \
                                         --parameters acaName="${{env.ACA_NAME}}" \
                                                      pgsqlName="${{env.PGSQL_NAME}}" \
                                                      pgsqlTodoAppDbName="${{secrets.TODO_APP_DB_NAME}}" \
@@ -176,8 +178,6 @@ jobs:
                                                      containerRegistrySubscriptionId="${{env.CONTAINER_REGISTRY_SUBSCRIPTION_ID}}" \
                                                      containerRegistryRG="${{env.CONTAINER_REGISTRY_RESOURCE_GROUP}}" \
                                                      location="${{secrets.AZURE_LOCATION}}" `
-
-          # TODO: Implement the deployment of the necessary infrastructure
 
           todoAppUserManagedIdentityName=`echo $deploymentOutput|jq ".properties.outputs.todoAppUserManagedIdentityName.value"`
           todoAppUserManagedIdentityPrincipalId=`echo $deploymentOutput|jq ".properties.outputs.todoAppUserManagedIdentityPrincipalId.value"`
@@ -229,14 +229,6 @@ jobs:
           psql --set=sslmode=require -h "${{env.PGSQL_SERVER_NAME}}" -p 5432 -d "${{env.DB}}" -U "${{env.DBA_GROUP_NAME}}" -tAc "GRANT USAGE ON SCHEMA public TO ${{env.DB_USER_NAME}};" -v ON_ERROR_STOP=1
           psql --set=sslmode=require -h "${{env.PGSQL_SERVER_NAME}}" -p 5432 -d "${{env.DB}}" -U "${{env.DBA_GROUP_NAME}}" -tAc "GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO ${{env.DB_USER_NAME}};" -v ON_ERROR_STOP=1
 
-    # - name: Test connection to AKS
-    #   run: |
-    #     az aks command invoke \
-    #       --resource-group ${{env.AKS_RESOURCE_GROUP}} \
-    #       --name ${{env.AKS_NAME}} \
-    #       --command "kubectl get ns" \
-    #       --subscription "${{env.AKS_SUBSCRIPTION_ID}}"
-
       - name: Deploy app into ACA using Bicep
         env:
           DEPLOYMENT_SUFFIX: ""
@@ -244,11 +236,14 @@ jobs:
           RELEASE_DIR_NAME: ${{steps.versions.outputs.RELEASE_DIR_NAME}}
           HOST_NAME: ${{vars.TODO_APP_DNS_RECORD_NAME}}.${{secrets.DNS_ZONE_NAME}}.${{secrets.PARENT_DNS_ZONE_NAME}}
         run: |
-          cat ./${{env.RELEASE_DIR_NAME}}/k8s/deployment.yml | CONTAINER_IMAGE=${{env.CONTAINER_IMAGE}} DEPLOYMENT_SUFFIX=${{env.DEPLOYMENT_SUFFIX}} HOST_NAME=${{env.HOST_NAME}} envsubst > ./deployment.yml.tmp
-          cat ./deployment.yml.tmp
-          az aks command invoke \
-            --resource-group ${{env.AKS_RESOURCE_GROUP}} \
-            --name ${{env.AKS_NAME}} \
-            --command "kubectl apply -f deployment.yml.tmp" \
-            --file deployment.yml.tmp \
-            --subscription "${{env.AKS_SUBSCRIPTION_ID}}"
+          ls ./${{env.RELEASE_DIR_NAME}}/aca/
+          deploymentOutput=`az deployment group create \
+                                        --resource-group ${{env.ACA_RESOURCE_GROUP}} \
+                                        --template-file ./${{env.RELEASE_DIR_NAME}}/aca/workload.bicep \
+                                        --parameters acaName="${{env.ACA_NAME}}" \
+                                                     todoAppDbUserName="${{secrets.TODO_APP_DB_USER_NAME}}" \
+                                                     location="${{secrets.AZURE_LOCATION}}" `
+
+          echo "Deployment output:"
+          echo "=================="
+          echo "$deploymentOutput"
