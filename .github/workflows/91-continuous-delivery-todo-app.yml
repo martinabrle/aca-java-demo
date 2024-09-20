@@ -28,7 +28,7 @@ jobs:
       ARTIFACT_NAME: todo-app
       SRC_DIR: todo-app
       JAVA_VERSION: 11
-      USER_IDENTITY_NAME: ${{secrets.AKS_NAME}}-todo-app-identity
+      USER_IDENTITY_NAME: ${{secrets.ACA_NAME}}-todo-app-identity
       PGSQL_NAME: ${{secrets.PGSQL_NAME}}
       DB: ${{secrets.TODO_APP_DB_NAME}}
       DB_USER_NAME: ${{secrets.TODO_APP_DB_USER_NAME}}
@@ -36,9 +36,9 @@ jobs:
       CONTAINER_REGISTRY_SUBSCRIPTION_ID: ${{secrets.CONTAINER_REGISTRY_SUBSCRIPTION_ID}}
       CONTAINER_REGISTRY_NAME: ${{secrets.CONTAINER_REGISTRY_NAME}}
       CONTAINER_REGISTRY_RESOURCE_GROUP: ${{secrets.CONTAINER_REGISTRY_RESOURCE_GROUP || secrets.ACA_RESOURCE_GROUP}}
-      ACA_RESOURCE_GROUP: ${{secrets.AKS_RESOURCE_GROUP}}
-      ACA_NAME: ${{secrets.AKS_NAME}}
-      ACA_SUBSCRIPTION_ID: ${{secrets.AKS_SUBSCRIPTION_ID}}
+      ACA_RESOURCE_GROUP: ${{secrets.ACA_RESOURCE_GROUP}}
+      ACA_NAME: ${{secrets.ACA_NAME}}
+      ACA_SUBSCRIPTION_ID: ${{secrets.ACA_SUBSCRIPTION_ID}}
 
     # when called from another workflow directly, it inherits the event name from the caller workflow
     # (push in this case when called from 10-continuous-integration.yml)
@@ -122,7 +122,7 @@ jobs:
             echo "Release '${{env.VERSION}}' does not exist."
             exit 1
 
-      - name: Azure login in AKS Subscription # https://learn.microsoft.com/en-us/azure/developer/github/connect-from-azure
+      - name: Azure login in ACA Subscription # https://learn.microsoft.com/en-us/azure/developer/github/connect-from-azure
         uses: azure/login@v2
         with:
           client-id: "${{secrets.AAD_CLIENT_ID}}"
