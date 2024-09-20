@@ -62,7 +62,14 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
       environmentId: acaEnvironment.id 
       configuration: {
           activeRevisionsMode: 'Single'
+          secrets: [
+            {
+              name: replace(kvSecretTodoAppSpringDSURI.name,'-','_')
+              keyVaultUrl: kvSecretTodoAppSpringDSURI.properties.secretUri
+            }
+          ]
       }
+       
       template: {
           containers: [
             {
@@ -71,20 +78,20 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
               env: [
                 {
                   name: replace(kvSecretTodoAppSpringDSURI.name,'-','_')
-                  secretRef: kvSecretTodoAppSpringDSURI.properties.secretUri
+                  secretRef: replace(kvSecretTodoAppSpringDSURI.name,'-','_')
                 }
-                {
-                  name: replace(kvSecretTodoAppDbUserName.name,'-','_')
-                  secretRef: kvSecretTodoAppDbUserName.properties.secretUri
-                }
-                {
-                  name: replace(kvSecretTodoAppInsightsConnectionString.name,'-','_')
-                  secretRef: kvSecretTodoAppInsightsConnectionString.properties.secretUri
-                }
-                {
-                  name: replace(kvSecretTodoAppInsightsInstrumentationKey.name,'-','_')
-                  secretRef: kvSecretTodoAppInsightsInstrumentationKey.properties.secretUri
-                }
+                // {
+                //   name: replace(kvSecretTodoAppDbUserName.name,'-','_')
+                //   secretRef: kvSecretTodoAppDbUserName.properties.secretUri
+                // }
+                // {
+                //   name: replace(kvSecretTodoAppInsightsConnectionString.name,'-','_')
+                //   secretRef: kvSecretTodoAppInsightsConnectionString.properties.secretUri
+                // }
+                // {
+                //   name: replace(kvSecretTodoAppInsightsInstrumentationKey.name,'-','_')
+                //   secretRef: kvSecretTodoAppInsightsInstrumentationKey.properties.secretUri
+                // }
               ]
               resources: {
                  cpu: json('0.5')
