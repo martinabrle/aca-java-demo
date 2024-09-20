@@ -71,19 +71,19 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
               env: [
                 {
                   name: replace(kvSecretTodoAppSpringDSURI.name,'-','_')
-                  secretRef: kvSecretTodoAppSpringDSURI.id
+                  secretRef: kvSecretTodoAppSpringDSURI.properties.secretUri
                 }
                 {
                   name: replace(kvSecretTodoAppDbUserName.name,'-','_')
-                  secretRef: kvSecretTodoAppDbUserName.name
+                  secretRef: kvSecretTodoAppDbUserName.properties.secretUri
                 }
                 {
                   name: replace(kvSecretTodoAppInsightsConnectionString.name,'-','_')
-                  secretRef: kvSecretTodoAppInsightsConnectionString.name
+                  secretRef: kvSecretTodoAppInsightsConnectionString.properties.secretUri
                 }
                 {
                   name: replace(kvSecretTodoAppInsightsInstrumentationKey.name,'-','_')
-                  secretRef: kvSecretTodoAppInsightsInstrumentationKey.name
+                  secretRef: kvSecretTodoAppInsightsInstrumentationKey.properties.secretUri
                 }
               ]
               resources: {
