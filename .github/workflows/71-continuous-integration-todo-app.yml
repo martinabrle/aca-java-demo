@@ -11,13 +11,15 @@ on:
 
   workflow_dispatch:
 
+permissions:
+  contents: write
+  packages: write
+  id-token: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      packages: write
-      id-token: write
+
     env:
       SEMVER_NAMESPACE: todo-app
       SEMVER_CHANGE_PATH: todo-app
