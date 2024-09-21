@@ -1,4 +1,6 @@
 param acaName string
+param acaTags string
+
 param appVersion string
 
 param todoAppUserManagedIdentityName string = '${acaName}-todo-app-identity'
@@ -55,6 +57,7 @@ resource acaEnvironment 'Microsoft.App/managedEnvironments@2024-03-01' existing 
 
 resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
    name: appName
+   tags: json(acaTags)
    identity: {
       type: 'UserAssigned'
       userAssignedIdentities: {
