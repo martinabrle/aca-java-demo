@@ -244,6 +244,7 @@ jobs:
                                         --resource-group ${{env.ACA_RESOURCE_GROUP}} \
                                         --template-file ./${{env.RELEASE_DIR_NAME}}/aca/workload.bicep \
                                         --parameters acaName="${{env.ACA_NAME}}" \
+                                                     acaTags="${{vars.ACA_RESOURCE_TAGS}}" \
                                                      appVersion="${{env.VERSION}}" \
                                                      containerImage="${{env.CONTAINER_IMAGE}}" \
                                                      containerRegistryName="${{env.CONTAINER_REGISTRY_NAME}}" \
