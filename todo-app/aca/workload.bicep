@@ -90,7 +90,7 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
           containers: [
             {
               image: 'mcr.microsoft.com/mcr/hello-world'
-              name: 'frontend'
+              name: appName
               env: [
                 {
                   name: replace(kvSecretTodoAppSpringDSURI.name,'-','_')
