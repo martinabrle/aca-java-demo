@@ -92,6 +92,11 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
               identity: todoAppUserManagedIdentity.id
             }
           ]
+          ingress: {
+            targetPort: 80
+            external: true
+            clientCertificateMode: 'ignore'    
+          }  
       }
       template: {
           containers: [

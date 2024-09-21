@@ -10,6 +10,6 @@ WORKDIR /
 ADD ./${ARTIFACT_NAME_ARG}-${VERSION_ARG}.jar /${ARTIFACT_NAME_ARG}-${VERSION_ARG}.jar
 ADD ./ai.jar /ai.jar
 
-EXPOSE 80 443
+EXPOSE 80
 
 ENTRYPOINT ["java","-Djava.security.egd=file:/dev/./urandom","-javaagent:/ai.jar","-jar","/${ARTIFACT_NAME_ARG}-${VERSION_ARG}.jar"]
