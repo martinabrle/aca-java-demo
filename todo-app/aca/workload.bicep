@@ -1,4 +1,5 @@
 param acaName string
+param appVersion string
 
 param todoAppUserManagedIdentityName string = '${acaName}-todo-app-identity'
 param appName string = 'todo-app'
@@ -63,7 +64,7 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
    properties: {
       environmentId: acaEnvironment.id 
       configuration: {
-          activeRevisionsMode: 'Single'
+          activeRevisionsMode: 'Multiple'
           secrets: [
             {
               name:  toLower(kvSecretTodoAppSpringDSURI.name)
@@ -95,11 +96,12 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
           ingress: {
             targetPort: 80
             external: true
-            clientCertificateMode: 'ignore'    
+            clientCertificateMode: 'ignore'
           }  
       }
       template: {
-          containers: [
+        revisionSuffix: appVersion
+        containers: [
             {
               image: containerImage
               name: appName
@@ -126,7 +128,7 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
                  memory: '1.0Gi'
               }
             }
-          ]
+        ]
       }
     }
     location: location
