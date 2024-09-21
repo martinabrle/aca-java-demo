@@ -243,6 +243,7 @@ jobs:
                                         --resource-group ${{env.ACA_RESOURCE_GROUP}} \
                                         --template-file ./${{env.RELEASE_DIR_NAME}}/aca/workload.bicep \
                                         --parameters acaName="${{env.ACA_NAME}}" \
+                                                     containerImage="${{env.CONTAINER_IMAGE}}" \
                                                      location="${{secrets.AZURE_LOCATION}}" `
 
           echo "Deployment output:"
