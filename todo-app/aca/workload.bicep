@@ -4,7 +4,7 @@ param todoAppUserManagedIdentityName string = '${acaName}-todo-app-identity'
 param appName string = 'todo-app'
 param containerImage string
 
-param containerRegistryName string = replace(replace(acaName, '_', ''), '-', '')
+param containerRegistryName string
 param containerRegistrySubscriptionId string = subscription().id
 param containerRegistryRG string = resourceGroup().name
 
