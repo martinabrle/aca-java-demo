@@ -66,6 +66,7 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
             {
               name: replace(kvSecretTodoAppSpringDSURI.name,'-','_')
               keyVaultUrl: kvSecretTodoAppSpringDSURI.properties.secretUri
+              identity: todoAppUserManagedIdentity.id
             }
           ]
       }
