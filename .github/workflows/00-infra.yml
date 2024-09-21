@@ -96,8 +96,6 @@ jobs:
                                                      petClinicCustsSvcDbUserName="${{secrets.PET_CLINIC_CUSTS_SVC_DB_USER_NAME}}" \
                                                      petClinicVetsSvcDbUserName="${{secrets.PET_CLINIC_VETS_SVC_DB_USER_NAME}}" \
                                                      petClinicVisitsSvcDbUserName="${{secrets.PET_CLINIC_VISITS_SVC_DB_USER_NAME}}" \
-                                                     pgsqlTodoAppDbName="${{secrets.TODO_APP_DB_NAME}}" \
-                                                     todoAppDbUserName="${{secrets.TODO_APP_DB_USER_NAME}}" \
                                                      pgsqlTags="${{vars.PGSQL_RESOURCE_TAGS}}" \
                                                      logAnalyticsName="${{secrets.LOG_ANALYTICS_WRKSPC_NAME}}" \
                                                      logAnalyticsSubscriptionId="${{env.LOG_ANALYTICS_WRKSPC_SUBSCRIPTION_ID}}" \
@@ -109,11 +107,6 @@ jobs:
                                                      location="${{secrets.AZURE_LOCATION}}" `
           
           #azurerm_kubernetes_cluster.aks.network_profile[0].load_balancer_profile[0].effective_outbound_ips
-
-          todoAppUserManagedIdentityName=`echo $deploymentOutput|jq ".properties.outputs.todoAppUserManagedIdentityName.value"`
-          todoAppUserManagedIdentityPrincipalId=`echo $deploymentOutput|jq ".properties.outputs.todoAppUserManagedIdentityPrincipalId.value"`
-          todoAppUserManagedIdentityClientId=`echo $deploymentOutput|jq ".properties.outputs.todoAppUserManagedIdentityClientId.value"`
-          todoAppDbUserName=`echo $deploymentOutput|jq ".properties.outputs.todoAppDbUserName.value"`
 
           petClinicAppUserManagedIdentityName=`echo $deploymentOutput|jq ".properties.outputs.petClinicAppUserManagedIdentityName.value"`
           petClinicAppUserManagedIdentityPrincipalId=`echo $deploymentOutput|jq ".properties.outputs.petClinicAppUserManagedIdentityPrincipalId.value"`
@@ -137,15 +130,6 @@ jobs:
           petClinicVisitsSvcUserManagedIdentityPrincipalId=`echo $deploymentOutput|jq ".properties.outputs.petClinicVisitsSvcUserManagedIdentityPrincipalId.value"`
           petClinicVisitsSvcUserManagedIdentityClientId=`echo $deploymentOutput|jq ".properties.outputs.petClinicVisitsSvcUserManagedIdentityClientId.value"`
           petClinicVisitsSvcDbUserName=`echo $deploymentOutput|jq ".properties.outputs.petClinicVisitsSvcDbUserName.value"`
-
-          echo "TODO_APP_USER_MI_NAME: ${todoAppUserManagedIdentityName}"
-          echo "TODO_APP_USER_MI_NAME=${todoAppUserManagedIdentityName}" >> $GITHUB_OUTPUT
-          echo "TODO_APP_USER_MI_PRINCIPAL_ID: ${todoAppUserManagedIdentityPrincipalId}"
-          echo "TODO_APP_USER_MI_PRINCIPAL_ID=${todoAppUserManagedIdentityPrincipalId}" >> $GITHUB_OUTPUT
-          echo "TODO_APP_USER_MI_CLIENT_ID: ${todoAppUserManagedIdentityClientId}"
-          echo "TODO_APP_USER_MI_CLIENT_ID=${todoAppUserManagedIdentityClientId}" >> $GITHUB_OUTPUT
-          echo "TODO_APP_DB_USER_NAME: ${todoAppDbUserName}"
-          echo "TODO_APP_DB_USER_NAME=${todoAppDbUserName}" >> $GITHUB_OUTPUT
 
           echo "PET_CLINIC_APP_USER_MI_NAME: ${petClinicAppUserManagedIdentityName}"
           echo "PET_CLINIC_APP_USER_MI_NAME=${petClinicAppUserManagedIdentityName}" >> $GITHUB_OUTPUT
