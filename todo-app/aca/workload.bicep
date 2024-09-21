@@ -2,15 +2,16 @@ param acaName string
 
 param todoAppUserManagedIdentityName string = '${acaName}-todo-app-identity'
 param appName string = 'todo-app'
+param containerImage string
 
-// param containerRegistryName string = replace(replace(acaName, '_', ''), '-', '')
-// param containerRegistrySubscriptionId string = subscription().id
-// param containerRegistryRG string = resourceGroup().name
+param containerRegistryName string = replace(replace(acaName, '_', ''), '-', '')
+param containerRegistrySubscriptionId string = subscription().id
+param containerRegistryRG string = resourceGroup().name
 
-// var containerRegistrySubscriptionIdVar = (containerRegistrySubscriptionId == '')
-//   ? subscription().id
-//   : containerRegistrySubscriptionId
-// var containerRegistryRGVar = (containerRegistryRG == '') ? resourceGroup().name : containerRegistryRG
+var containerRegistrySubscriptionIdVar = (containerRegistrySubscriptionId == '')
+  ? subscription().id
+  : containerRegistrySubscriptionId
+var containerRegistryRGVar = (containerRegistryRG == '') ? resourceGroup().name : containerRegistryRG
 
 param location string
 
@@ -42,10 +43,10 @@ resource keyVault 'Microsoft.KeyVault/vaults@2024-04-01-preview' existing = {
   name: '${acaName}-kv'
 }
 
-// resource containerRegistry 'Microsoft.ContainerRegistry/registries@2023-11-01-preview' existing = {
-//   name: containerRegistryName
-//   scope: resourceGroup(containerRegistrySubscriptionIdVar, containerRegistryRGVar)
-// }
+resource containerRegistry 'Microsoft.ContainerRegistry/registries@2023-11-01-preview' existing = {
+  name: containerRegistryName
+  scope: resourceGroup(containerRegistrySubscriptionIdVar, containerRegistryRGVar)
+}
 
 resource acaEnvironment 'Microsoft.App/managedEnvironments@2024-03-01' existing = {
   name: acaName
@@ -54,10 +55,10 @@ resource acaEnvironment 'Microsoft.App/managedEnvironments@2024-03-01' existing 
 resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
    name: appName
    identity: {
-      type: 'UserAssigned'
-       userAssignedIdentities: {
+      type: 'SystemAssigned,UserAssigned'
+      userAssignedIdentities: {
          '${todoAppUserManagedIdentity.id}': {}
-       }
+      }
    }
    properties: {
       environmentId: acaEnvironment.id 
@@ -85,11 +86,17 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
               identity: todoAppUserManagedIdentity.id
             }
           ]
+          registries: [
+            {
+              server: containerRegistry.name
+              identity: 'System'
+            }
+          ]
       }
       template: {
           containers: [
             {
-              image: 'martinabrle.azurecr.io/todo-app:0.0.29'
+              image: containerImage
               name: appName
               env: [
                 {
