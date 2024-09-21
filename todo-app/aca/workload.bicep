@@ -89,7 +89,7 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
       template: {
           containers: [
             {
-              image: 'mcr.microsoft.com/mcr/hello-world'
+              image: 'martinabrle.azurecr.io/todo-app:0.0.29'
               name: appName
               env: [
                 {
