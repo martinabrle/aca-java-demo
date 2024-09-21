@@ -64,7 +64,7 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
           activeRevisionsMode: 'Single'
           secrets: [
             {
-              name: kvSecretTodoAppSpringDSURI.name
+              name:  toLower(kvSecretTodoAppSpringDSURI.name)
               keyVaultUrl: kvSecretTodoAppSpringDSURI.properties.secretUri
               identity: todoAppUserManagedIdentity.id
             }
@@ -79,7 +79,7 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
               env: [
                 {
                   name: replace(kvSecretTodoAppSpringDSURI.name,'-','_')
-                  secretRef: kvSecretTodoAppSpringDSURI.name
+                  secretRef: toLower(kvSecretTodoAppSpringDSURI.name)
                 }
                 // {
                 //   name: replace(kvSecretTodoAppDbUserName.name,'-','_')
