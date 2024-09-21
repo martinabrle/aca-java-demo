@@ -1,6 +1,7 @@
 param acaName string
 
 param todoAppUserManagedIdentityName string = '${acaName}-todo-app-identity'
+param appName string = 'todo-app'
 
 // param containerRegistryName string = replace(replace(acaName, '_', ''), '-', '')
 // param containerRegistrySubscriptionId string = subscription().id
@@ -51,7 +52,7 @@ resource acaEnvironment 'Microsoft.App/managedEnvironments@2024-03-01' existing 
 }
 
 resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
-   name: 'fe'
+   name: appName
    identity: {
       type: 'UserAssigned'
        userAssignedIdentities: {
@@ -68,9 +69,23 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
               keyVaultUrl: kvSecretTodoAppSpringDSURI.properties.secretUri
               identity: todoAppUserManagedIdentity.id
             }
+            {
+              name:  toLower(kvSecretTodoAppDbUserName.name)
+              keyVaultUrl: kvSecretTodoAppDbUserName.properties.secretUri
+              identity: todoAppUserManagedIdentity.id
+            }
+            {
+              name:  toLower(kvSecretTodoAppInsightsConnectionString.name)
+              keyVaultUrl: kvSecretTodoAppInsightsConnectionString.properties.secretUri
+              identity: todoAppUserManagedIdentity.id
+            }
+            {
+              name:  toLower(kvSecretTodoAppInsightsInstrumentationKey.name)
+              keyVaultUrl: kvSecretTodoAppInsightsInstrumentationKey.properties.secretUri
+              identity: todoAppUserManagedIdentity.id
+            }
           ]
       }
-       
       template: {
           containers: [
             {
@@ -81,18 +96,18 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
                   name: replace(kvSecretTodoAppSpringDSURI.name,'-','_')
                   secretRef: toLower(kvSecretTodoAppSpringDSURI.name)
                 }
-                // {
-                //   name: replace(kvSecretTodoAppDbUserName.name,'-','_')
-                //   secretRef: kvSecretTodoAppDbUserName.properties.secretUri
-                // }
-                // {
-                //   name: replace(kvSecretTodoAppInsightsConnectionString.name,'-','_')
-                //   secretRef: kvSecretTodoAppInsightsConnectionString.properties.secretUri
-                // }
-                // {
-                //   name: replace(kvSecretTodoAppInsightsInstrumentationKey.name,'-','_')
-                //   secretRef: kvSecretTodoAppInsightsInstrumentationKey.properties.secretUri
-                // }
+                {
+                  name: replace(kvSecretTodoAppDbUserName.name,'-','_')
+                  secretRef: toLower(kvSecretTodoAppDbUserName.name)
+                }
+                {
+                  name: replace(kvSecretTodoAppInsightsConnectionString.name,'-','_')
+                  secretRef: toLower(kvSecretTodoAppInsightsConnectionString.name)
+                }
+                {
+                  name: replace(kvSecretTodoAppInsightsInstrumentationKey.name,'-','_')
+                  secretRef: toLower(kvSecretTodoAppInsightsInstrumentationKey.name)
+                }
               ]
               resources: {
                  cpu: json('0.5')
