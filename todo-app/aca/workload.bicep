@@ -88,7 +88,7 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
           ]
           registries: [
             {
-              server: '${containerRegistry.name}' //.azurecr.io'
+              server: '${containerRegistry.name}.azurecr.io'
               identity: todoAppUserManagedIdentity.id
             }
           ]
