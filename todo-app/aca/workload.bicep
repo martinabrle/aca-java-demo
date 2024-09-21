@@ -89,7 +89,7 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
       template: {
           containers: [
             {
-              image: 'mcr.microsoft.com/azuredocs/azure-vote-front:v1'
+              image: 'mcr.microsoft.com/mcr/hello-world'
               name: 'frontend'
               env: [
                 {
