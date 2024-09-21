@@ -55,7 +55,7 @@ resource acaEnvironment 'Microsoft.App/managedEnvironments@2024-03-01' existing 
 resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
    name: appName
    identity: {
-      type: 'SystemAssigned,UserAssigned'
+      type: 'UserAssigned'
       userAssignedIdentities: {
          '${todoAppUserManagedIdentity.id}': {}
       }
@@ -89,7 +89,7 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
           registries: [
             {
               server: containerRegistry.name
-              identity: 'System'
+              identity: todoAppUserManagedIdentity.id
             }
           ]
       }
