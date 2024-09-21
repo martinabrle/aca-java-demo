@@ -92,6 +92,7 @@ jobs:
                                                      pgsqlAADAdminGroupObjectId="${dbaGroupId}" \
                                                      pgsqlSubscriptionId="${{env.PGSQL_SUBSCRIPTION_ID}}" \
                                                      pgsqlRG="${{secrets.PGSQL_RESOURCE_GROUP}}" \
+                                                     pgsqlTodoAppDbName="${{secrets.TODO_APP_DB_NAME}}" \
                                                      pgsqlPetClinicDbName="${{secrets.PET_CLINIC_DB_NAME}}" \
                                                      petClinicCustsSvcDbUserName="${{secrets.PET_CLINIC_CUSTS_SVC_DB_USER_NAME}}" \
                                                      petClinicVetsSvcDbUserName="${{secrets.PET_CLINIC_VETS_SVC_DB_USER_NAME}}" \
