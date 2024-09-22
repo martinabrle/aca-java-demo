@@ -38,6 +38,15 @@ resource acaEnvironment 'Microsoft.App/managedEnvironments@2024-03-01'= {
   }
 }
 
+// resource sslCertificates 'Microsoft.App/managedEnvironments/managedCertificates@2024-03-01' = {
+//   parent: acaEnvironment
+//   name: '${name}-ssl-certificates'
+//   properties: {
+//      domainControlValidation: 'TXT'
+//      subjectName: ''
+//   }
+// }
+
 resource acaDiagnotsicsLogs 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
   name: '${name}-aca-logs'
   scope: acaEnvironment

@@ -65,7 +65,7 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
       }
    }
    properties: {
-      environmentId: acaEnvironment.id 
+      environmentId: acaEnvironment.id
       configuration: {
           activeRevisionsMode: 'Multiple'
           secrets: [
@@ -100,7 +100,12 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
             targetPort: 80
             external: true
             clientCertificateMode: 'ignore'
-          }  
+            // customDomains: [
+            //   {
+            //     name: 'todo.aca-java-demo.test.martinabrle.com'
+            //   }
+            // ]
+          } 
       }
       template: {
         revisionSuffix: replace(appVersion,'.','-')
