@@ -58,9 +58,22 @@ resource acaEnvironment 'Microsoft.App/managedEnvironments@2024-03-01' existing 
   name: acaName
 }
 
+module dnsRecordTXT './components/dns-record-txt.bicep' = {
+  name: 'dns-record-txt'
+  params: {
+    dnsZoneName: '${dnsZoneName}.${parentDnsZoneName}'
+    dnsRecordName: 'asuid.${appName}'
+    dnsRecordValue: acaEnvironment.properties.customDomainConfiguration.customDomainVerificationId //acaApp.properties.customDomainVerificationId
+  }
+}
+
 resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
    name: appName
    tags: json(acaTags)
+   dependsOn: [
+    dnsRecordTXT
+    acaManagedCertificate
+   ]
    identity: {
       type: 'UserAssigned'
       userAssignedIdentities: {
@@ -146,29 +159,12 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
     location: location
 }
 
-// resource acaAppCustomDomain acaApp::CustomDomain = {
-//   parent: acaApp
-//   name: 'custom-domain'
-//   properties: {
-//     customDomain: '${appName}.${dnsZoneName}.${parentDnsZoneName}'
-//   }
-// }
-
 module dnsRecordCname './components/dns-record-cname.bicep' = {
   name: 'dns-record-cname'
   params: {
     dnsZoneName: '${dnsZoneName}.${parentDnsZoneName}'
     dnsRecordName: appName
     dnsRecordValue: acaApp.properties.configuration.ingress.fqdn
-  }
-}
-
-module dnsRecordTXT './components/dns-record-txt.bicep' = {
-  name: 'dns-record-txt'
-  params: {
-    dnsZoneName: '${dnsZoneName}.${parentDnsZoneName}'
-    dnsRecordName: 'asuid.${appName}'
-    dnsRecordValue: acaApp.properties.customDomainVerificationId
   }
 }
 
@@ -186,3 +182,4 @@ resource acaManagedCertificate 'Microsoft.App/managedEnvironments/managedCertifi
   location: location
 }
 
+//output test string = acaApp.properties.configuration.ingress.customDomains[0].bindingType
