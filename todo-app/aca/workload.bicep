@@ -151,7 +151,7 @@ resource dnsZone 'Microsoft.Network/dnsZones@2023-07-01-preview' existing = if (
 
 resource dnsZoneRecord 'Microsoft.Network/dnsZones/NS@2023-07-01-preview' = if (!empty(dnsZoneName) && !empty(parentDnsZoneName)) {
   parent: dnsZone
-  name: '${appName}.${dnsZoneName}.${parentDnsZoneName}'
+  name: appName
   properties: {
     TTL: 172800
      CNAMERecord: {
@@ -159,3 +159,4 @@ resource dnsZoneRecord 'Microsoft.Network/dnsZones/NS@2023-07-01-preview' = if (
      }
   }
 }
+
