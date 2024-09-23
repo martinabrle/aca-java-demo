@@ -167,7 +167,7 @@ resource acaManagedCertificate 'Microsoft.App/managedEnvironments/managedCertifi
   ]
   properties: {
     domainControlValidation: 'TXT'
-    subjectName: '${dnsZoneName}.${parentDnsZoneName}'
+    subjectName: '${appName}.${dnsZoneName}.${parentDnsZoneName}'
   }
   location: location
 }
