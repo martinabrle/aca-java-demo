@@ -250,6 +250,7 @@ jobs:
                                                      containerRegistryName="${{env.CONTAINER_REGISTRY_NAME}}" \
                                                      containerRegistrySubscriptionId="${{env.CONTAINER_REGISTRY_SUBSCRIPTION_ID}}" \
                                                      containerRegistryRG="${{env.CONTAINER_REGISTRY_RESOURCE_GROUP}}" \
+                                                     dnsZoneName="${{secrets.DNS_ZONE_NAME}}" \
                                                      location="${{secrets.AZURE_LOCATION}}" `
 
           echo "Deployment output:"
