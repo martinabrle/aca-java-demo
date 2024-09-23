@@ -153,7 +153,7 @@ module dnsRecordTXT './components/dns-record-txt.bicep' = {
   name: 'dns-record-txt'
   params: {
     dnsZoneName: '${dnsZoneName}.${parentDnsZoneName}'
-    dnsRecordName: appName
+    dnsRecordName: 'asuid.${appName}'
     dnsRecordValue: acaApp.properties.customDomainVerificationId
   }
 }
@@ -166,8 +166,9 @@ resource acaManagedCertificate 'Microsoft.App/managedEnvironments/managedCertifi
     dnsRecordTXT
   ]
   properties: {
-    domainControlValidation: 'TXT'
+    domainControlValidation: 'CNAME'
     subjectName: '${appName}.${dnsZoneName}.${parentDnsZoneName}'
   }
   location: location
 }
+
