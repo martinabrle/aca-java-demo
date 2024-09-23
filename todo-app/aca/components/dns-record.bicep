@@ -1,14 +1,14 @@
 param dnsZoneName string
 param dnsRecordName string
 
-resource dnsRecord 'Microsoft.Network/privateDnsZones/A@2024-06-01' = {
+resource dnsRecord 'Microsoft.Network/dnsZones/A@2023-07-01-preview' = {
   name: '${dnsZoneName}/${dnsRecordName}'
   properties: {
-    ttl: 300
-    aRecords: [
-      {
-        ipv4Address: '127.0.0.1'
-      }
-    ]
+    TTL: 60
+    ARecords: [
+       {
+         ipv4Address: '127.0.0.1' 
+       }
+     ]
   }
 }
