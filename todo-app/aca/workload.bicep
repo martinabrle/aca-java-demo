@@ -163,7 +163,7 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
 module dnsRecord './components/dns-record.bicep' = {
   name: 'dnsRecord'
   params: {
-    dnsZoneName: dnsZoneName
+    dnsZoneName: '${dnsZoneName}.${parentDnsZoneName}'
     dnsRecordName: appName
   }
 }
