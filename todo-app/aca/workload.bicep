@@ -148,3 +148,26 @@ module dnsRecordCname './components/dns-record-cname.bicep' = {
     dnsRecordValue: acaApp.properties.configuration.ingress.fqdn
   }
 }
+
+module dnsRecordTXT './components/dns-record-txt.bicep' = {
+  name: 'dns-record-txt'
+  params: {
+    dnsZoneName: '${dnsZoneName}.${parentDnsZoneName}'
+    dnsRecordName: appName
+    dnsRecordValue: acaApp.properties.customDomainVerificationId
+  }
+}
+
+resource acaManagedCertificate 'Microsoft.App/managedEnvironments/managedCertificates@2024-03-01' = {
+  parent: acaEnvironment
+  name: 'managed-certificate'
+  tags: json(acaTags)
+  dependsOn: [
+    dnsRecordTXT
+  ]
+  properties: {
+    domainControlValidation: 'TXT'
+    subjectName: '${dnsZoneName}.${parentDnsZoneName}'
+  }
+  location: location
+}
