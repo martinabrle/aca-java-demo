@@ -11,6 +11,8 @@ param containerRegistryName string = replace(replace(acaName,'_', ''),'-','')
 param containerRegistrySubscriptionId string = subscription().id
 param containerRegistryRG string = resourceGroup().name
 
+param dnsZoneName string = ''
+
 var containerRegistrySubscriptionIdVar = (containerRegistrySubscriptionId == '')
   ? subscription().id
   : containerRegistrySubscriptionId
@@ -140,4 +142,19 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
       }
     }
     location: location
+}
+
+resource dnsZone 'Microsoft.Network/dnsZones@2023-07-01-preview' existing = if (!empty(dnsZoneName)) {
+  name: dnsZoneName
+}
+
+resource dnsZoneRecord 'Microsoft.Network/dnsZones/NS@2023-07-01-preview' = if (!empty(dnsZoneName)) {
+  parent: dnsZone
+  name: '${appName}.${dnsZoneName}'
+  properties: {
+    TTL: 172800
+     CNAMERecord: {
+       cname: acaApp.properties.configuration.ingress.fqdn
+     }
+  }
 }
