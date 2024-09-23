@@ -103,6 +103,12 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
             targetPort: 80
             external: true
             clientCertificateMode: 'ignore'
+            customDomains: [
+              {
+                name: '${appName}.${dnsZoneName}.${parentDnsZoneName}'
+                bindingType: 'Disabled'
+              }
+            ]
           }
       }
       template: {
@@ -139,6 +145,14 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
     }
     location: location
 }
+
+// resource acaAppCustomDomain acaApp::CustomDomain = {
+//   parent: acaApp
+//   name: 'custom-domain'
+//   properties: {
+//     customDomain: '${appName}.${dnsZoneName}.${parentDnsZoneName}'
+//   }
+// }
 
 module dnsRecordCname './components/dns-record-cname.bicep' = {
   name: 'dns-record-cname'
