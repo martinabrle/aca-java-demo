@@ -12,6 +12,7 @@ param containerRegistrySubscriptionId string = subscription().id
 param containerRegistryRG string = resourceGroup().name
 
 param dnsZoneName string = ''
+param parentDnsZoneName string = ''
 
 var containerRegistrySubscriptionIdVar = (containerRegistrySubscriptionId == '')
   ? subscription().id
@@ -144,13 +145,13 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
     location: location
 }
 
-resource dnsZone 'Microsoft.Network/dnsZones@2023-07-01-preview' existing = if (!empty(dnsZoneName)) {
-  name: dnsZoneName
+resource dnsZone 'Microsoft.Network/dnsZones@2023-07-01-preview' existing = if (!empty(dnsZoneName) && !empty(parentDnsZoneName)) {
+  name: '${dnsZoneName}.${parentDnsZoneName}'
 }
 
-resource dnsZoneRecord 'Microsoft.Network/dnsZones/NS@2023-07-01-preview' = if (!empty(dnsZoneName)) {
+resource dnsZoneRecord 'Microsoft.Network/dnsZones/NS@2023-07-01-preview' = if (!empty(dnsZoneName) && !empty(parentDnsZoneName)) {
   parent: dnsZone
-  name: '${appName}.${dnsZoneName}'
+  name: '${appName}.${dnsZoneName}.${parentDnsZoneName}'
   properties: {
     TTL: 172800
      CNAMERecord: {
