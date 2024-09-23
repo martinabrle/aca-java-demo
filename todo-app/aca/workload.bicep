@@ -160,10 +160,11 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
 //   }
 // }
 
-module dnsRecord './components/dns-record.bicep' = {
+module dnsRecordCname './components/dns-record-cname.bicep' = {
   name: 'dnsRecord'
   params: {
     dnsZoneName: '${dnsZoneName}.${parentDnsZoneName}'
     dnsRecordName: appName
+    dnsRecordValue: acaApp.properties.configuration.ingress.fqdn
   }
 }
