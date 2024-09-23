@@ -103,7 +103,7 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
             targetPort: 80
             external: true
             clientCertificateMode: 'ignore'
-          } 
+          }
       }
       template: {
         revisionSuffix: replace(appVersion,'.','-')
@@ -144,7 +144,7 @@ module dnsRecordCname './components/dns-record-cname.bicep' = {
   name: 'dnsRecord'
   params: {
     dnsZoneName: '${dnsZoneName}.${parentDnsZoneName}'
-    dnsRecordName: appName
+    dnsRecordName: '${appName}tst'
     dnsRecordValue: 'https://${acaApp.properties.configuration.ingress.fqdn}'
   }
 }
