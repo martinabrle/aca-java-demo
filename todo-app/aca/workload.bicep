@@ -165,6 +165,6 @@ module dnsRecordCname './components/dns-record-cname.bicep' = {
   params: {
     dnsZoneName: '${dnsZoneName}.${parentDnsZoneName}'
     dnsRecordName: appName
-    dnsRecordValue: acaApp.properties.configuration.ingress.fqdn
+    dnsRecordValue: 'https://${acaApp.properties.configuration.ingress.fqdn}'
   }
 }
