@@ -145,21 +145,6 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
     location: location
 }
 
-// resource dnsZone 'Microsoft.Network/dnsZones@2023-07-01-preview' existing = if (!empty(dnsZoneName) && !empty(parentDnsZoneName)) {
-//   name: '${dnsZoneName}.${parentDnsZoneName}'
-// }
-
-// resource dnsZoneRecord 'Microsoft.Network/dnsZones/NS@2023-07-01-preview' = if (!empty(dnsZoneName) && !empty(parentDnsZoneName)) {
-//   parent: dnsZone
-//   name: appName
-//   properties: {
-//     TTL: 172800
-//     CNAMERecord: {
-//       cname: acaApp.properties.configuration.ingress.fqdn
-//     }
-//   }
-// }
-
 module dnsRecordCname './components/dns-record-cname.bicep' = {
   name: 'dnsRecord'
   params: {
