@@ -154,7 +154,7 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
                 }
                 {
                   name: 'SPRING_PROFILES_ACTIVE'
-                  value: 'local'
+                  value: 'azure'
                 }
                 {
                   name: 'LOAD_DEMO_DATA'
@@ -163,6 +163,14 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
                 {
                   name: 'DEBUG_AUTH_TOKEN'
                   value: 'true'
+                }
+                {
+                  name: 'AZURE_TENANT_ID'
+                  value: '3bb1d348-1195-4267-9e02-ac34257780fc'
+                }
+                {
+                  name: 'AZURE_CLIENT_ID'
+                  value: '576e2117-d723-473f-85ef-47fee8c027b6'
                 }
                 {
                   name: 'SPRING_DATASOURCE_URL'
