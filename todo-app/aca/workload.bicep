@@ -127,6 +127,26 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
               name: appName
               env: [
                 {
+                  name: 'SPRING_DATASOURCE_SHOW_SQL'
+                  value: 'TRUE'
+                }
+                {
+                  name: 'PORT'
+                  value: '80'
+                }
+                {
+                  name: 'ENVIRONMENT'
+                  value: 'ACA'
+                }
+                {
+                  name: 'SPRING_PROFILES_ACTIVE'
+                  value: 'azure'
+                }
+                {
+                  name: 'LOAD_DEMO_DATA'
+                  value: 'TRUE'
+                }
+                {
                   name: replace(kvSecretTodoAppSpringDSURI.name,'-','_')
                   secretRef: toLower(kvSecretTodoAppSpringDSURI.name)
                 }
