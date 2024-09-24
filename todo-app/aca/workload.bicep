@@ -154,7 +154,7 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
                 }
                 {
                   name: 'SPRING_PROFILES_ACTIVE'
-                  value: 'azure'
+                  value: 'local'
                 }
                 {
                   name: 'LOAD_DEMO_DATA'
