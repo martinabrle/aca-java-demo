@@ -121,6 +121,20 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
       }
       template: {
         revisionSuffix: replace(appVersion,'.','-')
+        scale: {
+          minReplicas: 1
+          maxReplicas: 10
+          rules: [
+            {
+              name: 'http-rule'
+              http: {
+                metadata: {
+                  concurrentRequests: '100'
+                }
+              }
+            }
+          ]
+        }
         containers: [
             {
               image: containerImage
