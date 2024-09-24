@@ -235,7 +235,9 @@ jobs:
           if [[ ! -z ${{secrets.DNS_ZONE_NAME}} ]]; then
             certificateId=`az containerapp env certificate list -g ${{env.ACA_RESOURCE_GROUP}} --name ${{env.ACA_NAME}} --query "[?properties.subjectName=='${{env.APP_NAME}}.${{secrets.DNS_ZONE_NAME}}.${{secrets.PARENT_DNS_ZONE_NAME}}'].id" -o tsv`
           fi
+          appClientId=`az ad sp list --display-name "${{env.USER_IDENTITY_NAME}}" --query "[?displayName=='${{env.USER_IDENTITY_NAME}}'].appId" --out tsv`
           echo "Certificate ID: '${certificateId}'"
+          echo "Managed identity appClientId: ${appClientId}"
           
           deploymentOutput=`az deployment group create \
                                         --resource-group ${{env.ACA_RESOURCE_GROUP}} \
@@ -244,6 +246,7 @@ jobs:
                                                      acaTags="${{vars.ACA_RESOURCE_TAGS}}" \
                                                      appVersion="${{env.VERSION}}" \
                                                      appName="${{env.APP_NAME}}" \
+                                                     appClientId="${appClientId}" \
                                                      containerImage="${{env.CONTAINER_IMAGE}}" \
                                                      containerRegistryName="${{env.CONTAINER_REGISTRY_NAME}}" \
                                                      containerRegistrySubscriptionId="${{env.CONTAINER_REGISTRY_SUBSCRIPTION_ID}}" \
