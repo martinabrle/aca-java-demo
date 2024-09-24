@@ -192,6 +192,7 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
     location: location
 }
 
+
 module dnsRecordTXT './components/dns-record-txt.bicep' = {
   name: 'dns-record-txt'
   params: {
