@@ -5,6 +5,7 @@ param appVersion string
 
 param todoAppUserManagedIdentityName string = '${acaName}-todo-app-identity'
 param appName string = 'todo-app'
+param appClientId string
 param containerImage string
 
 param certificateId string = ''
@@ -166,11 +167,11 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
                 }
                 {
                   name: 'AZURE_TENANT_ID'
-                  value: '3bb1d348-1195-4267-9e02-ac34257780fc'
+                  value: tenant().tenantId
                 }
                 {
                   name: 'AZURE_CLIENT_ID'
-                  value: '576e2117-d723-473f-85ef-47fee8c027b6'
+                  value: appClientId
                 }
                 {
                   name: 'SPRING_DATASOURCE_URL'
