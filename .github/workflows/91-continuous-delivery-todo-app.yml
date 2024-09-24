@@ -181,20 +181,9 @@ jobs:
                                                      containerRegistrySubscriptionId="${{env.CONTAINER_REGISTRY_SUBSCRIPTION_ID}}" \
                                                      containerRegistryRG="${{env.CONTAINER_REGISTRY_RESOURCE_GROUP}}" \
                                                      location="${{secrets.AZURE_LOCATION}}" `
-
-          todoAppUserManagedIdentityName=`echo $deploymentOutput|jq ".properties.outputs.todoAppUserManagedIdentityName.value"`
-          todoAppUserManagedIdentityPrincipalId=`echo $deploymentOutput|jq ".properties.outputs.todoAppUserManagedIdentityPrincipalId.value"`
-          todoAppUserManagedIdentityClientId=`echo $deploymentOutput|jq ".properties.outputs.todoAppUserManagedIdentityClientId.value"`
-          todoAppDbUserName=`echo $deploymentOutput|jq ".properties.outputs.todoAppDbUserName.value"`
-
-          echo "TODO_APP_USER_MI_NAME: ${todoAppUserManagedIdentityName}"
-          echo "TODO_APP_USER_MI_NAME=${todoAppUserManagedIdentityName}" >> $GITHUB_OUTPUT
-          echo "TODO_APP_USER_MI_PRINCIPAL_ID: ${todoAppUserManagedIdentityPrincipalId}"
-          echo "TODO_APP_USER_MI_PRINCIPAL_ID=${todoAppUserManagedIdentityPrincipalId}" >> $GITHUB_OUTPUT
-          echo "TODO_APP_USER_MI_CLIENT_ID: ${todoAppUserManagedIdentityClientId}"
-          echo "TODO_APP_USER_MI_CLIENT_ID=${todoAppUserManagedIdentityClientId}" >> $GITHUB_OUTPUT
-          echo "TODO_APP_DB_USER_NAME: ${todoAppDbUserName}"
-          echo "TODO_APP_DB_USER_NAME=${todoAppDbUserName}" >> $GITHUB_OUTPUT
+          echo "Deployment output:"
+          echo "=================="
+          echo "$deploymentOutput"
 
       - name: Synchronize DB Schema
         if: ${{ env.DB != '' }}
