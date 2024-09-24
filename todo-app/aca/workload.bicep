@@ -161,6 +161,10 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
                   value: 'false'
                 }
                 {
+                  name: 'DEBUG_AUTH_TOKEN'
+                  value: 'true'
+                }
+                {
                   name: replace(kvSecretTodoAppSpringDSURI.name,'-','_')
                   secretRef: toLower(kvSecretTodoAppSpringDSURI.name)
                 }
