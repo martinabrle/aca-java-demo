@@ -7,6 +7,8 @@ param todoAppUserManagedIdentityName string = '${acaName}-todo-app-identity'
 param appName string = 'todo-app'
 param containerImage string
 
+param test string = 'test'
+
 param containerRegistryName string = replace(replace(acaName,'_', ''),'-','')
 param containerRegistrySubscriptionId string = subscription().id
 param containerRegistryRG string = resourceGroup().name
@@ -58,22 +60,9 @@ resource acaEnvironment 'Microsoft.App/managedEnvironments@2024-03-01' existing 
   name: acaName
 }
 
-module dnsRecordTXT './components/dns-record-txt.bicep' = {
-  name: 'dns-record-txt'
-  params: {
-    dnsZoneName: '${dnsZoneName}.${parentDnsZoneName}'
-    dnsRecordName: 'asuid.${appName}'
-    dnsRecordValue: acaEnvironment.properties.customDomainConfiguration.customDomainVerificationId //acaApp.properties.customDomainVerificationId
-  }
-}
-
 resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
    name: appName
    tags: json(acaTags)
-   dependsOn: [
-    dnsRecordTXT
-    acaManagedCertificate
-   ]
    identity: {
       type: 'UserAssigned'
       userAssignedIdentities: {
@@ -159,6 +148,15 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
     location: location
 }
 
+module dnsRecordTXT './components/dns-record-txt.bicep' = {
+  name: 'dns-record-txt'
+  params: {
+    dnsZoneName: '${dnsZoneName}.${parentDnsZoneName}'
+    dnsRecordName: 'asuid.${appName}'
+    dnsRecordValue: acaApp.properties.customDomainVerificationId
+  }
+}
+
 module dnsRecordCname './components/dns-record-cname.bicep' = {
   name: 'dns-record-cname'
   params: {
@@ -171,10 +169,11 @@ module dnsRecordCname './components/dns-record-cname.bicep' = {
 resource acaManagedCertificate 'Microsoft.App/managedEnvironments/managedCertificates@2024-03-01' = {
   parent: acaEnvironment
   name: 'managed-certificate'
-  tags: json(acaTags)
   dependsOn: [
+    dnsRecordCname
     dnsRecordTXT
   ]
+  tags: json(acaTags)
   properties: {
     domainControlValidation: 'CNAME'
     subjectName: '${appName}.${dnsZoneName}.${parentDnsZoneName}'
