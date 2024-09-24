@@ -174,7 +174,7 @@ module dnsRecordCname './components/dns-record-cname.bicep' = {
 
 resource acaManagedCertificate 'Microsoft.App/managedEnvironments/managedCertificates@2024-03-01' = {
   parent: acaEnvironment
-  name: 'managed-certificate'
+  name: 'managed-certificate-${appName}'
   dependsOn: [
     dnsRecordCname
     dnsRecordTXT
