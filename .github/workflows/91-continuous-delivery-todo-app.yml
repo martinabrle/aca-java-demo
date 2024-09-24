@@ -26,6 +26,7 @@ jobs:
       SEMVER_NAMESPACE: todo-app
       SEMVER_CHANGE_PATH: todo-app
       ARTIFACT_NAME: todo-app
+      APP_NAME: todo-app
       SRC_DIR: todo-app
       JAVA_VERSION: 11
       USER_IDENTITY_NAME: ${{secrets.ACA_NAME}}-todo-app-identity
@@ -238,18 +239,27 @@ jobs:
           RELEASE_DIR_NAME: ${{steps.versions.outputs.RELEASE_DIR_NAME}}
           HOST_NAME: ${{vars.TODO_APP_DNS_RECORD_NAME}}.${{secrets.DNS_ZONE_NAME}}.${{secrets.PARENT_DNS_ZONE_NAME}}
           VERSION: ${{steps.versions.outputs.VERSION}}
+
         run: |
           ls ./${{env.RELEASE_DIR_NAME}}/aca/
+          certificateId=''
+          if [[ ${{secrets.DNS_ZONE_NAME}} != '' ]]; then
+            certificateId=`az containerapp env certificate list -g ${{env.ACA_RESOURCE_GROUP}} --name ${{env.ACA_NAME}} --query "[?properties.subjectName=='${{env.APP_NAME}}.${{secrets.DNS_ZONE_NAME}}.{{secrets.PARENT_DNS_ZONE_NAME}}'].id" -o tsv`
+          fi
+          echo "Certificate ID: '${certificateId}'"
+          
           deploymentOutput=`az deployment group create \
                                         --resource-group ${{env.ACA_RESOURCE_GROUP}} \
                                         --template-file ./${{env.RELEASE_DIR_NAME}}/aca/workload.bicep \
                                         --parameters acaName="${{env.ACA_NAME}}" \
                                                      acaTags="${{vars.ACA_RESOURCE_TAGS}}" \
                                                      appVersion="${{env.VERSION}}" \
+                                                     appName="${{env.APP_NAME}}" \
                                                      containerImage="${{env.CONTAINER_IMAGE}}" \
                                                      containerRegistryName="${{env.CONTAINER_REGISTRY_NAME}}" \
                                                      containerRegistrySubscriptionId="${{env.CONTAINER_REGISTRY_SUBSCRIPTION_ID}}" \
                                                      containerRegistryRG="${{env.CONTAINER_REGISTRY_RESOURCE_GROUP}}" \
+                                                     certificateId="${certificateId}" \
                                                      dnsZoneName="${{secrets.DNS_ZONE_NAME}}" \
                                                      parentDnsZoneName="${{secrets.PARENT_DNS_ZONE_NAME}}" \
                                                      location="${{secrets.AZURE_LOCATION}}" `
