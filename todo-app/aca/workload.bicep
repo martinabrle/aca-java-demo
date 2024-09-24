@@ -154,7 +154,7 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
                 }
                 {
                   name: 'SPRING_PROFILES_ACTIVE'
-                  value: 'local'
+                  value: 'azure'
                 }
                 {
                   name: 'LOAD_DEMO_DATA'
@@ -165,19 +165,19 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
                   value: 'true'
                 }
                 {
-                  name: replace(kvSecretTodoAppSpringDSURI.name,'-','_')
+                  name: 'SPRING_DATASOURCE_URL'
                   secretRef: toLower(kvSecretTodoAppSpringDSURI.name)
                 }
                 {
-                  name: replace(kvSecretTodoAppDbUserName.name,'-','_')
+                  name: 'SPRING_DATASOURCE_USERNAME'
                   secretRef: toLower(kvSecretTodoAppDbUserName.name)
                 }
                 {
-                  name: replace(kvSecretTodoAppInsightsConnectionString.name,'-','_')
+                  name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
                   secretRef: toLower(kvSecretTodoAppInsightsConnectionString.name)
                 }
                 {
-                  name: replace(kvSecretTodoAppInsightsInstrumentationKey.name,'-','_')
+                  name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
                   secretRef: toLower(kvSecretTodoAppInsightsInstrumentationKey.name)
                 }
               ]
