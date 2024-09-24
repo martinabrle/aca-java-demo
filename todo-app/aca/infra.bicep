@@ -37,6 +37,7 @@ resource containerRegistry 'Microsoft.ContainerRegistry/registries@2023-11-01-pr
   scope: resourceGroup(containerRegistrySubscriptionIdVar, containerRegistryRGVar)
 }
 //TODO: extend with something similar to this - https://learn.microsoft.com/en-us/dotnet/api/overview/azure/service-to-service-authentication?view=azure-dotnet#connection-string-support
+//Perhaps setting AZURE_TENANT_ID and AZURE_CLIENT_ID would fixe this without the need to change the connection string
 module kvSecretTodoAppSpringDSURI 'components/kv-secret.bicep' = {
   name: 'kv-secret-todo-app-ds-uri'
   params: {
