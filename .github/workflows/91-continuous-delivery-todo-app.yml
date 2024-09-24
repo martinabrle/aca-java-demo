@@ -243,7 +243,7 @@ jobs:
         run: |
           ls ./${{env.RELEASE_DIR_NAME}}/aca/
           certificateId=''
-          if [[ ${{secrets.DNS_ZONE_NAME}} != '' ]]; then
+          if [[ -z ${{secrets.DNS_ZONE_NAME}} ]]; then
             certificateId=`az containerapp env certificate list -g ${{env.ACA_RESOURCE_GROUP}} --name ${{env.ACA_NAME}} --query "[?properties.subjectName=='${{env.APP_NAME}}.${{secrets.DNS_ZONE_NAME}}.${{secrets.PARENT_DNS_ZONE_NAME}}'].id" -o tsv`
           fi
           echo "Certificate ID: '${certificateId}'"
