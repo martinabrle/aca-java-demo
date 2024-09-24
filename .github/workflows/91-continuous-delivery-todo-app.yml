@@ -158,7 +158,7 @@ jobs:
           cd ./${{env.RELEASE_DIR_NAME}}
           mv ./Dockerfile ./Dockerfile.tmp
           # Dockerfile syntax is driving me bonkers. This should work...
-          cat ./Dockerfile.tmp | ARTIFACT_NAME_ARG=${{env.ARTIFACT_NAME}} VERSION_ARG=${{env.VERSION}} VERSION_ARG=${{env.VERSION}} envsubst > ./Dockerfile
+          cat ./Dockerfile.tmp | ARTIFACT_NAME_ARG=${{env.ARTIFACT_NAME}} VERSION_ARG=${{env.VERSION}} envsubst > ./Dockerfile
           cat ./Dockerfile
   
           az acr build ./ -r ${{env.CONTAINER_REGISTRY_NAME}} -t "${{env.ARTIFACT_NAME}}:${{env.VERSION}}" --file ./Dockerfile --subscription "${{env.CONTAINER_REGISTRY_SUBSCRIPTION_ID}}"
