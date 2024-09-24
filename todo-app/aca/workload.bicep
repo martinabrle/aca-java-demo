@@ -7,7 +7,7 @@ param todoAppUserManagedIdentityName string = '${acaName}-todo-app-identity'
 param appName string = 'todo-app'
 param containerImage string
 
-param test string = 'test'
+param certificateId string = ''
 
 param containerRegistryName string = replace(replace(acaName,'_', ''),'-','')
 param containerRegistrySubscriptionId string = subscription().id
@@ -105,10 +105,16 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
             targetPort: 80
             external: true
             clientCertificateMode: 'ignore'
-            customDomains: [
+            customDomains: empty(certificateId) ? [
               {
                 name: '${appName}.${dnsZoneName}.${parentDnsZoneName}'
                 bindingType: 'Disabled'
+              }
+            ] : [
+              {
+                name: '${appName}.${dnsZoneName}.${parentDnsZoneName}'
+                certificateId: certificateId
+                bindingType:'SniEnabled'
               }
             ]
           }
@@ -180,5 +186,3 @@ resource acaManagedCertificate 'Microsoft.App/managedEnvironments/managedCertifi
   }
   location: location
 }
-
-//output test string = acaApp.properties.configuration.ingress.customDomains[0].bindingType
