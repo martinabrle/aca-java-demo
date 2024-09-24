@@ -140,11 +140,11 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
                 }
                 {
                   name: 'SPRING_PROFILES_ACTIVE'
-                  value: 'local'
+                  value: 'azure'
                 }
                 {
                   name: 'LOAD_DEMO_DATA'
-                  value: 'true'
+                  value: 'false'
                 }
                 {
                   name: replace(kvSecretTodoAppSpringDSURI.name,'-','_')
