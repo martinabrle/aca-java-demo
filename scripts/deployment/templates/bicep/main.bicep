@@ -584,8 +584,3 @@ output petClinicVisitsSvcUserManagedIdentityName string = petClinicVisitsSvcUser
 output petClinicVisitsSvcUserManagedIdentityPrincipalId string = petClinicVisitsSvcUserManagedIdentity.properties.principalId
 output petClinicVisitsSvcUserManagedIdentityClientId string = petClinicVisitsSvcUserManagedIdentity.properties.clientId
 output petClinicVisitsSvcDbUserName string = petClinicVisitsSvcDbUserName
-
-// output agicIdentityName string = aks.outputs.agicIdentityName
-// output agicIdentityPrincipalId string = aks.outputs.agicIdentityPrincipalId
-// output agicIdentityClientId string = aks.outputs.agicIdentityClientId
-// output agicIdentityResourceId string = aks.outputs.agicIdentityResourceId
