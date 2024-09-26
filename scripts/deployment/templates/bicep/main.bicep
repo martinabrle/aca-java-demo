@@ -514,11 +514,11 @@ module dnsZone './components/dns-zone.bicep' = if (!empty(dnsZoneName)) {
   }
 }
 
-module dnsZonePetCloinic 'components/dns-zone.bicep' = if (!empty(dnsZoneName) && !empty(petClinicDnsZoneName)) {
+module dnsZonePetClinic 'components/dns-zone.bicep' = if (!empty(dnsZoneName) && !empty(petClinicDnsZoneName)) {
   name: 'child-dns-zone-pet-clinic'
   params: {
     zoneName: petClinicDnsZoneName
-    parentZoneName: dnsZoneName
+    parentZoneName: '${dnsZoneName}.${parentDnsZoneName}'
     parentZoneRG: resourceGroup().name
     parentZoneSubscriptionId: subscription().subscriptionId
     parentZoneTagsArray: aksTagsArray
