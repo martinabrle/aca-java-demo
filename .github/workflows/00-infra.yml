@@ -86,7 +86,7 @@ jobs:
                                                      parentDnsZoneSubscriptionId="${{secrets.PARENT_DNS_SUBSCRIPTION_ID}}" \
                                                      parentDnsZoneRG="${{secrets.PARENT_DNS_ZONE_RESOURCE_GROUP}}" \
                                                      parentDnsZoneTags="${{vars.PARENT_DNS_ZONE_TAGS}}" \
-                                                     petClinicDnsZoneName="${{vars.PET_CLINIC_DNS_ZONE_NAME}}" \
+                                                     petClinicDnsZoneName="${{secrets.PET_CLINIC_DNS_ZONE_NAME}}" \
                                                      pgsqlName="${{secrets.PGSQL_NAME}}" \
                                                      pgsqlAADAdminGroupName="${{secrets.DBA_GROUP_NAME}}" \
                                                      pgsqlAADAdminGroupObjectId="${dbaGroupId}" \
