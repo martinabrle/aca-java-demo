@@ -169,15 +169,14 @@ jobs:
         env:
           RELEASE_DIR_NAME: ${{steps.versions.outputs.RELEASE_DIR_NAME}}
         run: |
-          TODO: variables
           deploymentOutput=`az deployment group create \
                                         --resource-group ${{env.ACA_RESOURCE_GROUP}} \
                                         --template-file ./${{env.RELEASE_DIR_NAME}}/aca/infra.bicep \
                                         --parameters acaName="${{env.ACA_NAME}}" \
                                                      acaTags="${{vars.ACA_RESOURCE_TAGS}}" \
-                                                     pgsqlName="${{env.PGSQL_NAME}}" \
-                                                     pgsqlTodoAppDbName="${{secrets.TODO_APP_DB_NAME}}" \
-                                                     todoAppDbUserName="${{secrets.TODO_APP_DB_USER_NAME}}" \
+                                                     petClinicGitConfigRepoUri="${{secrets.PET_CLINIC_GIT_CONFIG_REPO_URI}}" \
+                                                     petClinicGitConfigRepoUserName="${{secrets.PET_CLINIC_GIT_CONFIG_REPO_USERNAME}}" \
+                                                     petClinicGitConfigRepoPassword="${{secrets.PET_CLINIC_GIT_CONFIG_REPO_PASSWORD}}" \
                                                      containerRegistryName="${{secrets.CONTAINER_REGISTRY_NAME}}" \
                                                      containerRegistrySubscriptionId="${{env.CONTAINER_REGISTRY_SUBSCRIPTION_ID}}" \
                                                      containerRegistryRG="${{env.CONTAINER_REGISTRY_RESOURCE_GROUP}}" \
