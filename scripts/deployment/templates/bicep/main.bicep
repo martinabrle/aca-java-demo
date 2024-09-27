@@ -541,7 +541,7 @@ module dnsZonePetClinic 'components/dns-zone.bicep' = if (!empty(dnsZoneName) &&
 module dnsRecordPetClinicTXT './components/dns-record-txt.bicep' = {
   name: 'dns-record-pet-clinic-config-svc-txt'
   params: {
-    dnsZoneName: '${dnsZoneName}.${petClinicDnsZoneName}.${parentDnsZoneName}'
+    dnsZoneName: '${petClinicDnsZoneName}.${dnsZoneName}.${parentDnsZoneName}'
     dnsRecordName: 'asuid.${petClinicConfigSvcName}'
     dnsRecordValue: acaEnvironment.outputs.acaCustomDomainVerificationId
   }
