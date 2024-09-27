@@ -216,11 +216,10 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
     location: location
 }
 
-
 module dnsRecordTXT './components/dns-record-txt.bicep' = {
   name: 'dns-record-txt'
   params: {
-    dnsZoneName: '${dnsZoneName}.${petClinicDnsZoneName}.${parentDnsZoneName}'
+    dnsZoneName: '${petClinicDnsZoneName}.${dnsZoneName}.${parentDnsZoneName}'
     dnsRecordName: 'asuid.${appName}'
     dnsRecordValue: acaApp.properties.customDomainVerificationId
   }
@@ -229,7 +228,7 @@ module dnsRecordTXT './components/dns-record-txt.bicep' = {
 module dnsRecordCname './components/dns-record-cname.bicep' = {
   name: 'dns-record-cname'
   params: {
-    dnsZoneName: '${dnsZoneName}.${petClinicDnsZoneName}.${parentDnsZoneName}'
+    dnsZoneName: '${petClinicDnsZoneName}.${dnsZoneName}.${parentDnsZoneName}'
     dnsRecordName: appName
     dnsRecordValue: acaApp.properties.configuration.ingress.fqdn
   }
