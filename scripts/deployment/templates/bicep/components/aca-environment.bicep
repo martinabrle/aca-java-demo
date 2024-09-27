@@ -73,3 +73,4 @@ resource acaDiagnotsicsLogs 'Microsoft.Insights/diagnosticSettings@2021-05-01-pr
 
 output acaEnvironmentName string = acaEnvironment.name
 output acaEnvironmentId string = acaEnvironment.id
+output acaCustomDomainVerificationId string = acaEnvironment.properties.customDomainConfiguration.customDomainVerificationId

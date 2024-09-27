@@ -5,6 +5,9 @@ param acaName string
 // param aksAdminGroupObjectId string
 param acaTags string
 
+param todoAppName string = 'todo-app'
+param petClinicConfigSvcName string = 'config-server'
+
 param pgsqlName string = '${replace(acaName,'_','-')}-pgsql'
 param pgsqlAADAdminGroupName string
 param pgsqlAADAdminGroupObjectId string
@@ -514,6 +517,15 @@ module dnsZone './components/dns-zone.bicep' = if (!empty(dnsZoneName)) {
   }
 }
 
+module dnsRecordTXT './components/dns-record-txt.bicep' = {
+  name: 'dns-record-txt'
+  params: {
+    dnsZoneName: '${dnsZoneName}.${parentDnsZoneName}'
+    dnsRecordName: 'asuid.${todoAppName}'
+    dnsRecordValue: acaEnvironment.outputs.acaCustomDomainVerificationId
+  }
+}
+
 module dnsZonePetClinic 'components/dns-zone.bicep' = if (!empty(dnsZoneName) && !empty(petClinicDnsZoneName)) {
   name: 'child-dns-zone-pet-clinic'
   params: {
@@ -523,6 +535,15 @@ module dnsZonePetClinic 'components/dns-zone.bicep' = if (!empty(dnsZoneName) &&
     parentZoneSubscriptionId: subscription().subscriptionId
     parentZoneTagsArray: aksTagsArray
     tagsArray: aksTagsArray
+  }
+}
+
+module dnsRecordPetClinicTXT './components/dns-record-txt.bicep' = {
+  name: 'dns-record-pet-clinic-config-svc-txt'
+  params: {
+    dnsZoneName: '${dnsZoneName}.${petClinicDnsZoneName}.${parentDnsZoneName}'
+    dnsRecordName: 'asuid.${petClinicConfigSvcName}'
+    dnsRecordValue: acaEnvironment.outputs.acaCustomDomainVerificationId
   }
 }
 
