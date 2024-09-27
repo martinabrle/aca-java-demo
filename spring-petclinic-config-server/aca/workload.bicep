@@ -115,7 +115,7 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
             }
             {
               name: toLower(kvSecretPetClinicConfigRepoPassword.name)
-              keyVaultUrl: kvSecretPetClinicConfigRepoURI.properties.secretUri //kvSecretPetClinicConfigRepoPassword.properties.secretUri
+              keyVaultUrl: kvSecretPetClinicConfigRepoPassword.properties.secretUri //kvSecretPetClinicConfigRepoPassword.properties.secretUri
               identity: petClinicConfigSvcUserManagedIdentity.id
             }
           ]
