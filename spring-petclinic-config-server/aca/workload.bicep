@@ -108,14 +108,14 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
               keyVaultUrl: kvSecretPetClinicConfigRepoURI.properties.secretUri
               identity: petClinicConfigSvcUserManagedIdentity.id
             }
-            // {
-            //   name: toLower(kvSecretPetClinicConfigRepoUserName.name)
-            //   keyVaultUrl: kvSecretPetClinicConfigRepoUserName.properties.secretUri
-            //   identity: petClinicConfigSvcUserManagedIdentity.id
-            // }
             {
-              name: 'git-password'
-              keyVaultUrl: kvSecretPetClinicConfigRepoPassword.properties.secretUri
+              name: toLower(kvSecretPetClinicConfigRepoUserName.name)
+              keyVaultUrl: kvSecretPetClinicConfigRepoURI.properties.secretUri //kvSecretPetClinicConfigRepoUserName.properties.secretUri
+              identity: petClinicConfigSvcUserManagedIdentity.id
+            }
+            {
+              name: toLower(kvSecretPetClinicConfigRepoPassword.name)
+              keyVaultUrl: kvSecretPetClinicConfigRepoURI.properties.secretUri //kvSecretPetClinicConfigRepoPassword.properties.secretUri
               identity: petClinicConfigSvcUserManagedIdentity.id
             }
           ]
@@ -208,13 +208,13 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
                   name: 'GIT_CONFIG_REPO_URI'
                   secretRef: toLower(kvSecretPetClinicConfigRepoURI.name)
                 }
-                // {
-                //   name: 'GIT_USERNAME'
-                //   secretRef: toLower(kvSecretPetClinicConfigRepoUserName.name)
-                // }
+                {
+                  name: 'GIT_USERNAME'
+                  secretRef: toLower(kvSecretPetClinicConfigRepoUserName.name)
+                }
                 {
                   name: 'GIT_PASSWORD'
-                  secretRef: 'git-password'
+                  secretRef: toLower(kvSecretPetClinicConfigRepoPassword.name)
                 }
               ]
               resources: {
