@@ -1,12 +1,8 @@
-// Secrets KeyVault integration https://learn.microsoft.com/en-us/azure/aks/csi-secrets-store-driver
-// Workload identities https://learn.microsoft.com/en-us/azure/aks/workload-identity-overview#how-it-works
-
 param acaName string
-// param aksAdminGroupObjectId string
 param acaTags string
 
-param todoAppName string = 'todo-app'
-param petClinicConfigSvcName string = 'config-server'
+// param todoAppName string = 'todo-app'
+// param petClinicConfigSvcName string = 'config-server'
 
 param pgsqlName string = '${replace(acaName,'_','-')}-pgsql'
 param pgsqlAADAdminGroupName string
@@ -517,14 +513,14 @@ module dnsZone './components/dns-zone.bicep' = if (!empty(dnsZoneName)) {
   }
 }
 
-module dnsRecordTXT './components/dns-record-txt.bicep' = {
-  name: 'dns-record-txt'
-  params: {
-    dnsZoneName: '${dnsZoneName}.${parentDnsZoneName}'
-    dnsRecordName: 'asuid.${todoAppName}'
-    dnsRecordValue: acaEnvironment.outputs.acaCustomDomainVerificationId
-  }
-}
+// module dnsRecordTXT './components/dns-record-txt.bicep' = {
+//   name: 'dns-record-txt'
+//   params: {
+//     dnsZoneName: '${dnsZoneName}.${parentDnsZoneName}'
+//     dnsRecordName: 'asuid.${todoAppName}'
+//     dnsRecordValue: acaEnvironment.outputs.acaCustomDomainVerificationId
+//   }
+// }
 
 module dnsZonePetClinic 'components/dns-zone.bicep' = if (!empty(dnsZoneName) && !empty(petClinicDnsZoneName)) {
   name: 'child-dns-zone-pet-clinic'
@@ -538,14 +534,14 @@ module dnsZonePetClinic 'components/dns-zone.bicep' = if (!empty(dnsZoneName) &&
   }
 }
 
-module dnsRecordPetClinicTXT './components/dns-record-txt.bicep' = {
-  name: 'dns-record-pet-clinic-config-svc-txt'
-  params: {
-    dnsZoneName: '${petClinicDnsZoneName}.${dnsZoneName}.${parentDnsZoneName}'
-    dnsRecordName: 'asuid.${petClinicConfigSvcName}'
-    dnsRecordValue: acaEnvironment.outputs.acaCustomDomainVerificationId
-  }
-}
+// module dnsRecordPetClinicTXT './components/dns-record-txt.bicep' = {
+//   name: 'dns-record-pet-clinic-config-svc-txt'
+//   params: {
+//     dnsZoneName: '${petClinicDnsZoneName}.${dnsZoneName}.${parentDnsZoneName}'
+//     dnsRecordName: 'asuid.${petClinicConfigSvcName}'
+//     dnsRecordValue: acaEnvironment.outputs.acaCustomDomainVerificationId
+//   }
+// }
 
 // @description('This is the built-in AcrPull role. See https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#acrpull')
 // resource acrPullRole 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
