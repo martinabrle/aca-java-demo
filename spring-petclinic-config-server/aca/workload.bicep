@@ -210,7 +210,7 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
                 }
                 {
                   name: 'GIT_USERNAME'
-                  secretRef: toLower(kvSecretPetClinicConfigRepoPassword.name)
+                  secretRef: toLower(kvSecretPetClinicConfigRepoUserName.name)
                 }
                 {
                   name: 'GIT_PASSWORD'
