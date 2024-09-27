@@ -108,16 +108,16 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
               keyVaultUrl: kvSecretPetClinicConfigRepoURI.properties.secretUri
               identity: petClinicConfigSvcUserManagedIdentity.id
             }
-            {
-              name: toLower(kvSecretPetClinicConfigRepoUserName.name)
-              keyVaultUrl: kvSecretPetClinicConfigRepoUserName.properties.secretUri
-              identity: petClinicConfigSvcUserManagedIdentity.id
-            }
-            {
-              name: toLower(kvSecretPetClinicConfigRepoPassword.name)
-              keyVaultUrl: kvSecretPetClinicConfigRepoPassword.properties.secretUri
-              identity: petClinicConfigSvcUserManagedIdentity.id
-            }            
+            // {
+            //   name: toLower(kvSecretPetClinicConfigRepoUserName.name)
+            //   keyVaultUrl: kvSecretPetClinicConfigRepoUserName.properties.secretUri
+            //   identity: petClinicConfigSvcUserManagedIdentity.id
+            // }
+            // {
+            //   name: toLower(kvSecretPetClinicConfigRepoPassword.name)
+            //   keyVaultUrl: kvSecretPetClinicConfigRepoPassword.properties.secretUri
+            //   identity: petClinicConfigSvcUserManagedIdentity.id
+            // }            
           ]
           registries: [
             {
@@ -208,14 +208,14 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
                   name: 'GIT_CONFIG_REPO_URI'
                   secretRef: toLower(kvSecretPetClinicConfigRepoURI.name)
                 }
-                {
-                  name: 'GIT_USERNAME'
-                  secretRef: toLower(kvSecretPetClinicConfigRepoUserName.name)
-                }
-                {
-                  name: 'GIT_PASSWORD'
-                  secretRef: toLower(kvSecretPetClinicConfigRepoPassword.name)
-                }
+                // {
+                //   name: 'GIT_USERNAME'
+                //   secretRef: toLower(kvSecretPetClinicConfigRepoUserName.name)
+                // }
+                // {
+                //   name: 'GIT_PASSWORD'
+                //   secretRef: toLower(kvSecretPetClinicConfigRepoPassword.name)
+                // }
               ]
               resources: {
                  cpu: json('0.5')

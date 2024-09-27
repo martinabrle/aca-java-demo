@@ -50,7 +50,7 @@ module kvSecretPetClinicConfigRepoURI 'components/kv-secret.bicep' = {
 }
 
 module kvSecretPetClinicConfigRepoUserName 'components/kv-secret.bicep' = {
-  name: 'kv-secret-pet-clinic-config-repo-usern-name'
+  name: 'kv-secret-pet-clinic-config-repo-user-name'
   params: {
     keyVaultName: keyVault.name
     secretName: 'PET-CLINIC-CONFIG-SVC-GIT-REPO-USERNAME'
