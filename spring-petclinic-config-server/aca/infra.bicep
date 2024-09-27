@@ -50,7 +50,7 @@ module kvSecretPetClinicConfigRepoURI 'components/kv-secret.bicep' = {
 }
 
 module kvSecretPetClinicConfigRepoUserName 'components/kv-secret.bicep' = {
-  name: 'kv-secret-pet-clinic-config-repo-usern-ame'
+  name: 'kv-secret-pet-clinic-config-repo-usern-name'
   params: {
     keyVaultName: keyVault.name
     secretName: 'PET-CLINIC-CONFIG-SVC-GIT-REPO-USERNAME'
@@ -118,7 +118,7 @@ module rbacKVSecretPetClinicConfigSvcGitRepoURI './components/role-assignment-kv
   }
 }
 
-module rbacKVSecretPetClinicConfigSvcGitRepoUserName './components/role-assignment-kv-secret.bicep' = {
+module rbacKVSecretPetClinicConfigSvcGitRepoUser './components/role-assignment-kv-secret.bicep' = {
   name: 'rbac-kv-secret-git-repo-user'
   params: {
     roleDefinitionId: keyVaultSecretsUser.id
