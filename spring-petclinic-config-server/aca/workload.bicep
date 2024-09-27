@@ -247,7 +247,7 @@ resource acaManagedCertificate 'Microsoft.App/managedEnvironments/managedCertifi
   tags: json(acaTags)
   properties: {
     domainControlValidation: 'CNAME'
-    subjectName: '${appName}.${dnsZoneName}.${parentDnsZoneName}'
+    subjectName: '${appName}.${petClinicDnsZoneName}.${dnsZoneName}.${parentDnsZoneName}'
   }
   location: location
 }
