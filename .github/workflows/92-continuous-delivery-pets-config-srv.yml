@@ -23,11 +23,8 @@ permissions:
 jobs:
   deploy:
     env:
-      SEMVER_NAMESPACE: spring-petclinic-config-server
-      SEMVER_CHANGE_PATH: spring-petclinic-config-server
       ARTIFACT_NAME: spring-petclinic-config-server
       APP_NAME: config-server
-      SRC_DIR: spring-petclinic-config-server
       JAVA_VERSION: 17
       USER_IDENTITY_NAME: ${{secrets.ACA_NAME}}-pet-clinic-config-identity
       PGSQL_NAME: ''
