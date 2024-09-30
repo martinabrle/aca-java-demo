@@ -4,7 +4,7 @@ param acaTags string
 param appVersion string
 
 param petClinicAppUserManagedIdentityName string = '${acaName}-pet-clinic-app-identity'
-param appName string = 'prometheus'
+param appName string = 'grafana'
 param appClientId string
 param containerImage string
 
@@ -96,8 +96,7 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
             }
           ]
           ingress: {
-            exposedPort: 9091
-            targetPort: 9090
+            targetPort: 80
             external: true
             clientCertificateMode: 'ignore'
             customDomains: empty(certificateId) ? [
@@ -141,7 +140,7 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
                 }
                 {
                   name: 'PORT'
-                  value: '9090'
+                  value: '8888'
                 }
                 {
                   name: 'ENVIRONMENT'
@@ -165,12 +164,12 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
                 }
                 {
                   name:  'APPLICATIONINSIGHTS_CONFIGURATION_CONTENT'
-                  value: '{ "role": { "name": "prometheus" } }'
+                  value: '{ "role": { "name": "grafana" } }'
                 }
               ]
               resources: {
                  cpu: json('0.5')
-                 memory: '1.0Gi'
+                 memory: '2.0Gi'
               }
               probes: [
                 {
