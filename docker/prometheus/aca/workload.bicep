@@ -171,6 +171,41 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
                  cpu: json('0.5')
                  memory: '1.0Gi'
               }
+              probes: [
+                {
+                  type: 'Startup'
+                  httpGet:{
+                    path: '/-/healthy'
+                    port: 9090
+                  }
+                  initialDelaySeconds: 30
+                  successThreshold: 1
+                  failureThreshold: 3
+                  periodSeconds: 20
+                }
+                {
+                  type: 'Readiness'
+                  httpGet:{
+                    path: '/-/healthy'
+                    port: 9090
+                  }
+                  initialDelaySeconds: 30
+                  successThreshold: 1
+                  failureThreshold: 3
+                  periodSeconds: 20
+                }
+                {
+                  type:'Liveness'
+                  httpGet:{
+                    path: '/-/healthy'
+                    port: 9090
+                  }
+                  initialDelaySeconds: 180
+                  successThreshold: 1
+                  failureThreshold: 3
+                  periodSeconds: 20
+                }
+              ]
             }
         ]
       }
