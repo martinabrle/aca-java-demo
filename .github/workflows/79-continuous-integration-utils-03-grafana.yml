@@ -8,16 +8,18 @@ on:
      - 'docker/grafana/**'
 
   workflow_call:
-  
+
   workflow_dispatch:
+
+permissions:
+  contents: write
+  packages: write
+  id-token: write
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      packages: write
-      id-token: write
+
     env:
       APP_INSIGHTS: false
       SEMVER_NAMESPACE: grafana
@@ -26,7 +28,7 @@ jobs:
       SRC_DIR: docker/grafana
       JAVA_VERSION: ''
       DB: ''
-      USER_IDENTITY_NAME: '${{secrets.AKS_NAME}}-pet-clinic-app-identity'
+      USER_IDENTITY_NAME: '${{secrets.ACA_NAME}}-pet-clinic-app-identity'
       DB_USER_NAME: ''
       CONTAINER_REGISTRY_SUBSCRIPTION_ID: ${{secrets.CONTAINER_REGISTRY_SUBSCRIPTION_ID}}
       CONTAINER_REGISTRY_NAME: ${{secrets.CONTAINER_REGISTRY_NAME}}
@@ -153,6 +155,7 @@ jobs:
           mv ./target/${{env.RELEASE_FILE_NAME}} ./${{env.RELEASE_DIR_NAME}}
           cp ./Dockerfile ./${{env.RELEASE_DIR_NAME}}/Dockerfile
           cp -R ./k8s ./${{env.RELEASE_DIR_NAME}}/k8s
+          cp -R ./aca ./${{env.RELEASE_DIR_NAME}}/aca
           if [[ -d "./src/main/resources/db" ]]; then
             cp -R ./src/main/resources/db ./${{env.RELEASE_DIR_NAME}}/db
           fi
@@ -169,7 +172,7 @@ jobs:
         zip -r ${{env.RELEASE_ARCHIVE_NAME}} ./${{env.RELEASE_DIR_NAME}}
         ls -la
         echo "RELEASE_NAME=${{env.RELEASE_DIR_NAME}}" >> $GITHUB_OUTPUT
-      
+
     # Only for troubleshooting, otherwise not needed, takes a lot of time
     # - name: Upload build artifact
     #   uses: actions/upload-artifact@v3
@@ -193,7 +196,7 @@ jobs:
         ls -la ./${{env.RELEASE_ARCHIVE_NAME}}
         gh release create ${{env.VERSION_TAG}} ${{env.RELEASE_ARCHIVE_NAME}} --notes "Auto release ${{env.VERSION_TAG}}"
     
-    - name: Azure login in AKS Subscription # https://learn.microsoft.com/en-us/azure/developer/github/connect-from-azure
+    - name: Azure login in Container Registry Subscription # https://learn.microsoft.com/en-us/azure/developer/github/connect-from-azure
       uses: azure/login@v2
       with:
         client-id: "${{secrets.AAD_CLIENT_ID}}"
