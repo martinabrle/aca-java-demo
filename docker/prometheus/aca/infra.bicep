@@ -1,7 +1,7 @@
 param acaName string
 param acaTags string
 
-param petClinicAppUserManagedIdentityName string = '${acaName}-pet-app-identity'
+param petClinicAppUserManagedIdentityName string = '${acaName}-pet-clinic-app-identity'
 
 param containerRegistryName string = replace(replace(acaName,'_', ''),'-','')
 param containerRegistrySubscriptionId string = subscription().id
