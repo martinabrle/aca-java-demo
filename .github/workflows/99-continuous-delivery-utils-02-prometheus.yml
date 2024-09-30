@@ -24,7 +24,7 @@ jobs:
   deploy:
     env:
       ARTIFACT_NAME: prometheus
-      APP_NAME: config-server
+      APP_NAME: prometheus
       JAVA_VERSION: ''
       USER_IDENTITY_NAME: ${{secrets.ACA_NAME}}-pet-clinic-app-identity
       PGSQL_NAME: ''
