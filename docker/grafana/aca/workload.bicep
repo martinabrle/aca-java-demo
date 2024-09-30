@@ -200,7 +200,7 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
                     path: '/-/healthy'
                     port: 9090
                   }
-                  initialDelaySeconds: 180
+                  initialDelaySeconds: 60
                   successThreshold: 1
                   failureThreshold: 3
                   periodSeconds: 20
