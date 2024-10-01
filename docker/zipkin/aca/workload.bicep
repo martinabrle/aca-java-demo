@@ -4,7 +4,7 @@ param acaTags string
 param appVersion string
 
 param petClinicAppUserManagedIdentityName string = '${acaName}-pet-clinic-app-identity'
-param appName string = 'grafana'
+param appName string = 'tracing-server'
 param appClientId string
 param containerImage string
 
@@ -164,7 +164,7 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
                 }
                 {
                   name:  'APPLICATIONINSIGHTS_CONFIGURATION_CONTENT'
-                  value: '{ "role": { "name": "grafana" } }'
+                  value: '{ "role": { "name": "tracing-server" } }'
                 }
               ]
               resources: {
