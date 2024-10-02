@@ -4,7 +4,7 @@ param acaTags string
 param appVersion string
 
 param petClinicAppUserManagedIdentityName string = '${acaName}-pet-clinic-app-identity'
-param appName string = 'admin-server'
+param appName string = 'api-gateway'
 param appClientId string
 param containerImage string
 
@@ -168,7 +168,7 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
                 }
                 {
                   name:  'APPLICATIONINSIGHTS_CONFIGURATION_CONTENT'
-                  value: '{ "role": { "name": "admin-server" } }'
+                  value: '{ "role": { "name": "api-gateway" } }'
                 }
               ]
               resources: {
