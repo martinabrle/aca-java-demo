@@ -169,7 +169,7 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
               ]
               resources: {
                  cpu: json('0.5')
-                 memory: '2.0Gi'
+                 memory: '1.0Gi'
               }
               probes: [
                 {
