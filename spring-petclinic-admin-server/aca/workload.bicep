@@ -3,8 +3,8 @@ param acaTags string
 
 param appVersion string
 
-param petClinicConfigSvcUserManagedIdentityName string = '${acaName}-pet-clinic-app-identity'
-param appName string = 'config-server'
+param petClinicAppUserManagedIdentityName string = '${acaName}-pet-clinic-app-identity'
+param appName string = 'admin-server'
 param appClientId string
 param containerImage string
 
@@ -25,8 +25,8 @@ var containerRegistryRGVar = (containerRegistryRG == '') ? resourceGroup().name 
 
 param location string
 
-resource petClinicConfigSvcUserManagedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' existing = {
-  name: petClinicConfigSvcUserManagedIdentityName
+resource petClinicAppUserManagedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' existing = {
+  name: petClinicAppUserManagedIdentityName
 }
 
 resource kvSecretPetClinicAppInsightsConnectionString 'Microsoft.KeyVault/vaults/secrets@2024-04-01-preview' existing = {
@@ -37,21 +37,6 @@ resource kvSecretPetClinicAppInsightsConnectionString 'Microsoft.KeyVault/vaults
 resource kvSecretPetClinicAppInsightsInstrumentationKey 'Microsoft.KeyVault/vaults/secrets@2024-04-01-preview' existing = {
   parent: keyVault
   name: 'PET-CLINIC-APP-INSIGHTS-INSTRUMENTATION-KEY'
-}
-
-resource kvSecretPetClinicConfigRepoURI 'Microsoft.KeyVault/vaults/secrets@2024-04-01-preview' existing = {
-  parent: keyVault
-  name: 'PET-CLINIC-CONFIG-SVC-GIT-REPO-URI'
-}
-
-resource kvSecretPetClinicConfigRepoUserName 'Microsoft.KeyVault/vaults/secrets@2024-04-01-preview' existing = {
-  parent: keyVault
-  name: 'PET-CLINIC-CONFIG-SVC-GIT-REPO-USERNAME'
-}
-
-resource kvSecretPetClinicConfigRepoPassword 'Microsoft.KeyVault/vaults/secrets@2024-04-01-preview' existing = {
-  parent: keyVault
-  name: 'PET-CLINIC-CONFIG-SVC-GIT-REPO-PASSWORD'
 }
 
 resource keyVault 'Microsoft.KeyVault/vaults@2024-04-01-preview' existing = {
@@ -85,7 +70,7 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
    identity: {
       type: 'UserAssigned'
       userAssignedIdentities: {
-         '${petClinicConfigSvcUserManagedIdentity.id}': {}
+         '${petClinicAppUserManagedIdentity.id}': {}
       }
    }
    properties: {
@@ -96,33 +81,18 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
             {
               name: toLower(kvSecretPetClinicAppInsightsConnectionString.name)
               keyVaultUrl: kvSecretPetClinicAppInsightsConnectionString.properties.secretUri
-              identity: petClinicConfigSvcUserManagedIdentity.id
+              identity: petClinicAppUserManagedIdentity.id
             }
             {
               name: toLower(kvSecretPetClinicAppInsightsInstrumentationKey.name)
               keyVaultUrl: kvSecretPetClinicAppInsightsInstrumentationKey.properties.secretUri
-              identity: petClinicConfigSvcUserManagedIdentity.id
-            }
-            {
-              name: toLower(kvSecretPetClinicConfigRepoURI.name)
-              keyVaultUrl: kvSecretPetClinicConfigRepoURI.properties.secretUri
-              identity: petClinicConfigSvcUserManagedIdentity.id
-            }
-            {
-              name: toLower(kvSecretPetClinicConfigRepoUserName.name)
-              keyVaultUrl: kvSecretPetClinicConfigRepoURI.properties.secretUri //kvSecretPetClinicConfigRepoUserName.properties.secretUri
-              identity: petClinicConfigSvcUserManagedIdentity.id
-            }
-            {
-              name: toLower(kvSecretPetClinicConfigRepoPassword.name)
-              keyVaultUrl: kvSecretPetClinicConfigRepoURI.properties.secretUri //kvSecretPetClinicConfigRepoPassword.properties.secretUri
-              identity: petClinicConfigSvcUserManagedIdentity.id
+              identity: petClinicAppUserManagedIdentity.id
             }
           ]
           registries: [
             {
               server: '${containerRegistry.name}.azurecr.io'
-              identity: petClinicConfigSvcUserManagedIdentity.id
+              identity: petClinicAppUserManagedIdentity.id
             }
           ]
           ingress: {
@@ -181,10 +151,6 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
                   value: 'true'
                 }
                 {
-                  name: 'LOAD_DEMO_DATA'
-                  value: 'true'
-                }
-                {
                   name: 'AZURE_TENANT_ID'
                   value: tenant().tenantId
                 }
@@ -202,19 +168,7 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
                 }
                 {
                   name:  'APPLICATIONINSIGHTS_CONFIGURATION_CONTENT'
-                  value: '{ "role": { "name": "config-server" } }'
-                }
-                {
-                  name: 'GIT_CONFIG_REPO_URI'
-                  secretRef: toLower(kvSecretPetClinicConfigRepoURI.name)
-                }
-                {
-                  name: 'GIT_USERNAME'
-                  secretRef: toLower(kvSecretPetClinicConfigRepoUserName.name)
-                }
-                {
-                  name: 'GIT_PASSWORD'
-                  secretRef: toLower(kvSecretPetClinicConfigRepoPassword.name)
+                  value: '{ "role": { "name": "admin-server" } }'
                 }
               ]
               resources: {
