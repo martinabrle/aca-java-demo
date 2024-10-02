@@ -222,7 +222,6 @@ jobs:
           RELEASE_DIR_NAME: ${{steps.versions.outputs.RELEASE_DIR_NAME}}
           HOST_NAME: ${{env.APP_NAME}}.${{secrets.PET_CLINIC_DNS_ZONE_NAME}}.${{secrets.DNS_ZONE_NAME}}.${{secrets.PARENT_DNS_ZONE_NAME}}
           VERSION: ${{steps.versions.outputs.VERSION}}
-
         run: |
           ls ./${{env.RELEASE_DIR_NAME}}/aca/
           certificateId=''
