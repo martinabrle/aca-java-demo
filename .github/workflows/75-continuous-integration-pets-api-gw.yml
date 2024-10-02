@@ -19,6 +19,7 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     env:
       APP_INSIGHTS: true
       SEMVER_NAMESPACE: spring-petclinic-api-gateway
@@ -195,7 +196,7 @@ jobs:
         ls -la ./${{env.RELEASE_ARCHIVE_NAME}}
         gh release create ${{env.VERSION_TAG}} ${{env.RELEASE_ARCHIVE_NAME}} --notes "Auto release ${{env.VERSION_TAG}}"
     
-    - name: Azure login in AKS Subscription # https://learn.microsoft.com/en-us/azure/developer/github/connect-from-azure
+    - name: Azure login in Container Registry Subscription # https://learn.microsoft.com/en-us/azure/developer/github/connect-from-azure
       uses: azure/login@v2
       with:
         client-id: "${{secrets.AAD_CLIENT_ID}}"
