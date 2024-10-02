@@ -96,7 +96,6 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
             }
           ]
           ingress: {
-            exposedPort: 9091
             targetPort: 9090
             external: true
             clientCertificateMode: 'ignore'
