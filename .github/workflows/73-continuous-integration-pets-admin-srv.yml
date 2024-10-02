@@ -8,24 +8,27 @@ on:
      - 'spring-petclinic-admin-server/**'
 
   workflow_call:
-  
+
   workflow_dispatch:
+
+permissions:
+  contents: write
+  packages: write
+  id-token: write
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      packages: write
-      id-token: write
+
     env:
+      APP_INSIGHTS: true
       SEMVER_NAMESPACE: spring-petclinic-admin-server
       SEMVER_CHANGE_PATH: spring-petclinic-admin-server
       ARTIFACT_NAME: spring-petclinic-admin-server
       SRC_DIR: spring-petclinic-admin-server
       JAVA_VERSION: 17
       DB: ''
-      USER_IDENTITY_NAME: ${{secrets.AKS_NAME}}-pet-clinic-app-identity
+      USER_IDENTITY_NAME: ${{secrets.ACA_NAME}}-pet-clinic-app-identity
       DB_USER_NAME: ''
       CONTAINER_REGISTRY_SUBSCRIPTION_ID: ${{secrets.CONTAINER_REGISTRY_SUBSCRIPTION_ID}}
       CONTAINER_REGISTRY_NAME: ${{secrets.CONTAINER_REGISTRY_NAME}}
@@ -142,20 +145,30 @@ jobs:
         RELEASE_DIR_NAME: ${{steps.versions.outputs.RELEASE_DIR_NAME}}
         RELEASE_FILE_NAME: ${{steps.versions.outputs.RELEASE_FILE_NAME}}
       run: |
-        mkdir ./${{env.RELEASE_DIR_NAME}}
-        ls -la ./target
-        if [[ ! -f "./target/${{env.RELEASE_FILE_NAME}}" ]]; then
-          echo "File ./target/${{env.RELEASE_FILE_NAME}} does not exists. Check the build script."
-          exit 1
+        if [[ "${{env.JAVA_VERSION}}" != '' ]]; then
+          mkdir ./${{env.RELEASE_DIR_NAME}}
+          ls -la ./target
+          if [[ ! -f "./target/${{env.RELEASE_FILE_NAME}}" ]]; then
+            echo "File ./target/${{env.RELEASE_FILE_NAME}} does not exists. Check the build script."
+            exit 1
+          fi
+          mv ./target/${{env.RELEASE_FILE_NAME}} ./${{env.RELEASE_DIR_NAME}}
+          cp ./Dockerfile ./${{env.RELEASE_DIR_NAME}}/Dockerfile
+          cp -R ./k8s ./${{env.RELEASE_DIR_NAME}}/k8s
+          cp -R ./aca ./${{env.RELEASE_DIR_NAME}}/aca
+          if [[ -d "./src/main/resources/db" ]]; then
+            cp -R ./src/main/resources/db ./${{env.RELEASE_DIR_NAME}}/db
+          fi
+          if [[ "${{env.APP_INSIGHTS}}" == 'true'  ]]; then
+            mv ./ai.jar ./${{env.RELEASE_DIR_NAME}}
+          fi
+        else
+          # No source code here, proceed with copying the whole docker directory
+          ls -la
+          mkdir ../${{env.ARTIFACT_NAME}}-${{env.VERSION}}
+          cp -R * ../${{env.ARTIFACT_NAME}}-${{env.VERSION}}/
+          mv ../${{env.ARTIFACT_NAME}}-${{env.VERSION}} ./${{env.ARTIFACT_NAME}}-${{env.VERSION}}
         fi
-        mv ./target/${{env.RELEASE_FILE_NAME}} ./${{env.RELEASE_DIR_NAME}}
-        cp ./Dockerfile ./${{env.RELEASE_DIR_NAME}}/Dockerfile
-        cp -R ./k8s ./${{env.RELEASE_DIR_NAME}}/k8s
-        if [[ -d "./src/main/resources/db" ]]; then
-          cp -R ./src/main/resources/db ./${{env.RELEASE_DIR_NAME}}/db
-        fi
-        mv ./ai.jar ./${{env.RELEASE_DIR_NAME}}
-
         zip -r ${{env.RELEASE_ARCHIVE_NAME}} ./${{env.RELEASE_DIR_NAME}}
         ls -la
         echo "RELEASE_NAME=${{env.RELEASE_DIR_NAME}}" >> $GITHUB_OUTPUT
@@ -183,7 +196,7 @@ jobs:
         ls -la ./${{env.RELEASE_ARCHIVE_NAME}}
         gh release create ${{env.VERSION_TAG}} ${{env.RELEASE_ARCHIVE_NAME}} --notes "Auto release ${{env.VERSION_TAG}}"
     
-    - name: Azure login in AKS Subscription # https://learn.microsoft.com/en-us/azure/developer/github/connect-from-azure
+    - name: Azure login in Container Registry Subscription # https://learn.microsoft.com/en-us/azure/developer/github/connect-from-azure
       uses: azure/login@v2
       with:
         client-id: "${{secrets.AAD_CLIENT_ID}}"
