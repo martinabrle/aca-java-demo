@@ -96,7 +96,7 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
             }
           ]
           ingress: {
-            targetPort: 80
+            targetPort: 3000
             external: true
             clientCertificateMode: 'ignore'
             customDomains: empty(certificateId) ? [
@@ -140,7 +140,7 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
                 }
                 {
                   name: 'PORT'
-                  value: '8888'
+                  value: '3000'
                 }
                 {
                   name: 'ENVIRONMENT'
