@@ -15,15 +15,18 @@ on:
         type: string
         description: Full version tag (e.g. "v1.0.5")
 
+
+permissions:
+  id-token: write
+  contents: read
+  packages: read
 jobs:
   deploy:
     env:
-      SEMVER_NAMESPACE: spring-petclinic-vets-service
-      SEMVER_CHANGE_PATH: spring-petclinic-vets-service
       ARTIFACT_NAME: spring-petclinic-vets-service
-      SRC_DIR: spring-petclinic-vets-service
+      APP_NAME: spring-petclinic-custs-service
       JAVA_VERSION: 17
-      USER_IDENTITY_NAME: ${{secrets.AKS_NAME}}-pet-clinic-vets-identity
+      USER_IDENTITY_NAME: ${{secrets.ACA_NAME}}-pet-clinic-vets-identity
       PGSQL_NAME: ${{secrets.PGSQL_NAME}}
       DB: ${{secrets.PET_CLINIC_DB_NAME}}
       DB_USER_NAME: ${{secrets.PET_CLINIC_VETS_SVC_DB_USER_NAME}}
