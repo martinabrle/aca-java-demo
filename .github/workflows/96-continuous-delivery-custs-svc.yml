@@ -24,7 +24,7 @@ jobs:
   deploy:
     env:
       ARTIFACT_NAME: spring-petclinic-customers-service
-      APP_NAME: spring-petclinic-customers-service
+      APP_NAME: customers-service
       JAVA_VERSION: 17
       USER_IDENTITY_NAME: ${{secrets.ACA_NAME}}-pet-clinic-custs-identity
       PGSQL_NAME: ${{secrets.PGSQL_NAME}}
