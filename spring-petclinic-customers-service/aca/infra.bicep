@@ -5,7 +5,7 @@ param pgsqlName string
 param pgsqlPetClinicDbName string = 'petclinicdb'
 param petClinicCustsSvcDbUserName string = 'petclinicadmin'
 
-param petClinicCustsSvcUserManagedIdentityName string = '${acaName}-pet-clinic-custs-svc-identity'
+param petClinicCustsSvcUserManagedIdentityName string = '${acaName}-pet-clinic-custs-identity'
 
 param containerRegistryName string = replace(replace(acaName,'_', ''),'-','')
 param containerRegistrySubscriptionId string = subscription().id

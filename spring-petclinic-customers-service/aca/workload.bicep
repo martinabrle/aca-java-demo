@@ -3,7 +3,7 @@ param acaTags string
 
 param appVersion string
 
-param petClinicCustsSvcUserManagedIdentityName string = '${acaName}-pet-clinic-custs-svc-identity'
+param petClinicCustsSvcUserManagedIdentityName string = '${acaName}-pet-clinic-custs-identity'
 param appName string = 'customers-service'
 param appClientId string
 param containerImage string
