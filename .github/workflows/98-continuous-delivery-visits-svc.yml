@@ -15,24 +15,28 @@ on:
         type: string
         description: Full version tag (e.g. "v1.0.5")
 
+permissions:
+  id-token: write
+  contents: read
+  packages: read
+
 jobs:
   deploy:
     env:
-      SEMVER_NAMESPACE: spring-petclinic-visits-service
-      SEMVER_CHANGE_PATH: spring-petclinic-visits-service
       ARTIFACT_NAME: spring-petclinic-visits-service
-      SRC_DIR: spring-petclinic-visits-service
+      APP_NAME: visits-service
       JAVA_VERSION: 17
-      USER_IDENTITY_NAME: ${{secrets.AKS_NAME}}-pet-clinic-visits-identity
+      USER_IDENTITY_NAME: ${{secrets.ACA_NAME}}-pet-clinic-visits-identity
       PGSQL_NAME: ${{secrets.PGSQL_NAME}}
       DB: ${{secrets.PET_CLINIC_DB_NAME}}
       DB_USER_NAME: ${{secrets.PET_CLINIC_VISITS_SVC_DB_USER_NAME}}
       DBA_GROUP_NAME: ${{secrets.DBA_GROUP_NAME}}
       CONTAINER_REGISTRY_SUBSCRIPTION_ID: ${{secrets.CONTAINER_REGISTRY_SUBSCRIPTION_ID}}
       CONTAINER_REGISTRY_NAME: ${{secrets.CONTAINER_REGISTRY_NAME}}
-      AKS_RESOURCE_GROUP: ${{secrets.AKS_RESOURCE_GROUP}}
-      AKS_NAME: ${{secrets.AKS_NAME}}
-      AKS_SUBSCRIPTION_ID: ${{secrets.AKS_SUBSCRIPTION_ID}}
+      CONTAINER_REGISTRY_RESOURCE_GROUP: ${{secrets.CONTAINER_REGISTRY_RESOURCE_GROUP || secrets.ACA_RESOURCE_GROUP}}
+      ACA_RESOURCE_GROUP: ${{secrets.ACA_RESOURCE_GROUP}}
+      ACA_NAME: ${{secrets.ACA_NAME}}
+      ACA_SUBSCRIPTION_ID: ${{secrets.ACA_SUBSCRIPTION_ID}}
 
     # when called from another workflow directly, it inherits the event name from the caller workflow
     # (push in this case when called from 10-continuous-integration.yml)
@@ -120,7 +124,7 @@ jobs:
             echo "Release '${{env.VERSION}}' does not exist."
             exit 1
 
-      - name: Azure login in AKS Subscription # https://learn.microsoft.com/en-us/azure/developer/github/connect-from-azure
+      - name: Azure login in ACA Subscription # https://learn.microsoft.com/en-us/azure/developer/github/connect-from-azure
         uses: azure/login@v2
         with:
           client-id: "${{secrets.AAD_CLIENT_ID}}"
@@ -155,12 +159,33 @@ jobs:
           cd ./${{env.RELEASE_DIR_NAME}}
           mv ./Dockerfile ./Dockerfile.tmp
           # Dockerfile syntax is driving me bonkers. This should work...
-          cat ./Dockerfile.tmp | ARTIFACT_NAME_ARG=${{env.ARTIFACT_NAME}} VERSION_ARG=${{env.VERSION}} VERSION_ARG=${{env.VERSION}} envsubst > ./Dockerfile
+          cat ./Dockerfile.tmp | ARTIFACT_NAME_ARG=${{env.ARTIFACT_NAME}} VERSION_ARG=${{env.VERSION}} envsubst > ./Dockerfile
           cat ./Dockerfile
   
           az acr build ./ -r ${{env.CONTAINER_REGISTRY_NAME}} -t "${{env.ARTIFACT_NAME}}:${{env.VERSION}}" --file ./Dockerfile --subscription "${{env.CONTAINER_REGISTRY_SUBSCRIPTION_ID}}"
           cd ..
-  
+
+      - name: Deploy app specific infrastructure (managed identities, RBAC etc.)
+        id: deployment
+        env:
+          RELEASE_DIR_NAME: ${{steps.versions.outputs.RELEASE_DIR_NAME}}
+        run: |
+          deploymentOutput=`az deployment group create \
+                                        --resource-group ${{env.ACA_RESOURCE_GROUP}} \
+                                        --template-file ./${{env.RELEASE_DIR_NAME}}/aca/infra.bicep \
+                                        --parameters acaName="${{env.ACA_NAME}}" \
+                                                     acaTags="${{vars.ACA_RESOURCE_TAGS}}" \
+                                                     pgsqlName="${{env.PGSQL_NAME}}" \
+                                                     pgsqlPetClinicDbName="${{secrets.PET_CLINIC_DB_NAME}}" \
+                                                     petClinicVisitsSvcDbUserName="${{secrets.PET_CLINIC_VISITS_SVC_DB_USER_NAME}}" \
+                                                     containerRegistryName="${{secrets.CONTAINER_REGISTRY_NAME}}" \
+                                                     containerRegistrySubscriptionId="${{env.CONTAINER_REGISTRY_SUBSCRIPTION_ID}}" \
+                                                     containerRegistryRG="${{env.CONTAINER_REGISTRY_RESOURCE_GROUP}}" \
+                                                     location="${{secrets.AZURE_LOCATION}}" `
+          echo "Deployment output:"
+          echo "=================="
+          echo "$deploymentOutput"
+
       - name: Synchronize DB Schema
         if: ${{ env.DB != '' }}
         env:
@@ -197,25 +222,41 @@ jobs:
           psql --set=sslmode=require -h "${{env.PGSQL_SERVER_NAME}}" -p 5432 -d "${{env.DB}}" -U "${{env.DBA_GROUP_NAME}}" -tAc "GRANT USAGE ON SCHEMA public TO ${{env.DB_USER_NAME}};" -v ON_ERROR_STOP=1
           psql --set=sslmode=require -h "${{env.PGSQL_SERVER_NAME}}" -p 5432 -d "${{env.DB}}" -U "${{env.DBA_GROUP_NAME}}" -tAc "GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO ${{env.DB_USER_NAME}};" -v ON_ERROR_STOP=1
 
-    # - name: Test connection to AKS
-    #   run: |
-    #     az aks command invoke \
-    #       --resource-group ${{env.AKS_RESOURCE_GROUP}} \
-    #       --name ${{env.AKS_NAME}} \
-    #       --command "kubectl get ns" \
-    #       --subscription "${{env.AKS_SUBSCRIPTION_ID}}"
-
-      - name: Deploy app into AKS
+      - name: Deploy app into ACA using Bicep
         env:
           DEPLOYMENT_SUFFIX: ""
           CONTAINER_IMAGE: ${{env.CONTAINER_REGISTRY_NAME}}.azurecr.io/${{env.ARTIFACT_NAME}}:${{steps.versions.outputs.VERSION}}
           RELEASE_DIR_NAME: ${{steps.versions.outputs.RELEASE_DIR_NAME}}
+          HOST_NAME: ${{env.APP_NAME}}.${{secrets.PET_CLINIC_DNS_ZONE_NAME}}.${{secrets.DNS_ZONE_NAME}}.${{secrets.PARENT_DNS_ZONE_NAME}}
+          VERSION: ${{steps.versions.outputs.VERSION}}
         run: |
-          cat ./${{env.RELEASE_DIR_NAME}}/k8s/deployment.yml | CONTAINER_IMAGE=${{env.CONTAINER_IMAGE}} DEPLOYMENT_SUFFIX=${{env.DEPLOYMENT_SUFFIX}} envsubst > ./deployment.yml.tmp
-          cat ./deployment.yml.tmp
-          az aks command invoke \
-            --resource-group ${{env.AKS_RESOURCE_GROUP}} \
-            --name ${{env.AKS_NAME}} \
-            --command "kubectl apply -f deployment.yml.tmp" \
-            --file deployment.yml.tmp \
-            --subscription "${{env.AKS_SUBSCRIPTION_ID}}"
+          ls ./${{env.RELEASE_DIR_NAME}}/aca/
+          certificateId=''
+          if [[ ! -z ${{secrets.DNS_ZONE_NAME}} ]]; then
+            certificateId=`az containerapp env certificate list -g ${{env.ACA_RESOURCE_GROUP}} --name ${{env.ACA_NAME}} --query "[?properties.subjectName=='${{env.HOST_NAME}}'].id" -o tsv`
+          fi
+          appClientId=`az ad sp list --display-name "${{env.USER_IDENTITY_NAME}}" --query "[?displayName=='${{env.USER_IDENTITY_NAME}}'].appId" --out tsv`
+          echo "Certificate ID: '${certificateId}'"
+          echo "Managed identity appClientId: ${appClientId}"
+          
+          deploymentOutput=`az deployment group create \
+                                        --resource-group ${{env.ACA_RESOURCE_GROUP}} \
+                                        --template-file ./${{env.RELEASE_DIR_NAME}}/aca/workload.bicep \
+                                        --parameters acaName="${{env.ACA_NAME}}" \
+                                                     acaTags="${{vars.ACA_RESOURCE_TAGS}}" \
+                                                     appVersion="${{env.VERSION}}" \
+                                                     appName="${{env.APP_NAME}}" \
+                                                     appClientId="${appClientId}" \
+                                                     containerImage="${{env.CONTAINER_IMAGE}}" \
+                                                     containerRegistryName="${{env.CONTAINER_REGISTRY_NAME}}" \
+                                                     containerRegistrySubscriptionId="${{env.CONTAINER_REGISTRY_SUBSCRIPTION_ID}}" \
+                                                     containerRegistryRG="${{env.CONTAINER_REGISTRY_RESOURCE_GROUP}}" \
+                                                     certificateId="${certificateId}" \
+                                                     petClinicDnsZoneName="${{secrets.PET_CLINIC_DNS_ZONE_NAME}}" \
+                                                     dnsZoneName="${{secrets.DNS_ZONE_NAME}}" \
+                                                     parentDnsZoneName="${{secrets.PARENT_DNS_ZONE_NAME}}" \
+                                                     location="${{secrets.AZURE_LOCATION}}" `
+
+          echo "Deployment output:"
+          echo "=================="
+          echo "$deploymentOutput"
