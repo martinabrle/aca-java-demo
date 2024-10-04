@@ -44,7 +44,7 @@ module kvSecretPetClinicConfigRepoURI 'components/kv-secret.bicep' = {
   name: 'kv-secret-pet-clinic-config-repo-uri'
   params: {
     keyVaultName: keyVault.name
-    secretName: 'PET-CLINIC-CONFIG-SVC-GIT-REPO-URI'
+    secretName: 'PET-CLINIC-CONFIG-GIT-REPO-URI'
     secretValue: petClinicGitConfigRepoUri
   }
 }
@@ -53,7 +53,7 @@ module kvSecretPetClinicConfigRepoUserName 'components/kv-secret.bicep' = {
   name: 'kv-secret-pet-clinic-config-repo-user-name'
   params: {
     keyVaultName: keyVault.name
-    secretName: 'PET-CLINIC-CONFIG-SVC-GIT-REPO-USERNAME'
+    secretName: 'PET-CLINIC-CONFIG-GIT-REPO-USER'
     secretValue: petClinicGitConfigRepoUserName
   }
 }
@@ -62,7 +62,7 @@ module kvSecretPetClinicConfigRepoPassword 'components/kv-secret.bicep' = {
   name: 'kv-secret-pet-clinic-config-repo-password'
   params: {
     keyVaultName: keyVault.name
-    secretName: 'PET-CLINIC-CONFIG-SVC-GIT-REPO-PASSWORD'
+    secretName: 'PET-CLINIC-CONFIG-GIT-REPO-PWD'
     secretValue: petClinicGitConfigRepoPassword
   }
 }
