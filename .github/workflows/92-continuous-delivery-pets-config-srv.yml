@@ -171,6 +171,7 @@ jobs:
                                         --template-file ./${{env.RELEASE_DIR_NAME}}/aca/infra.bicep \
                                         --parameters acaName="${{env.ACA_NAME}}" \
                                                      acaTags="${{vars.ACA_RESOURCE_TAGS}}" \
+                                                     petClinicConfigSvcUserManagedIdentityName="${{env.USER_IDENTITY_NAME}}" \
                                                      petClinicGitConfigRepoUri="${{secrets.PET_CLINIC_GIT_CONFIG_REPO_URI}}" \
                                                      petClinicGitConfigRepoUserName="${{secrets.PET_CLINIC_GIT_CONFIG_REPO_USERNAME}}" \
                                                      petClinicGitConfigRepoPassword="${{secrets.PET_CLINIC_GIT_CONFIG_REPO_PASSWORD}}" \
@@ -243,6 +244,7 @@ jobs:
                                                      appVersion="${{env.VERSION}}" \
                                                      appName="${{env.APP_NAME}}" \
                                                      appClientId="${appClientId}" \
+                                                     petClinicConfigSvcUserManagedIdentityName="${{env.USER_IDENTITY_NAME}}" \
                                                      containerImage="${{env.CONTAINER_IMAGE}}" \
                                                      containerRegistryName="${{env.CONTAINER_REGISTRY_NAME}}" \
                                                      containerRegistrySubscriptionId="${{env.CONTAINER_REGISTRY_SUBSCRIPTION_ID}}" \
