@@ -107,69 +107,8 @@ jobs:
                                                      petClinicGitConfigRepoPassword="${{secrets.PET_CLINIC_GIT_CONFIG_REPO_PASSWORD}}" \
                                                      location="${{secrets.AZURE_LOCATION}}" `
           
-          #azurerm_kubernetes_cluster.aks.network_profile[0].load_balancer_profile[0].effective_outbound_ips
-
-          petClinicAppUserManagedIdentityName=`echo $deploymentOutput|jq ".properties.outputs.petClinicAppUserManagedIdentityName.value"`
-          petClinicAppUserManagedIdentityPrincipalId=`echo $deploymentOutput|jq ".properties.outputs.petClinicAppUserManagedIdentityPrincipalId.value"`
-          petClinicAppUserManagedIdentityClientId=`echo $deploymentOutput|jq ".properties.outputs.petClinicAppUserManagedIdentityClientId.value"`
-
-          petClinicConfigSvcUserManagedIdentityName=`echo $deploymentOutput|jq ".properties.outputs.petClinicConfigSvcUserManagedIdentityName.value"`
-          petClinicConfigSvcUserManagedIdentityPrincipalId=`echo $deploymentOutput|jq ".properties.outputs.petClinicConfigSvcUserManagedIdentityPrincipalId.value"`
-          petClinicConfigSvcUserManagedIdentityClientId=`echo $deploymentOutput|jq ".properties.outputs.petClinicConfigSvcUserManagedIdentityClientId.value"`
-
-          petClinicCustsSvcUserManagedIdentityName=`echo $deploymentOutput|jq ".properties.outputs.petClinicCustsSvcUserManagedIdentityName.value"`
-          petClinicCustsSvcUserManagedIdentityPrincipalId=`echo $deploymentOutput|jq ".properties.outputs.petClinicCustsSvcUserManagedIdentityPrincipalId.value"`
-          petClinicCustsSvcUserManagedIdentityClientId=`echo $deploymentOutput|jq ".properties.outputs.petClinicCustsSvcUserManagedIdentityClientId.value"`
-          petClinicCustsSvcDbUserName=`echo $deploymentOutput|jq ".properties.outputs.petClinicCustsSvcDbUserName.value"`
-
-          petClinicVetsSvcUserManagedIdentityName=`echo $deploymentOutput|jq ".properties.outputs.petClinicVetsSvcUserManagedIdentityName.value"`
-          petClinicVetsSvcUserManagedIdentityPrincipalId=`echo $deploymentOutput|jq ".properties.outputs.petClinicVetsSvcUserManagedIdentityPrincipalId.value"`
-          petClinicVetsSvcUserManagedIdentityClientId=`echo $deploymentOutput|jq ".properties.outputs.petClinicVetsSvcUserManagedIdentityClientId.value"`
-          petClinicVetsSvcDbUserName=`echo $deploymentOutput|jq ".properties.outputs.petClinicVetsSvcDbUserName.value"`
-
-          petClinicVisitsSvcUserManagedIdentityName=`echo $deploymentOutput|jq ".properties.outputs.petClinicVisitsSvcUserManagedIdentityName.value"`
-          petClinicVisitsSvcUserManagedIdentityPrincipalId=`echo $deploymentOutput|jq ".properties.outputs.petClinicVisitsSvcUserManagedIdentityPrincipalId.value"`
-          petClinicVisitsSvcUserManagedIdentityClientId=`echo $deploymentOutput|jq ".properties.outputs.petClinicVisitsSvcUserManagedIdentityClientId.value"`
-          petClinicVisitsSvcDbUserName=`echo $deploymentOutput|jq ".properties.outputs.petClinicVisitsSvcDbUserName.value"`
-
-          echo "PET_CLINIC_APP_USER_MI_NAME: ${petClinicAppUserManagedIdentityName}"
-          echo "PET_CLINIC_APP_USER_MI_NAME=${petClinicAppUserManagedIdentityName}" >> $GITHUB_OUTPUT
-          echo "PET_CLINIC_APP_USER_MI_PRINCIPAL_ID: ${petClinicAppUserManagedIdentityPrincipalId}"
-          echo "PET_CLINIC_APP_USER_MI_PRINCIPAL_ID=${petClinicAppUserManagedIdentityPrincipalId}" >> $GITHUB_OUTPUT
-          echo "PET_CLINIC_APP_USER_MI_CLIENT_ID: ${petClinicAppUserManagedIdentityClientId}"
-          echo "PET_CLINIC_APP_USER_MI_CLIENT_ID=${petClinicAppUserManagedIdentityClientId}" >> $GITHUB_OUTPUT
-
-          echo "PET_CLINIC_CONFIG_SVC_USER_MI_NAME: ${petClinicConfigSvcUserManagedIdentityName}"
-          echo "PET_CLINIC_CONFIG_SVC_USER_MI_NAME=${petClinicConfigSvcUserManagedIdentityName}" >> $GITHUB_OUTPUT
-          echo "PET_CLINIC_CONFIG_SVC_USER_MI_PRINCIPAL_ID: ${petClinicConfigSvcUserManagedIdentityPrincipalId}"
-          echo "PET_CLINIC_CONFIG_SVC_USER_MI_PRINCIPAL_ID=${petClinicConfigSvcUserManagedIdentityPrincipalId}" >> $GITHUB_OUTPUT
-          echo "PET_CLINIC_CONFIG_SVC_USER_MI_CLIENT_ID: ${petClinicConfigSvcUserManagedIdentityClientId}"
-          echo "PET_CLINIC_CONFIG_SVC_USER_MI_CLIENT_ID=${petClinicConfigSvcUserManagedIdentityClientId}" >> $GITHUB_OUTPUT
-
-          echo "PET_CLINIC_CUSTS_SVC_USER_MI_NAME: ${petClinicCustsSvcUserManagedIdentityName}"
-          echo "PET_CLINIC_CUSTS_SVC_USER_MI_NAME=${petClinicCustsSvcUserManagedIdentityName}" >> $GITHUB_OUTPUT
-          echo "PET_CLINIC_CUSTS_SVC_USER_MI_PRINCIPAL_ID: ${petClinicCustsSvcUserManagedIdentityPrincipalId}"
-          echo "PET_CLINIC_CUSTS_SVC_USER_MI_PRINCIPAL_ID=${petClinicCustsSvcUserManagedIdentityPrincipalId}" >> $GITHUB_OUTPUT
-          echo "PET_CLINIC_CUSTS_SVC_USER_MI_CLIENT_ID: ${petClinicCustsSvcUserManagedIdentityClientId}"
-          echo "PET_CLINIC_CUSTS_SVC_USER_MI_CLIENT_ID=${petClinicCustsSvcUserManagedIdentityClientId}" >> $GITHUB_OUTPUT
-          echo "PET_CLINIC_CUSTS_SVC_DB_USER_NAME: ${petClinicCustsSvcDbUserName}"
-          echo "PET_CLINIC_CUSTS_SVC_DB_USER_NAME=${petClinicCustsSvcDbUserName}" >> $GITHUB_OUTPUT
-
-          echo "PET_CLINIC_VETS_SVC_USER_MI_NAME: ${petClinicVetsSvcUserManagedIdentityName}"
-          echo "PET_CLINIC_VETS_SVC_USER_MI_NAME=${petClinicVetsSvcUserManagedIdentityName}" >> $GITHUB_OUTPUT
-          echo "PET_CLINIC_VETS_SVC_USER_MI_PRINCIPAL_ID: ${petClinicVetsSvcUserManagedIdentityPrincipalId}"
-          echo "PET_CLINIC_VETS_SVC_USER_MI_PRINCIPAL_ID=${petClinicVetsSvcUserManagedIdentityPrincipalId}" >> $GITHUB_OUTPUT
-          echo "PET_CLINIC_VETS_SVC_USER_MI_CLIENT_ID: ${petClinicVetsSvcUserManagedIdentityClientId}"
-          echo "PET_CLINIC_VETS_SVC_USER_MI_CLIENT_ID=${petClinicVetsSvcUserManagedIdentityClientId}" >> $GITHUB_OUTPUT
-          echo "PET_CLINIC_VETS_SVC_DB_USER_NAME: ${petClinicVetsSvcDbUserName}"
-          echo "PET_CLINIC_VETS_SVC_DB_USER_NAME=${petClinicVetsSvcDbUserName}" >> $GITHUB_OUTPUT
-
-          echo "PET_CLINIC_VISITS_SVC_USER_MI_NAME: ${petClinicVisitsSvcUserManagedIdentityName}"
-          echo "PET_CLINIC_VISITS_SVC_USER_MI_NAME=${petClinicVisitsSvcUserManagedIdentityName}" >> $GITHUB_OUTPUT
-          echo "PET_CLINIC_VISITS_SVC_USER_MI_PRINCIPAL_ID: ${petClinicVisitsSvcUserManagedIdentityPrincipalId}"
-          echo "PET_CLINIC_VISITS_SVC_USER_MI_PRINCIPAL_ID=${petClinicVisitsSvcUserManagedIdentityPrincipalId}" >> $GITHUB_OUTPUT
-          echo "PET_CLINIC_VISITS_SVC_USER_MI_CLIENT_ID: ${petClinicVisitsSvcUserManagedIdentityClientId}"
-          echo "PET_CLINIC_VISITS_SVC_USER_MI_CLIENT_ID=${petClinicVisitsSvcUserManagedIdentityClientId}" >> $GITHUB_OUTPUT
-          echo "PET_CLINIC_VISITS_SVC_DB_USER_NAME: ${petClinicVisitsSvcDbUserName}"
-          echo "PET_CLINIC_VISITS_SVC_DB_USER_NAME=${petClinicVisitsSvcDbUserName}" >> $GITHUB_OUTPUT
+          echo "Deployment output:"
+          echo "===================================================="
+          echo "$deploymentOutput"
+          echo "===================================================="
 
