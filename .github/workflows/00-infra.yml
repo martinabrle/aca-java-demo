@@ -102,7 +102,7 @@ jobs:
                                                      logAnalyticsSubscriptionId="${{env.LOG_ANALYTICS_WRKSPC_SUBSCRIPTION_ID}}" \
                                                      logAnalyticsRG="${{env.LOG_ANALYTICS_WRKSPC_RESOURCE_GROUP}}" \
                                                      logAnalyticsTags="${{vars.LOG_ANALYTICS_WRKSPC_RESOURCE_TAGS}}" \
-                                                     petClinicGitConfigRepoUri="${{vars.PET_CLINIC_GIT_CONFIG_REPO_URI}}" \
+                                                     petClinicGitConfigRepoUri="${{secrets.PET_CLINIC_GIT_CONFIG_REPO_URI}}" \
                                                      petClinicGitConfigRepoUserName="${{secrets.PET_CLINIC_GIT_CONFIG_REPO_USERNAME}}" \
                                                      petClinicGitConfigRepoPassword="${{secrets.PET_CLINIC_GIT_CONFIG_REPO_PASSWORD}}" \
                                                      location="${{secrets.AZURE_LOCATION}}" `
