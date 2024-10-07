@@ -255,6 +255,7 @@ jobs:
           echo "Deployment output:"
           echo "=================="
           echo "$deploymentOutput"
+          echo "=================="
 
           if [[ -z $certificateId ]]; then
             certificateId=`az containerapp env certificate list -g ${{env.ACA_RESOURCE_GROUP}} --name ${{env.ACA_NAME}} --query "[?properties.subjectName=='${{env.HOST_NAME}}'].id" -o tsv`
