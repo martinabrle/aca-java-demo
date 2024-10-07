@@ -252,7 +252,16 @@ jobs:
                                                      dnsZoneName="${{secrets.DNS_ZONE_NAME}}" \
                                                      parentDnsZoneName="${{secrets.PARENT_DNS_ZONE_NAME}}" \
                                                      location="${{secrets.AZURE_LOCATION}}" `
-
+          az containerapp hostname bind -n my-containerapp -g "${{env.ACA_RESOURCE_GROUP}}" --hostname "${{env.HOST_NAME}}" --certificate "${certificateId}"
+          if [[ -z $certificateId ]]; then
+            certificateId=`az containerapp env certificate list -g ${{env.ACA_RESOURCE_GROUP}} --name ${{env.ACA_NAME}} --query "[?properties.subjectName=='${{env.HOST_NAME}}'].id" -o tsv`
+            if [[ ! -z $certificateId ]]; then
+              echo "Binding certificate '${certificateId}' to hostname '${{env.HOST_NAME}}' using CLI, as doing this the first time ib Bicep deployment leads to a circular reference issue"
+              az containerapp hostname bind -n my-containerapp -g "${{env.ACA_RESOURCE_GROUP}}" --hostname "${{env.HOST_NAME}}" --certificate "${certificateId}"
+            else
+              echo "No certificate found for '${{env.HOST_NAME}}'"
+            fi
+          fi
           echo "Deployment output:"
           echo "=================="
           echo "$deploymentOutput"
