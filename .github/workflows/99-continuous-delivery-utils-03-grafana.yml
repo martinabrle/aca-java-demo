@@ -263,5 +263,5 @@ jobs:
               echo "No certificate found for '${{env.HOST_NAME}}'"
             fi
           else
-            echo "This is not the first deployment, skipping the AZ CLI certificate binding. Certificate was either bound or the binding happened in the Bicep deployment"
+            echo "This is not the first deployment, skipping the AZ CLI certificate binding. Certificate was either bound already or the binding happened in the Bicep deployment."
           fi
