@@ -252,7 +252,10 @@ jobs:
                                                      dnsZoneName="${{secrets.DNS_ZONE_NAME}}" \
                                                      parentDnsZoneName="${{secrets.PARENT_DNS_ZONE_NAME}}" \
                                                      location="${{secrets.AZURE_LOCATION}}" `
-          az containerapp hostname bind -n "${{env.APP_NAME}}" -g "${{env.ACA_RESOURCE_GROUP}}" --hostname "${{env.HOST_NAME}}" --certificate "${certificateId}"
+          echo "Deployment output:"
+          echo "=================="
+          echo "$deploymentOutput"
+
           if [[ -z $certificateId ]]; then
             certificateId=`az containerapp env certificate list -g ${{env.ACA_RESOURCE_GROUP}} --name ${{env.ACA_NAME}} --query "[?properties.subjectName=='${{env.HOST_NAME}}'].id" -o tsv`
             if [[ ! -z $certificateId ]]; then
@@ -261,7 +264,6 @@ jobs:
             else
               echo "No certificate found for '${{env.HOST_NAME}}'"
             fi
+          else
+            echo "This is not the first deployment, skipping the AZ CLI certificate binding. Certificate was either bound or the binding happened in the Bicep deployment"
           fi
-          echo "Deployment output:"
-          echo "=================="
-          echo "$deploymentOutput"
