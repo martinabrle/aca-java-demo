@@ -1,5 +1,6 @@
 param acaName string
-param acaTags string
+
+param acaTags string = '{ "CostCentre": "DEV", "Department": "RESEARCH", "WorkloadType": "TEST" }'
 
 param petClinicConfigSvcUserManagedIdentityName string = '${acaName}-pet-clinic-config-identity'
 @description('URI of the GitHub config repo, for example: https://github.com/spring-petclinic/spring-petclinic-microservices-config')
@@ -17,7 +18,9 @@ param containerRegistryRG string = resourceGroup().name
 var containerRegistrySubscriptionIdVar = (containerRegistrySubscriptionId == '') ? subscription().id : containerRegistrySubscriptionId
 var containerRegistryRGVar = (containerRegistryRG == '') ? resourceGroup().name : containerRegistryRG
 
-var acaTagsArray = json(acaTags)
+var acaTagsVar = (acaTags == '') ? '{ "CostCentre": "DEV", "Department": "RESEARCH", "WorkloadType": "TEST" }' : acaTags
+
+var acaTagsArray = json(acaTagsVar)
 
 param location string
 
