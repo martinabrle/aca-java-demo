@@ -1,32 +1,47 @@
 param location string = deployment().location
 
 param acaRG string
-param acaTags string
 
-param containerRegistrySubscriptionId string
-param containerRegistryRG string
-param containerRegistryTags string
+// Rest of the parameteres are optional but recommended; typically, you would want to keep the application's state (DB, logs, container images, etc.)
+// in a different resource group than the ACA resource group. This is to ensure that the ACA resource group can be deleted without affecting the
+// application's state.
 
-param logAnalyticsSubscriptionId string
-param logAnalyticsRG string
-param logAnalyticsTags string
+param acaTags string = '{ "CostCentre": "DEV", "Department": "RESEARCH", "WorkloadType": "TEST" }'
 
-param pgsqlSubscriptionId string
-param pgsqlRG string
-param pgsqlTags string
+param containerRegistrySubscriptionId string = subscription().subscriptionId
+param containerRegistryRG string = acaRG
+param containerRegistryTags string = acaTags
 
-var acaTagsArray = json(acaTags)
-var containerRegistryTagsArray = json(containerRegistryTags)
-var logAnalyticsTagsArray = json(logAnalyticsTags)
+param logAnalyticsSubscriptionId string = subscription().subscriptionId
+param logAnalyticsRG string = acaRG
+param logAnalyticsTags string = acaTags
+
+param pgsqlSubscriptionId string = subscription().subscriptionId
+param pgsqlRG string = acaRG
+param pgsqlTags string = acaTags
+
+var acaTagsVar = empty(acaTags) ? '{ "CostCentre": "DEV", "Department": "RESEARCH", "WorkloadType": "TEST" }' : acaTags
+var logAnalyticsSubscriptionIdVar = empty(logAnalyticsSubscriptionId) ? subscription().subscriptionId : logAnalyticsSubscriptionId
+var containerRegistrySubscriptionIdVar = empty(containerRegistrySubscriptionId) ? subscription().subscriptionId : containerRegistrySubscriptionId
+var pgsqlSubscriptionIdVar = empty(pgsqlSubscriptionId) ? subscription().subscriptionId : pgsqlSubscriptionId
+
+var containerRegistryRGVar = empty(containerRegistryRG) ? acaRG : containerRegistryRG
+var logAnalyticsRGVar = empty(logAnalyticsRG) ? acaRG : logAnalyticsRG
+var pgsqlRGVar = empty(pgsqlRG) ? acaRG : pgsqlRG
+
+var acaTagsArray = json(acaTagsVar)
+var containerRegistryTagsArray = json(empty(containerRegistryTags) ? acaTagsVar : containerRegistryTags)
+var logAnalyticsTagsArray = json(empty(logAnalyticsTags) ? acaTagsVar : logAnalyticsTags)
 var pgsqlTagsArray = json(pgsqlTags)
+
 
 targetScope = 'subscription'
 
-module logAnalyticsResourceGroup 'components/rg.bicep' = {
+module logAnalyticsResourceGroup 'components/rg.bicep' = if (!empty(logAnalyticsRG)) {
   name: 'log-analytics-rg'
-  scope: subscription(logAnalyticsSubscriptionId)
+  scope: subscription(logAnalyticsSubscriptionIdVar)
   params: {
-    name: logAnalyticsRG
+    name: logAnalyticsRGVar
     location: location
     tagsArray: logAnalyticsTagsArray
   }
@@ -34,9 +49,9 @@ module logAnalyticsResourceGroup 'components/rg.bicep' = {
 
 module pgsqlResourceGroup 'components/rg.bicep' = {
   name: 'pgsql-rg'
-  scope: subscription(pgsqlSubscriptionId)
+  scope: subscription(pgsqlSubscriptionIdVar)
   params: {
-    name: pgsqlRG
+    name: pgsqlRGVar
     location: location
     tagsArray: pgsqlTagsArray
   }
@@ -44,9 +59,9 @@ module pgsqlResourceGroup 'components/rg.bicep' = {
 
 module containerRegistryResourceGroup 'components/rg.bicep' = {
   name: 'container-registry-rg'
-  scope: subscription(containerRegistrySubscriptionId)
+  scope: subscription(containerRegistrySubscriptionIdVar)
   params: {
-    name: containerRegistryRG
+    name: containerRegistryRGVar
     location: location
     tagsArray: containerRegistryTagsArray
   }
