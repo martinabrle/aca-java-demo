@@ -6,7 +6,8 @@ Application architecture and the original description of this Spring Boot app ca
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-## Currently broken, under development - Different ways of deploying the app into Azure Container Apps (ACA):
+## Currently broken, under development - Different ways of deploying the app into Azure Container Apps (ACA)
+
 * [Deploying the app using Azure Command Line Interface (az cli)](./docs/aca-az-cli.md)
 * [Deploying the app using Bicep templates](./docsaca-bicep.md)
 * [Deploying the app using GitHub Actions (CI/CD pipelines)](./docs/aca-github-actions.md)

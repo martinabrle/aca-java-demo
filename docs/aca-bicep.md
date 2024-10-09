@@ -1,96 +1,124 @@
-# Spring Boot Todo App and Pet Clinic App on Azure Kubernetes Service (AKS)
+# Spring Boot Todo App and Pet Clinic App on Azure Container Apps (ACA)
 
-## Deploying Todo App and Pet Clinic App into an AKS using az CLI, Azure Bicep template and kubectl
+## Deploying Todo App and Pet Clinic App into an ACA using az CLI and Azure Bicep templates
 
-![Architecture Diagram](./aks-java-demo-architecture.drawio.png)
+![Architecture Diagram](./aca-java-demo-architecture.drawio.png)
 
-* Start the command line, clone the repo using ```git clone https://github.com/martinabrle/aca-java-demo.git``` and change your current directory to ```aks-java-demo/scripts``` directory:
+* Start the command line, clone the repo using ```git clone https://github.com/martinabrle/aca-java-demo.git``` and change your current directory to ```aca-java-demo/scripts``` directory:
+
+    ```bash
+    cd ./aca-java-demo/scripts
     ```
-    cd ./aks-java-demo/scripts
-    ```
+
 * Log in into Azure from the command line using ```az login``` ([link](https://docs.microsoft.com/en-us/cli/azure/authenticate-azure-cli))
 * List available Azure subscriptions using ```az account list -o table``` ([link](https://docs.microsoft.com/en-us/cli/azure/account#az-account-list))
 * Select an Azure subscription to deploy the infra into, using ```az account set -s 00000000-0000-0000-0000-000000000000```
   ([link](https://docs.microsoft.com/en-us/cli/azure/account#az-account-set)); replace ```00000000-0000-0000-0000-000000000000``` with Azure subscription Id you will deploy into
 * Set environment variables:
-    ```
-    AZURE_LOCATION="eastus"
-    LOG_ANALYTICS_WRKSPC_NAME="{{{REPLACE_WITH_LOG_WORKSPACE_NAME}}}"
-    LOG_ANALYTICS_WRKSPC_SUBSCRIPTION_ID="{{{REPLACE_WITH_LOG_WORKSPACE_SUBSCRIPTION_ID}}}"
-    LOG_ANALYTICS_WRKSPC_RESOURCE_GROUP="{{{REPLACE_WITH_LOG_WORKSPACE_RESOURCE_GROUP}}}"
-    LOG_ANALYTICS_WRKSPC_RESOURCE_TAGS='{ \"Department\": \"RESEARCH\", \"CostCentre\": \"DEV\", \"DeleteNightly\": \"true\",  \"DeleteWeekly\": \"true\", \"Architecture\": \"LOG-ANALYTICS\"}'
-    
-    PGSQL_NAME="{{{REPLACE_WITH_PGSQL_NAME}}}"
-    PGSQL_SUBSCRIPTION_ID="{{{REPLACE_WITH_PGSQL_SUBSCRIPTION_ID}}}"
-    PGSQL_RESOURCE_GROUP="{{{REPLACE_WITH_PGSQL_RESOURCE_GROUP}}}"
-    PGSQL_RESOURCE_TAGS='{ \"Department\": \"RESEARCH\", \"CostCentre\": \"DEV\", \"DeleteNightly\": \"false\",  \"DeleteWeekly\": \"false\", \"Architecture\": \"PGSQL\"}'
 
-    APP_SERVICE_NAME="{{{REPLACE_WITH_APP_SERVICE_NAME}}}"
-    APP_SERVICE_RESOURCE_GROUP="{{{REPLACE_WITH_APP_SERVICE_RESOURCE_GROUP}}}"
-    APP_SERVICE_RESOURCE_TAGS='{ \"Department\": \"RESEARCH\", \"CostCentre\": \"DEV\", \"DeleteNightly\": \"false\",  \"DeleteWeekly\": \"false\", \"Architecture\": \"APP-SERVICE\"}'
+    ```bash
+    AZURE_LOCATION="eastus"
+    ACA_NAME="aca-java-demo"
+    ACA_RESOURCE_GROUP="aca_java_demo_rg"
+    PGSQL_NAME="{{{REPLACE_WITH_PGSQL_NAME}}}"
+    CONTAINER_REGISTRY_NAME="{{{REPLACE_WITH_APP_SERVICE_NAME}}}"
+    LOG_ANALYTICS_WRKSPC_NAME="{{{REPLACE_WITH_LOG_WORKSPACE_NAME}}}"
 
     DBA_GROUP_NAME="All TEST PGSQL Admins"
     DBA_GROUP_ID=`az ad group show --group "${DBA_GROUP_NAME}" --query '[id]' -o tsv`
+    ```
+
+    Optionally, you can set the following environment variables:
+
+    ```bash
+    ACA_TAGS='{ \"Department\": \"RESEARCH\", \"CostCentre\": \"DEV\", \"DeleteNightly\": \"true\",  \"DeleteWeekly\": \"true\", \"Architecture\": \"ACA\" }'
+    
+    LOG_ANALYTICS_WRKSPC_RESOURCE_GROUP="{{{REPLACE_WITH_LOG_WORKSPACE_RESOURCE_GROUP}}}"
+    LOG_ANALYTICS_WRKSPC_RESOURCE_TAGS='{ \"Department\": \"RESEARCH\", \"CostCentre\": \"DEV\", \"DeleteNightly\": \"true\",  \"DeleteWeekly\": \"true\", \"Architecture\": \"LOG-ANALYTICS\"}'
+    
+    
+    PGSQL_RESOURCE_GROUP="{{{REPLACE_WITH_PGSQL_RESOURCE_GROUP}}}"
+    PGSQL_RESOURCE_TAGS='{ \"Department\": \"RESEARCH\", \"CostCentre\": \"DEV\", \"DeleteNightly\": \"false\",  \"DeleteWeekly\": \"false\", \"Architecture\": \"PGSQL\"}'
+
+    
+    CONTAINER_REGISTRY_RESOURCE_GROUP="{{{REPLACE_WITH_APP_SERVICE_RESOURCE_GROUP}}}"
+    CONTAINER_REGISTRY_RESOURCE_TAGS ='{ \"Department\": \"RESEARCH\", \"CostCentre\": \"DEV\", \"DeleteNightly\": \"false\",  \"DeleteWeekly\": \"false\", \"Architecture\": \"CONTAINER-REGISTRY\"}'
 
     DB_NAME="tododb"
-    DB_NAME_STAGING="stagingtododb"
 
     DB_USER_MI_NAME="todoapi"
-    DB_USER_MI_STAGING_NAME="stagingtodoapi"
-    clientIPAddress=`dig +short myip.opendns.com @resolver1.opendns.com.`
     ```
-* Deploy resource groups for all services:
-    ```
-    //TODO: rewrite into CLI for creating RGs
+
+* Deploy resource groups for all services using a Bicep template - easier than typing in AZ CLI commands:
+
+    ```bash
     az deployment sub create \
-        -l "${{secrets.AZURE_LOCATION}}" \
+        -l "${AZURE_LOCATION}" \
         --template-file ./resource_groups.bicep \
-        --parameters location="${{secrets.AZURE_LOCATION}}" \
-                    acaRG="${{secrets.AKS_RESOURCE_GROUP}}" \
-                    acaTags="${{vars.AKS_RESOURCE_TAGS}}" \
-                    containerRegistrySubscriptionId="${{secrets.CONTAINER_REGISTRY_SUBSCRIPTION_ID}}" \
-                    containerRegistryRG="${{secrets.CONTAINER_REGISTRY_RESOURCE_GROUP}}" \
-                    containerRegistryTags="${{vars.CONTAINER_REGISTRY_RESOURCE_TAGS}}" \
-                    pgsqlSubscriptionId="${{secrets.PGSQL_SUBSCRIPTION_ID}}" \
-                    pgsqlRG="${{secrets.PGSQL_RESOURCE_GROUP}}" \
-                    pgsqlTags="${{vars.PGSQL_RESOURCE_TAGS}}" \
-                    logAnalyticsSubscriptionId="${{secrets.LOG_ANALYTICS_WRKSPC_SUBSCRIPTION_ID}}" \
-                    logAnalyticsRG="${{secrets.LOG_ANALYTICS_WRKSPC_RESOURCE_GROUP}}" \
-                    logAnalyticsTags="${{vars.LOG_ANALYTICS_WRKSPC_RESOURCE_TAGS}}"
+        --parameters location="${secrets.AZURE_LOCATION}" \
+                    acaRG="${ACA_RESOURCE_GROUP}" \
+                    /* OPTIONAL */ \
+                    acaTags="${ACA_RESOURCE_TAGS}" \
+                    containerRegistrySubscriptionId="${CONTAINER_REGISTRY_SUBSCRIPTION_ID}" \
+                    containerRegistryRG="${CONTAINER_REGISTRY_RESOURCE_GROUP}" \
+                    containerRegistryTags="${CONTAINER_REGISTRY_RESOURCE_TAGS}" \
+                    pgsqlSubscriptionId="${PGSQL_SUBSCRIPTION_ID}" \
+                    pgsqlRG="${PGSQL_RESOURCE_GROUP}" \
+                    pgsqlTags="${PGSQL_RESOURCE_TAGS}" \
+                    logAnalyticsSubscriptionId="${LOG_ANALYTICS_WRKSPC_SUBSCRIPTION_ID}" \
+                    logAnalyticsRG="${LOG_ANALYTICS_WRKSPC_RESOURCE_GROUP}" \
+                    logAnalyticsTags="${LOG_ANALYTICS_WRKSPC_RESOURCE_TAGS}"
     ```
+
 * Deploy all services (and create both app's databases):
-    ```
+
+    ```bash
     az deployment group create \
-        --resource-group ${AKS_RESOURCE_GROUP} \
+        --resource-group ${ACA_RESOURCE_GROUP} \
         --template-file ./main.bicep \
-        --parameters aksName="${AKS_NAME}" \
-                        aksAdminGroupObjectId="${aksGroupId}" \
-                        aksTags="${AKS_RESOURCE_TAGS}" \
-                        containerRegistryName="${{CONTAINER_REGISTRY_NAME}" \
-                        containerRegistrySubscriptionId="${CONTAINER_REGISTRY_SUBSCRIPTION_ID}" \
-                        containerRegistryRG="${CONTAINER_REGISTRY_RESOURCE_GROUP}" \
-                        containerRegistryTags="${CONTAINER_REGISTRY_RESOURCE_TAGS}" \
-                        pgsqlName="${PGSQL_NAME}" \
-                        pgsqlAADAdminGroupName="${DBA_GROUP_NAME}" \
-                        pgsqlAADAdminGroupObjectId="${dbaGroupId}" \
-                        pgsqlSubscriptionId="${PGSQL_SUBSCRIPTION_ID}" \
-                        pgsqlRG="${PGSQL_RESOURCE_GROUP}" \
-                        pgsqlPetClinicDbName="${PET_CLINIC_DB_NAME}" \
-                        petClinicCustsSvcDbUserName="${PET_CLINIC_CUSTS_SVC_DB_USER_NAME}" \
-                        petClinicVetsSvcDbUserName="${PET_CLINIC_VETS_SVC_DB_USER_NAME}" \
-                        petClinicVisitsSvcDbUserName="${PET_CLINIC_VISITS_SVC_DB_USER_NAME}" \
-                        pgsqlTodoAppDbName="${TODO_APP_DB_NAME}" \
-                        todoAppDbUserName="${TODO_APP_DB_USER_NAME}" \
-                        pgsqlTags="${PGSQL_RESOURCE_TAGS}" \
-                        logAnalyticsName="${LOG_ANALYTICS_WRKSPC_NAME}" \
-                        logAnalyticsSubscriptionId="${LOG_ANALYTICS_WRKSPC_SUBSCRIPTION_ID}" \
-                        logAnalyticsRG="${LOG_ANALYTICS_WRKSPC_RESOURCE_GROUP}" \
-                        logAnalyticsTags="${LOG_ANALYTICS_WRKSPC_RESOURCE_TAGS}" \
-                        petClinicGitConfigRepoUri="${PET_CLINIC_GIT_CONFIG_REPO_URI}" \
-                        petClinicGitConfigRepoUserName="${PET_CLINIC_GIT_CONFIG_REPO_USERNAME}" \
-                        petClinicGitConfigRepoPassword="${PET_CLINIC_GIT_CONFIG_REPO_PASSWORD}" \
-                        location="${AZURE_LOCATION}"
+        --parameters acaName="${ACA_NAME}" \
+                     logAnalyticsName="${LOG_ANALYTICS_WRKSPC_NAME}" \
+                     containerRegistryName="${CONTAINER_REGISTRY_NAME}" \
+                     petClinicGitConfigRepoUri="${PET_CLINIC_GIT_CONFIG_REPO_URI}" \
+                     petClinicGitConfigRepoUserName="${PET_CLINIC_GIT_CONFIG_REPO_USERNAME}" \
+                     petClinicGitConfigRepoPassword="${PET_CLINIC_GIT_CONFIG_REPO_PASSWORD}" \
+                     location="${AZURE_LOCATION}" \
+                     /* OPTIONAL */ \
+                     acaTags="${ACA_RESOURCE_TAGS}" \
+                     containerRegistrySubscriptionId="${CONTAINER_REGISTRY_SUBSCRIPTION_ID}" \
+                     containerRegistryRG="${CONTAINER_REGISTRY_RESOURCE_GROUP}" \
+                     containerRegistryTags="${CONTAINER_REGISTRY_RESOURCE_TAGS}" \
+                     dnsZoneName="${DNS_ZONE_NAME}" \
+                     parentDnsZoneName="${PARENT_DNS_ZONE_NAME}" \
+                     parentDnsZoneSubscriptionId="${PARENT_DNS_SUBSCRIPTION_ID}" \
+                     parentDnsZoneRG="${PARENT_DNS_ZONE_RESOURCE_GROUP}" \
+                     parentDnsZoneTags="${PARENT_DNS_ZONE_TAGS}" \
+                     petClinicDnsZoneName="${PET_CLINIC_DNS_ZONE_NAME}" \
+                     pgsqlName="${PGSQL_NAME}" \
+                     pgsqlAADAdminGroupName="${DBA_GROUP_NAME}" \
+                     pgsqlAADAdminGroupObjectId="${dbaGroupId}" \
+                     pgsqlSubscriptionId="${PGSQL_SUBSCRIPTION_ID}" \
+                     pgsqlRG="${GSQL_RESOURCE_GROUP}" \
+                     pgsqlTodoAppDbName="${TODO_APP_DB_NAME}" \
+                     pgsqlPetClinicDbName="${PET_CLINIC_DB_NAME}" \
+                     petClinicCustsSvcDbUserName="${PET_CLINIC_CUSTS_SVC_DB_USER_NAME}" \
+                     petClinicVetsSvcDbUserName="${PET_CLINIC_VETS_SVC_DB_USER_NAME}" \
+                     petClinicVisitsSvcDbUserName="${PET_CLINIC_VISITS_SVC_DB_USER_NAME}" \
+                     pgsqlTags="${PGSQL_RESOURCE_TAGS}" \
+                     logAnalyticsSubscriptionId="${LOG_ANALYTICS_WRKSPC_SUBSCRIPTION_ID}" \
+                     logAnalyticsRG="${LOG_ANALYTICS_WRKSPC_RESOURCE_GROUP}" \
+                     logAnalyticsTags="${LOG_ANALYTICS_WRKSPC_RESOURCE_TAGS}"
+
+
     ```
+
+* Build TODO APP container image and push it to the Azure Container Registry:
+
+    ```bash
+    cd ../todo
+    az acr build --registry ${CONTAINER_REGISTRY_NAME} --image todo-app:latest .
+    ```
+
 * Get AKS credentials:
     ```
     az aks get-credentials --resource-group ${AKS_RESOURCE_GROUP} --name ${AKS_NAME}
@@ -200,6 +228,7 @@
     cat ./06f-workload-identity-pet-clinic-visits-svc.yml.tmp
     kubectl apply -f ./06f-workload-identity-pet-clinic-visits-svc.yml.tmp
     ```
+
 * Create federated identity for Todo App
     ```
     export SERVICE_ACCOUNT_NAMESPACE="todo"
