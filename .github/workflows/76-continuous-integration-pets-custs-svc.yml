@@ -8,7 +8,7 @@ on:
      - 'spring-petclinic-customers-service/**'
 
   workflow_call:
-  
+
   workflow_dispatch:
 
 permissions:
@@ -28,7 +28,7 @@ jobs:
       SRC_DIR: spring-petclinic-customers-service
       JAVA_VERSION: 17
       DB:  ${{secrets.PET_CLINIC_DB_NAME}}
-      USER_IDENTITY_NAME: ${{secrets.AKS_NAME}}-pet-clinic-custs-identity
+      USER_IDENTITY_NAME: ${{secrets.ACA_NAME}}-pet-clinic-custs-identity
       DB_USER_NAME: ${{secrets.PET_CLINIC_CUSTS_SVC_DB_USER_NAME}}
       CONTAINER_REGISTRY_SUBSCRIPTION_ID: ${{secrets.CONTAINER_REGISTRY_SUBSCRIPTION_ID}}
       CONTAINER_REGISTRY_NAME: ${{secrets.CONTAINER_REGISTRY_NAME}}

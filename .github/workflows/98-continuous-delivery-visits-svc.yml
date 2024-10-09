@@ -41,10 +41,6 @@ jobs:
     # when called from another workflow directly, it inherits the event name from the caller workflow
     # (push in this case when called from 10-continuous-integration.yml)
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: read
-      id-token: write
     if: ${{ startsWith(github.ref, 'refs/tags/v') || ((github.event_name == 'workflow_dispatch' || github.event_name == 'workflow_call' || (github.event_name == 'push' && github.ref == 'refs/heads/main')) && startsWith(inputs.version,'v')) }} 
     steps:
       - uses: actions/checkout@v4
@@ -256,6 +252,7 @@ jobs:
                                                      dnsZoneName="${{secrets.DNS_ZONE_NAME}}" \
                                                      parentDnsZoneName="${{secrets.PARENT_DNS_ZONE_NAME}}" \
                                                      location="${{secrets.AZURE_LOCATION}}" `
+
           echo "Deployment output:"
           echo "=================="
           echo "$deploymentOutput"

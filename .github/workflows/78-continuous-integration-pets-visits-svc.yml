@@ -8,7 +8,7 @@ on:
      - 'spring-petclinic-visits-service/**'
 
   workflow_call:
-  
+
   workflow_dispatch:
 
 permissions:
@@ -19,6 +19,7 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     env:
       APP_INSIGHTS: true
       SEMVER_NAMESPACE: spring-petclinic-visits-service
@@ -27,7 +28,7 @@ jobs:
       SRC_DIR: spring-petclinic-visits-service
       JAVA_VERSION: 17
       DB:  ${{secrets.PET_CLINIC_DB_NAME}}
-      USER_IDENTITY_NAME: ${{secrets.AKS_NAME}}-pet-clinic-visits-identity
+      USER_IDENTITY_NAME: ${{secrets.ACA_NAME}}-pet-clinic-visits-identity
       DB_USER_NAME: ${{secrets.PET_CLINIC_VISITS_SVC_DB_USER_NAME}}
       CONTAINER_REGISTRY_SUBSCRIPTION_ID: ${{secrets.CONTAINER_REGISTRY_SUBSCRIPTION_ID}}
       CONTAINER_REGISTRY_NAME: ${{secrets.CONTAINER_REGISTRY_NAME}}

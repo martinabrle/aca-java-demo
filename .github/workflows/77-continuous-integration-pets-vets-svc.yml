@@ -8,7 +8,7 @@ on:
      - 'spring-petclinic-vets-service/**'
 
   workflow_call:
-  
+
   workflow_dispatch:
 
 permissions:

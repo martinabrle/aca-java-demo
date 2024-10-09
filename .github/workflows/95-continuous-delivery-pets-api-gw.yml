@@ -24,7 +24,6 @@ jobs:
   deploy:
     env:
       ARTIFACT_NAME: spring-petclinic-api-gateway
-      SRC_DIR: spring-petclinic-api-gateway
       APP_NAME: api-gateway
       JAVA_VERSION: 17
       USER_IDENTITY_NAME: ${{secrets.ACA_NAME}}-pet-clinic-app-identity

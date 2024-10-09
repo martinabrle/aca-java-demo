@@ -24,7 +24,6 @@ jobs:
   deploy:
     env:
       ARTIFACT_NAME: spring-petclinic-discovery-server
-      SRC_DIR: spring-petclinic-discovery-server
       APP_NAME: discovery-server
       JAVA_VERSION: 17
       USER_IDENTITY_NAME: ${{secrets.ACA_NAME}}-pet-clinic-app-identity

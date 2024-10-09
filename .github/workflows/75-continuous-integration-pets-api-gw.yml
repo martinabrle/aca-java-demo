@@ -28,7 +28,7 @@ jobs:
       SRC_DIR: spring-petclinic-api-gateway
       JAVA_VERSION: 17
       DB: ''
-      USER_IDENTITY_NAME: ${{secrets.AKS_NAME}}-pet-clinic-app-identity
+      USER_IDENTITY_NAME: ${{secrets.ACA_NAME}}-pet-clinic-app-identity
       DB_USER_NAME: ''
       CONTAINER_REGISTRY_SUBSCRIPTION_ID: ${{secrets.CONTAINER_REGISTRY_SUBSCRIPTION_ID}}
       CONTAINER_REGISTRY_NAME: ${{secrets.CONTAINER_REGISTRY_NAME}}
