@@ -53,6 +53,9 @@ param parentDnsZoneTags string = ''
 
 param petClinicDnsZoneName string = ''
 
+param todoAppName string = 'todo-app'
+param petClinicConfigSvcName string = 'config-service'
+
 var acaTagsVar = (acaTags == '') ? '{ "CostCentre": "DEV", "Department": "RESEARCH", "WorkloadType": "TEST" }' : acaTags
 
 var pgsqlSubscriptionIdVar = (pgsqlSubscriptionId == '') ? subscription().id : pgsqlSubscriptionId
@@ -187,10 +190,11 @@ module keyVault 'components/kv.bicep' = {
     logAnalyticsWorkspaceId: logAnalytics.outputs.logAnalyticsWorkspaceId
   }
 }
+
 module kvSecretTodoAppSpringDSURI 'components/kv-secret.bicep' = {
   name: 'kv-secret-todo-app-ds-uri'
   params: {
-    keyVaultName: keyVault.name
+    keyVaultName: keyVault.outputs.keyVaultName
     secretName: 'TODO-SPRING-DATASOURCE-URL'
     secretValue: 'jdbc:postgresql://${pgsqlName}.postgres.database.azure.com:5432/${pgsqlTodoAppDbName}'
   }
@@ -199,7 +203,7 @@ module kvSecretTodoAppSpringDSURI 'components/kv-secret.bicep' = {
 module kvSecretTodoAppDbUserName 'components/kv-secret.bicep' = {
   name: 'kv-secret-todo-app-ds-username'
   params: {
-    keyVaultName: keyVault.name
+    keyVaultName: keyVault.outputs.keyVaultName
     secretName: 'TODO-SPRING-DATASOURCE-USERNAME'
     secretValue: todoAppDbUserName
   }
@@ -208,7 +212,7 @@ module kvSecretTodoAppDbUserName 'components/kv-secret.bicep' = {
 module kvSecretPetClinicCustsSvcDbUserName 'components/kv-secret.bicep' = {
   name: 'kv-secret-pet-clinic-custs-svc-ds-username'
   params: {
-    keyVaultName: keyVault.name
+    keyVaultName: keyVault.outputs.keyVaultName
     secretName: 'PET-CLINIC-CUSTS-SVC-SPRING-DS-USER'
     secretValue: petClinicCustsSvcDbUserName
 
@@ -221,7 +225,7 @@ module rbacKVSecretPetClinicAppInsightsConStr './components/role-assignment-kv-s
     roleDefinitionId: keyVaultSecretsUser.id
     principalId: petClinicCustsSvcUserManagedIdentity.properties.principalId
     roleAssignmentNameGuid: guid(petClinicCustsSvcUserManagedIdentity.properties.principalId, kvSecretPetClinicAppInsightsConnectionString.outputs.kvSecretId, keyVaultSecretsUser.id)
-    kvName: keyVault.name
+    kvName: keyVault.outputs.keyVaultName
     kvSecretName: kvSecretPetClinicAppInsightsConnectionString.outputs.kvSecretName
   }
 }
@@ -232,7 +236,7 @@ module rbacKVSecretCustSvcAppInsightsInstrKey './components/role-assignment-kv-s
     roleDefinitionId: keyVaultSecretsUser.id
     principalId: petClinicCustsSvcUserManagedIdentity.properties.principalId
     roleAssignmentNameGuid: guid(petClinicCustsSvcUserManagedIdentity.properties.principalId, kvSecretPetClinicAppInsightsInstrumentationKey.outputs.kvSecretId, keyVaultSecretsUser.id)
-    kvName: keyVault.name
+    kvName: keyVault.outputs.keyVaultName
     kvSecretName: kvSecretPetClinicAppInsightsInstrumentationKey.outputs.kvSecretName
   }
 }
@@ -243,7 +247,7 @@ module rbacKVSecretConfigSvcAppInsightsConStr './components/role-assignment-kv-s
     roleDefinitionId: keyVaultSecretsUser.id
     principalId: petClinicConfigSvcUserManagedIdentity.properties.principalId
     roleAssignmentNameGuid: guid(petClinicConfigSvcUserManagedIdentity.properties.principalId, kvSecretPetClinicAppInsightsConnectionString.outputs.kvSecretId, keyVaultSecretsUser.id)
-    kvName: keyVault.name
+    kvName: keyVault.outputs.keyVaultName
     kvSecretName: kvSecretPetClinicAppInsightsConnectionString.outputs.kvSecretName
   }
 }
@@ -254,7 +258,7 @@ module rbacKVSecretSvcAppInsightsInstrKey './components/role-assignment-kv-secre
     roleDefinitionId: keyVaultSecretsUser.id
     principalId: petClinicConfigSvcUserManagedIdentity.properties.principalId
     roleAssignmentNameGuid: guid(petClinicConfigSvcUserManagedIdentity.properties.principalId, kvSecretPetClinicAppInsightsInstrumentationKey.outputs.kvSecretId, keyVaultSecretsUser.id)
-    kvName: keyVault.name
+    kvName: keyVault.outputs.keyVaultName
     kvSecretName: kvSecretPetClinicAppInsightsInstrumentationKey.outputs.kvSecretName
   }
 }
@@ -265,7 +269,7 @@ module rbacKVSecretConfigSvcGitRepoURI './components/role-assignment-kv-secret.b
     roleDefinitionId: keyVaultSecretsUser.id
     principalId: petClinicConfigSvcUserManagedIdentity.properties.principalId
     roleAssignmentNameGuid: guid(petClinicConfigSvcUserManagedIdentity.properties.principalId, kvSecretPetClinicConfigRepoURI.outputs.kvSecretId, keyVaultSecretsUser.id)
-    kvName: keyVault.name
+    kvName: keyVault.outputs.keyVaultName
     kvSecretName: kvSecretPetClinicConfigRepoURI.outputs.kvSecretName
   }
 }
@@ -276,7 +280,7 @@ module rbacKVSecretConfigSvcGitRepoUser './components/role-assignment-kv-secret.
     roleDefinitionId: keyVaultSecretsUser.id
     principalId: petClinicConfigSvcUserManagedIdentity.properties.principalId
     roleAssignmentNameGuid: guid(petClinicConfigSvcUserManagedIdentity.properties.principalId, kvSecretPetClinicConfigRepoUserName.outputs.kvSecretId, keyVaultSecretsUser.id)
-    kvName: keyVault.name
+    kvName: keyVault.outputs.keyVaultName
     kvSecretName: kvSecretPetClinicConfigRepoUserName.outputs.kvSecretName
   }
 }
@@ -287,7 +291,7 @@ module rbacKVSecretConfigSvcGitRepoPassword './components/role-assignment-kv-sec
     roleDefinitionId: keyVaultSecretsUser.id
     principalId: petClinicConfigSvcUserManagedIdentity.properties.principalId
     roleAssignmentNameGuid: guid(petClinicConfigSvcUserManagedIdentity.properties.principalId, kvSecretPetClinicConfigRepoPassword.outputs.kvSecretId, keyVaultSecretsUser.id)
-    kvName: keyVault.name
+    kvName: keyVault.outputs.keyVaultName
     kvSecretName: kvSecretPetClinicConfigRepoPassword.outputs.kvSecretName
   }
 }
@@ -309,7 +313,7 @@ module rbacKVSecretVetsSvcAppInsightsConStr './components/role-assignment-kv-sec
     roleDefinitionId: keyVaultSecretsUser.id
     principalId: petClinicVetsSvcUserManagedIdentity.properties.principalId
     roleAssignmentNameGuid: guid(petClinicVetsSvcUserManagedIdentity.properties.principalId, kvSecretPetClinicAppInsightsConnectionString.outputs.kvSecretId, keyVaultSecretsUser.id)
-    kvName: keyVault.name
+    kvName: keyVault.outputs.keyVaultName
     kvSecretName: kvSecretPetClinicAppInsightsConnectionString.outputs.kvSecretName
   }
 }
@@ -320,7 +324,7 @@ module rbacKVSecretVetsSvcAppInsightsInstrKey './components/role-assignment-kv-s
     roleDefinitionId: keyVaultSecretsUser.id
     principalId: petClinicVetsSvcUserManagedIdentity.properties.principalId
     roleAssignmentNameGuid: guid(petClinicVetsSvcUserManagedIdentity.properties.principalId, kvSecretPetClinicAppInsightsInstrumentationKey.outputs.kvSecretId, keyVaultSecretsUser.id)
-    kvName: keyVault.name
+    kvName: keyVault.outputs.keyVaultName
     kvSecretName: kvSecretPetClinicAppInsightsInstrumentationKey.outputs.kvSecretName
   }
 }
@@ -331,7 +335,7 @@ module rbacKVSecretVetsSvcDSUri './components/role-assignment-kv-secret.bicep' =
     roleDefinitionId: keyVaultSecretsUser.id
     principalId: petClinicVetsSvcUserManagedIdentity.properties.principalId
     roleAssignmentNameGuid: guid(petClinicVetsSvcUserManagedIdentity.properties.principalId, kvSecretPetClinicAppSpringDSURL.outputs.kvSecretId, keyVaultSecretsUser.id)
-    kvName: keyVault.name
+    kvName: keyVault.outputs.keyVaultName
     kvSecretName: kvSecretPetClinicAppSpringDSURL.outputs.kvSecretName
   }
 }
@@ -342,7 +346,7 @@ module rbacKVSecretVetsSvcDBUSer './components/role-assignment-kv-secret.bicep' 
     roleDefinitionId: keyVaultSecretsUser.id
     principalId: petClinicVetsSvcUserManagedIdentity.properties.principalId
     roleAssignmentNameGuid: guid(petClinicVetsSvcUserManagedIdentity.properties.principalId, kvSecretPetClinicVetsSvcDbUserName.outputs.kvSecretId, keyVaultSecretsUser.id)
-    kvName: keyVault.name
+    kvName: keyVault.outputs.keyVaultName
     kvSecretName: kvSecretPetClinicVetsSvcDbUserName.outputs.kvSecretName
   }
 }
@@ -364,7 +368,7 @@ module rbacKVSecretCustsSvcDSUri './components/role-assignment-kv-secret.bicep' 
     roleDefinitionId: keyVaultSecretsUser.id
     principalId: petClinicCustsSvcUserManagedIdentity.properties.principalId
     roleAssignmentNameGuid: guid(petClinicCustsSvcUserManagedIdentity.properties.principalId, kvSecretPetClinicAppSpringDSURL.outputs.kvSecretId, keyVaultSecretsUser.id)
-    kvName: keyVault.name
+    kvName: keyVault.outputs.keyVaultName
     kvSecretName: kvSecretPetClinicAppSpringDSURL.outputs.kvSecretName
   }
 }
@@ -375,7 +379,7 @@ module rbacKVSecretCustsSvcDBUSer './components/role-assignment-kv-secret.bicep'
     roleDefinitionId: keyVaultSecretsUser.id
     principalId: petClinicCustsSvcUserManagedIdentity.properties.principalId
     roleAssignmentNameGuid: guid(petClinicCustsSvcUserManagedIdentity.properties.principalId, kvSecretPetClinicCustsSvcDbUserName.outputs.kvSecretId, keyVaultSecretsUser.id)
-    kvName: keyVault.name
+    kvName: keyVault.outputs.keyVaultName
     kvSecretName: kvSecretPetClinicCustsSvcDbUserName.outputs.kvSecretName
   }
 }
@@ -397,7 +401,7 @@ module rbacKVSecretVisitsSvcAppInsightsConStr './components/role-assignment-kv-s
     roleDefinitionId: keyVaultSecretsUser.id
     principalId: petClinicVisitsSvcUserManagedIdentity.properties.principalId
     roleAssignmentNameGuid: guid(petClinicVisitsSvcUserManagedIdentity.properties.principalId, kvSecretPetClinicAppInsightsConnectionString.outputs.kvSecretId, keyVaultSecretsUser.id)
-    kvName: keyVault.name
+    kvName: keyVault.outputs.keyVaultName
     kvSecretName: kvSecretPetClinicAppInsightsConnectionString.outputs.kvSecretName
   }
 }
@@ -408,7 +412,7 @@ module rbacKVSecretVisitsSvcAppInsightsInstrKeyVisit './components/role-assignme
     roleDefinitionId: keyVaultSecretsUser.id
     principalId: petClinicVisitsSvcUserManagedIdentity.properties.principalId
     roleAssignmentNameGuid: guid(petClinicVisitsSvcUserManagedIdentity.properties.principalId, kvSecretPetClinicAppInsightsInstrumentationKey.outputs.kvSecretId, keyVaultSecretsUser.id)
-    kvName: keyVault.name
+    kvName: keyVault.outputs.keyVaultName
     kvSecretName: kvSecretPetClinicAppInsightsInstrumentationKey.outputs.kvSecretName
   }
 }
@@ -419,7 +423,7 @@ module rbacKVSecretVisitsSvcDSUri './components/role-assignment-kv-secret.bicep'
     roleDefinitionId: keyVaultSecretsUser.id
     principalId: petClinicVisitsSvcUserManagedIdentity.properties.principalId
     roleAssignmentNameGuid: guid(petClinicVisitsSvcUserManagedIdentity.properties.principalId, kvSecretPetClinicAppSpringDSURL.outputs.kvSecretId, keyVaultSecretsUser.id)
-    kvName: keyVault.name
+    kvName: keyVault.outputs.keyVaultName
     kvSecretName: kvSecretPetClinicAppSpringDSURL.outputs.kvSecretName
   }
 }
@@ -430,7 +434,7 @@ module rbacKVSecretVisitsSvcDBUSer './components/role-assignment-kv-secret.bicep
     roleDefinitionId: keyVaultSecretsUser.id
     principalId: petClinicVisitsSvcUserManagedIdentity.properties.principalId
     roleAssignmentNameGuid: guid(petClinicVisitsSvcUserManagedIdentity.properties.principalId, kvSecretPetClinicVisitsSvcDbUserName.outputs.kvSecretId, keyVaultSecretsUser.id)
-    kvName: keyVault.name
+    kvName: keyVault.outputs.keyVaultName
     kvSecretName: kvSecretPetClinicVisitsSvcDbUserName.outputs.kvSecretName
   }
 }
@@ -452,7 +456,7 @@ module rbacKVSecretTodoDSUri './components/role-assignment-kv-secret.bicep' = {
     roleDefinitionId: keyVaultSecretsUser.id
     principalId: todoAppUserManagedIdentity.properties.principalId
     roleAssignmentNameGuid: guid(todoAppUserManagedIdentity.properties.principalId, kvSecretTodoAppSpringDSURI.outputs.kvSecretId, keyVaultSecretsUser.id)
-    kvName: keyVault.name
+    kvName: keyVault.outputs.keyVaultName
     kvSecretName: kvSecretTodoAppSpringDSURI.outputs.kvSecretName
   }
 }
@@ -463,7 +467,7 @@ module rbacKVSecretTodoAppDbUserName './components/role-assignment-kv-secret.bic
     roleDefinitionId: keyVaultSecretsUser.id
     principalId: todoAppUserManagedIdentity.properties.principalId
     roleAssignmentNameGuid: guid(todoAppUserManagedIdentity.properties.principalId, kvSecretTodoAppDbUserName.outputs.kvSecretId, keyVaultSecretsUser.id)
-    kvName: keyVault.name
+    kvName: keyVault.outputs.keyVaultName
     kvSecretName: kvSecretTodoAppDbUserName.outputs.kvSecretName
   }
 }
@@ -474,7 +478,7 @@ module rbacKVSecretTodoAppInsightsConStr './components/role-assignment-kv-secret
     roleDefinitionId: keyVaultSecretsUser.id
     principalId: todoAppUserManagedIdentity.properties.principalId
     roleAssignmentNameGuid: guid(todoAppUserManagedIdentity.properties.principalId, kvSecretTodoAppInsightsConnectionString.outputs.kvSecretId, keyVaultSecretsUser.id)
-    kvName: keyVault.name
+    kvName: keyVault.outputs.keyVaultName
     kvSecretName: kvSecretTodoAppInsightsConnectionString.outputs.kvSecretName
   }
 }
@@ -485,7 +489,7 @@ module rbacKVSecretTodoAppInsightsInstrKey './components/role-assignment-kv-secr
     roleDefinitionId: keyVaultSecretsUser.id
     principalId: todoAppUserManagedIdentity.properties.principalId
     roleAssignmentNameGuid: guid(todoAppUserManagedIdentity.properties.principalId, kvSecretTodoAppInsightsInstrumentationKey.outputs.kvSecretId, keyVaultSecretsUser.id)
-    kvName: keyVault.name
+    kvName: keyVault.outputs.keyVaultName
     kvSecretName: kvSecretTodoAppInsightsInstrumentationKey.outputs.kvSecretName
   }
 }
@@ -508,7 +512,7 @@ module rbacKVSecretPetAppClinicAppInsightsConStr './components/role-assignment-k
     roleDefinitionId: keyVaultSecretsUser.id
     principalId: petClinicAppUserManagedIdentity.properties.principalId
     roleAssignmentNameGuid: guid(petClinicAppUserManagedIdentity.properties.principalId, kvSecretPetClinicAppInsightsConnectionString.outputs.kvSecretId, keyVaultSecretsUser.id)
-    kvName: keyVault.name
+    kvName: keyVault.outputs.keyVaultName
     kvSecretName: kvSecretPetClinicAppInsightsConnectionString.outputs.kvSecretName
   }
 }
@@ -519,7 +523,7 @@ module rbacKVSecretPetAppClinicAppInsightsInstrKey './components/role-assignment
     roleDefinitionId: keyVaultSecretsUser.id
     principalId: petClinicAppUserManagedIdentity.properties.principalId
     roleAssignmentNameGuid: guid(petClinicAppUserManagedIdentity.properties.principalId, kvSecretPetClinicAppInsightsInstrumentationKey.outputs.kvSecretId, keyVaultSecretsUser.id)
-    kvName: keyVault.name
+    kvName: keyVault.outputs.keyVaultName
     kvSecretName: kvSecretPetClinicAppInsightsInstrumentationKey.outputs.kvSecretName
   }
 }
@@ -610,7 +614,7 @@ module kvSecretPetClinicAppInsightsInstrumentationKey 'components/kv-secret.bice
 module kvSecretTodoAppInsightsConnectionString 'components/kv-secret.bicep' = {
   name: 'kv-secret-todo-app-ai-connection-string'
   params: {
-    keyVaultName: keyVault.name
+    keyVaultName: keyVault.outputs.keyVaultName
     secretName: 'TODO-APP-INSIGHTS-CONNECTION-STRING'
     secretValue: todoAppInsights.outputs.appInsightsConnectionString
   }
@@ -619,7 +623,7 @@ module kvSecretTodoAppInsightsConnectionString 'components/kv-secret.bicep' = {
 module kvSecretTodoAppInsightsInstrumentationKey 'components/kv-secret.bicep' = {
   name: 'kv-secret-todo-app-ai-instrumentation-key'
   params: {
-    keyVaultName: keyVault.name
+    keyVaultName: keyVault.outputs.keyVaultName
     secretName: 'TODO-APP-INSIGHTS-INSTRUMENTATION-KEY'
     secretValue: todoAppInsights.outputs.appInsightsInstrumentationKey
   }
@@ -658,6 +662,24 @@ module dnsZonePetClinic 'components/dns-zone.bicep' = if (!empty(dnsZoneName) &&
     parentZoneSubscriptionId: subscription().subscriptionId
     parentZoneTagsArray: acaTagsArray
     tagsArray: acaTagsArray
+  }
+}
+
+module dnsRecordTXT './components/dns-record-txt.bicep' = {
+  name: 'dns-record-txt'
+  params: {
+    dnsZoneName: '${dnsZoneName}.${parentDnsZoneName}'
+    dnsRecordName: 'asuid.${todoAppName}'
+    dnsRecordValue: acaEnvironment.outputs.acaCustomDomainVerificationId
+  }
+}
+
+module dnsRecordTXTPetClinicConfigSvc './components/dns-record-txt.bicep' = {
+  name: 'dns-record-txt-pet-clinic'
+  params: {
+    dnsZoneName: '${petClinicDnsZoneName}.${dnsZoneName}.${parentDnsZoneName}'
+    dnsRecordName: 'asuid.${petClinicConfigSvcName}'
+    dnsRecordValue: acaEnvironment.outputs.acaCustomDomainVerificationId
   }
 }
 
