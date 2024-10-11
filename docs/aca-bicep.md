@@ -17,36 +17,54 @@
 * Set environment variables:
 
     ```bash
-    AZURE_LOCATION="eastus"
+    AZURE_LOCATION="switzerlandnorth" # <--azure region for deploying resources
     ACA_NAME="aca-java-demo"
     ACA_RESOURCE_GROUP="aca_java_demo_rg"
-    PGSQL_NAME="{{{REPLACE_WITH_PGSQL_NAME}}}"
-    CONTAINER_REGISTRY_NAME="{{{REPLACE_WITH_APP_SERVICE_NAME}}}"
-    LOG_ANALYTICS_WRKSPC_NAME="{{{REPLACE_WITH_LOG_WORKSPACE_NAME}}}"
+    PGSQL_NAME="{{{REPLACE_WITH_PGSQL_NAME}}}" # <--needs to be unique
+    CONTAINER_REGISTRY_NAME="{{{REPLACE_WITH_APP_SERVICE_NAME}}}" # <--needs to be unique
+    LOG_ANALYTICS_WRKSPC_NAME="{{{REPLACE_WITH_LOG_WORKSPACE_NAME}}}" # <--needs to be unique
 
-    DBA_GROUP_NAME="All TEST PGSQL Admins"
+    DBA_GROUP_NAME="All TEST PGSQL Admins" # <--Entra ID group of users with permissions to manage the PGSQL server
     DBA_GROUP_ID=`az ad group show --group "${DBA_GROUP_NAME}" --query '[id]' -o tsv`
+
+    PET_CLINIC_GIT_CONFIG_REPO_URI="https://github.com/martinabrle/aks-java-demo-config" # <--URI of YOUR Git repository with Pet Clinic Java Spring Boot configurations
+    PET_CLINIC_GIT_CONFIG_REPO_USERNAME="martinabrle" # <--Username to access the Git repository with Pet Clinic Java Spring Boot configurations - in this case my GH handle
+    PET_CLINIC_GIT_CONFIG_REPO_PASSWORD="PAT_TOKEN" # <--Token to access the Git repository with Pet Clinic Java Spring Boot configurations
+
     ```
 
-    Optionally, you can set the following environment variables:
+    Optionally, you can set some or all of the following environment variables in order to tag resources and separate state (DBs, Log Analytics, container repository) and compute (ACA, managed identities, app insights,..) into different resource groups and/or subscriptions:
 
     ```bash
-    ACA_TAGS='{ \"Department\": \"RESEARCH\", \"CostCentre\": \"DEV\", \"DeleteNightly\": \"true\",  \"DeleteWeekly\": \"true\", \"Architecture\": \"ACA\" }'
+    ACA_TAGS='{ \"Department\": \"RESEARCH\", \"CostCentre\": \"DEV\", \"DeleteNightly\": \"true\",  \"DeleteWeekly\": \"true\", \"Architecture\": \"ACA\" }' # <--Resource tags for the ACA resource group and all resources within
     
-    LOG_ANALYTICS_WRKSPC_RESOURCE_GROUP="{{{REPLACE_WITH_LOG_WORKSPACE_RESOURCE_GROUP}}}"
-    LOG_ANALYTICS_WRKSPC_RESOURCE_TAGS='{ \"Department\": \"RESEARCH\", \"CostCentre\": \"DEV\", \"DeleteNightly\": \"true\",  \"DeleteWeekly\": \"true\", \"Architecture\": \"LOG-ANALYTICS\"}'
+    LOG_ANALYTICS_WRKSPC_RESOURCE_GROUP="{{{REPLACE_WITH_LOG_WORKSPACE_RESOURCE_GROUP}}}" # <--Resource group for Log Abalytics Workspace
+    LOG_ANALYTICS_WRKSPC_RESOURCE_TAGS='{ \"Department\": \"RESEARCH\", \"CostCentre\": \"DEV\", \"DeleteNightly\": \"true\",  \"DeleteWeekly\": \"true\", \"Architecture\": \"LOG-ANALYTICS\"}' # <--Resource tags for the Log Analytics resource group and all resources within
+    LOG_ANALYTICS_WRKSPC_SUBSCRIPTION_ID='00000000-0000-0000-0000-000000000000' # <--Subscription ID where Log Analytics will be deployed
     
     
-    PGSQL_RESOURCE_GROUP="{{{REPLACE_WITH_PGSQL_RESOURCE_GROUP}}}"
-    PGSQL_RESOURCE_TAGS='{ \"Department\": \"RESEARCH\", \"CostCentre\": \"DEV\", \"DeleteNightly\": \"false\",  \"DeleteWeekly\": \"false\", \"Architecture\": \"PGSQL\"}'
+    PGSQL_RESOURCE_GROUP="{{{REPLACE_WITH_PGSQL_RESOURCE_GROUP}}}" # <--Resource group for Postgresql server
+    PGSQL_RESOURCE_TAGS='{ \"Department\": \"RESEARCH\", \"CostCentre\": \"DEV\", \"DeleteNightly\": \"false\",  \"DeleteWeekly\": \"false\", \"Architecture\": \"PGSQL\"}' # <--Resource tags for the Postgresql resource group and all resources within
+    PGSQL_SUBSCRIPTION_ID='00000000-0000-0000-0000-000000000000' # <--Subscription ID where PGSQL will be deployed
 
     
     CONTAINER_REGISTRY_RESOURCE_GROUP="{{{REPLACE_WITH_APP_SERVICE_RESOURCE_GROUP}}}"
-    CONTAINER_REGISTRY_RESOURCE_TAGS ='{ \"Department\": \"RESEARCH\", \"CostCentre\": \"DEV\", \"DeleteNightly\": \"false\",  \"DeleteWeekly\": \"false\", \"Architecture\": \"CONTAINER-REGISTRY\"}'
+    CONTAINER_REGISTRY_RESOURCE_TAGS='{ \"Department\": \"RESEARCH\", \"CostCentre\": \"DEV\", \"DeleteNightly\": \"false\",  \"DeleteWeekly\": \"false\", \"Architecture\": \"CONTAINER-REGISTRY\"}'
+    CONTAINER_REGISTRY_SUBSCRIPTION_ID='00000000-0000-0000-0000-000000000000' # <--Subscription ID where the container registry will be deployed
 
     DB_NAME="tododb"
 
     DB_USER_MI_NAME="todoapi"
+    ```
+
+    If you are aiming to integrate with your DNS inftrasructure, you can set the following environment variables:
+
+    ```bash
+    DNS_ZONE_NAME="aca-java-demo" # <--Name of the DNS zone of all services - here I expect to use DNS names like "aca-java-demo.petclinic.DEVELOPMENT_ENVI.MY_COMPANY_DOMAIN.com"
+    PARENT_DNS_ZONE_NAME="{{{REPLACE_WITH_PARENT_DNS_ZONE_NAME}}}" # <--Name of the parent DNS zone
+    PARENT_DNS_SUBSCRIPTION_ID='00000000-0000-0000-0000-000000000000' # <--Subscription ID where the parent DNS zone is located
+    PARENT_DNS_ZONE_RESOURCE_GROUP="{{{REPLACE_WITH_PARENT_DNS_ZONE_RESOURCE_GROUP}}}" # <--Resource group for the parent DNS zone
+    PET_CLINIC_DNS_ZONE_NAME="petclinic" # <--Name of the subdomain where the Pet Clinic app will be deployed
     ```
 
 * Deploy resource groups for all services using a Bicep template - easier than typing in AZ CLI commands:
@@ -57,8 +75,7 @@
         --template-file ./resource_groups.bicep \
         --parameters location="${secrets.AZURE_LOCATION}" \
                     acaRG="${ACA_RESOURCE_GROUP}" \
-                    /* OPTIONAL */ \
-                    acaTags="${ACA_RESOURCE_TAGS}" \
+                    acaTags="${ACA_RESOURCE_TAGS}" \ # <--optional from here
                     containerRegistrySubscriptionId="${CONTAINER_REGISTRY_SUBSCRIPTION_ID}" \
                     containerRegistryRG="${CONTAINER_REGISTRY_RESOURCE_GROUP}" \
                     containerRegistryTags="${CONTAINER_REGISTRY_RESOURCE_TAGS}" \
@@ -83,8 +100,7 @@
                      petClinicGitConfigRepoUserName="${PET_CLINIC_GIT_CONFIG_REPO_USERNAME}" \
                      petClinicGitConfigRepoPassword="${PET_CLINIC_GIT_CONFIG_REPO_PASSWORD}" \
                      location="${AZURE_LOCATION}" \
-                     /* OPTIONAL */ \
-                     acaTags="${ACA_RESOURCE_TAGS}" \
+                     acaTags="${ACA_RESOURCE_TAGS}" \ # <--optional from here
                      containerRegistrySubscriptionId="${CONTAINER_REGISTRY_SUBSCRIPTION_ID}" \
                      containerRegistryRG="${CONTAINER_REGISTRY_RESOURCE_GROUP}" \
                      containerRegistryTags="${CONTAINER_REGISTRY_RESOURCE_TAGS}" \
