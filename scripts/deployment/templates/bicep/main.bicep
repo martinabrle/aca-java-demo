@@ -299,7 +299,7 @@ module rbacContainerRegistryConfigSvcACRPull 'components/role-assignment-contain
     containerRegistryName: containerRegistryName
     roleDefinitionId: acrPullRole.id
     principalId: petClinicConfigSvcUserManagedIdentity.properties.principalId
-    roleAssignmentNameGuid: guid(petClinicConfigSvcUserManagedIdentity.properties.principalId, containerRegistry.id, acrPullRole.id)
+    roleAssignmentNameGuid: guid(petClinicConfigSvcUserManagedIdentity.properties.principalId, containerRegistry.outputs.containerRegistryId, acrPullRole.id)
   }
 }
 
@@ -354,7 +354,7 @@ module rbacContainerRegistryVetsSvcACRPull 'components/role-assignment-container
     containerRegistryName: containerRegistryName
     roleDefinitionId: acrPullRole.id
     principalId: petClinicVetsSvcUserManagedIdentity.properties.principalId
-    roleAssignmentNameGuid: guid(petClinicVetsSvcUserManagedIdentity.properties.principalId, containerRegistry.id, acrPullRole.id)
+    roleAssignmentNameGuid: guid(petClinicVetsSvcUserManagedIdentity.properties.principalId, containerRegistry.outputs.containerRegistryId, acrPullRole.id)
   }
 }
 
@@ -387,7 +387,7 @@ module rbacContainerRegistryCustsSvcACRPull 'components/role-assignment-containe
     containerRegistryName: containerRegistryName
     roleDefinitionId: acrPullRole.id
     principalId: petClinicCustsSvcUserManagedIdentity.properties.principalId
-    roleAssignmentNameGuid: guid(petClinicCustsSvcUserManagedIdentity.properties.principalId, containerRegistry.id, acrPullRole.id)
+    roleAssignmentNameGuid: guid(petClinicCustsSvcUserManagedIdentity.properties.principalId, containerRegistry.outputs.containerRegistryId, acrPullRole.id)
   }
 }
 
@@ -442,7 +442,7 @@ module rbacContainerRegistryVisitsSvcACRPull 'components/role-assignment-contain
     containerRegistryName: containerRegistryName
     roleDefinitionId: acrPullRole.id
     principalId: petClinicVisitsSvcUserManagedIdentity.properties.principalId
-    roleAssignmentNameGuid: guid(petClinicVisitsSvcUserManagedIdentity.properties.principalId, containerRegistry.id, acrPullRole.id)
+    roleAssignmentNameGuid: guid(petClinicVisitsSvcUserManagedIdentity.properties.principalId, containerRegistry.outputs.containerRegistryId, acrPullRole.id)
   }
 }
 
@@ -497,7 +497,7 @@ module rbacContainerRegistryTodoAppACRPull 'components/role-assignment-container
     containerRegistryName: containerRegistryName
     roleDefinitionId: acrPullRole.id
     principalId: todoAppUserManagedIdentity.properties.principalId
-    roleAssignmentNameGuid: guid(todoAppUserManagedIdentity.properties.principalId, containerRegistry.id, acrPullRole.id)
+    roleAssignmentNameGuid: guid(todoAppUserManagedIdentity.properties.principalId, containerRegistry.outputs.containerRegistryId, acrPullRole.id)
   }
 }
 
@@ -531,7 +531,7 @@ module rbacContainerRegistryPetAppACRPull 'components/role-assignment-container-
     containerRegistryName: containerRegistryName
     roleDefinitionId: acrPullRole.id
     principalId: petClinicAppUserManagedIdentity.properties.principalId
-    roleAssignmentNameGuid: guid(petClinicAppUserManagedIdentity.properties.principalId, containerRegistry.id, acrPullRole.id)
+    roleAssignmentNameGuid: guid(petClinicAppUserManagedIdentity.properties.principalId, containerRegistry.outputs.containerRegistryId, acrPullRole.id)
   }
 }
 
