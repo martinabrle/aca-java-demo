@@ -94,47 +94,20 @@ jobs:
                                                      pgsqlRG="${{secrets.PGSQL_RESOURCE_GROUP}}" \
                                                      pgsqlTodoAppDbName="${{secrets.TODO_APP_DB_NAME}}" \
                                                      pgsqlPetClinicDbName="${{secrets.PET_CLINIC_DB_NAME}}" \
+                                                     todoAppDbUserName="${{secrets.TODO_APP_DB_USER_NAME}}" \
+                                                     petClinicCustsSvcDbUserName="${{secrets.PET_CLINIC_CUSTS_SVC_DB_USER_NAME}}" \
+                                                     petClinicVetsSvcDbUserName="${{secrets.PET_CLINIC_VETS_SVC_DB_USER_NAME}}" \
+                                                     petClinicVisitsSvcDbUserName="${{secrets.PET_CLINIC_VISITS_SVC_DB_USER_NAME}}" \
                                                      pgsqlTags="${{vars.PGSQL_RESOURCE_TAGS}}" \
                                                      logAnalyticsName="${{secrets.LOG_ANALYTICS_WRKSPC_NAME}}" \
                                                      logAnalyticsSubscriptionId="${{env.LOG_ANALYTICS_WRKSPC_SUBSCRIPTION_ID}}" \
                                                      logAnalyticsRG="${{env.LOG_ANALYTICS_WRKSPC_RESOURCE_GROUP}}" \
                                                      logAnalyticsTags="${{vars.LOG_ANALYTICS_WRKSPC_RESOURCE_TAGS}}" \
+                                                     petClinicGitConfigRepoUri="${{secrets.PET_CLINIC_GIT_CONFIG_REPO_URI}}" \
+                                                     petClinicGitConfigRepoUserName="${{secrets.PET_CLINIC_GIT_CONFIG_REPO_USERNAME}}" \
+                                                     petClinicGitConfigRepoPassword="${{secrets.PET_CLINIC_GIT_CONFIG_REPO_PASSWORD}}" \
                                                      location="${{secrets.AZURE_LOCATION}}" `
-
-                    # deploymentOutput=`az deployment group create \
-                    #                     --resource-group ${{env.ACA_RESOURCE_GROUP}} \
-                    #                     --template-file ./main.bicep \
-                    #                     --parameters acaName="${{env.ACA_NAME}}" \
-                    #                                  acaTags="${{vars.ACA_RESOURCE_TAGS}}" \
-                    #                                  containerRegistryName="${{secrets.CONTAINER_REGISTRY_NAME}}" \
-                    #                                  containerRegistrySubscriptionId="${{env.CONTAINER_REGISTRY_SUBSCRIPTION_ID}}" \
-                    #                                  containerRegistryRG="${{env.CONTAINER_REGISTRY_RESOURCE_GROUP}}" \
-                    #                                  containerRegistryTags="${{vars.CONTAINER_REGISTRY_RESOURCE_TAGS}}" \
-                    #                                  dnsZoneName="${{secrets.DNS_ZONE_NAME}}" \
-                    #                                  parentDnsZoneName="${{secrets.PARENT_DNS_ZONE_NAME}}" \
-                    #                                  parentDnsZoneSubscriptionId="${{secrets.PARENT_DNS_SUBSCRIPTION_ID}}" \
-                    #                                  parentDnsZoneRG="${{secrets.PARENT_DNS_ZONE_RESOURCE_GROUP}}" \
-                    #                                  parentDnsZoneTags="${{vars.PARENT_DNS_ZONE_TAGS}}" \
-                    #                                  petClinicDnsZoneName="${{secrets.PET_CLINIC_DNS_ZONE_NAME}}" \
-                    #                                  pgsqlName="${{secrets.PGSQL_NAME}}" \
-                    #                                  pgsqlAADAdminGroupName="${{secrets.DBA_GROUP_NAME}}" \
-                    #                                  pgsqlAADAdminGroupObjectId="${dbaGroupId}" \
-                    #                                  pgsqlSubscriptionId="${{env.PGSQL_SUBSCRIPTION_ID}}" \
-                    #                                  pgsqlRG="${{secrets.PGSQL_RESOURCE_GROUP}}" \
-                    #                                  pgsqlTodoAppDbName="${{secrets.TODO_APP_DB_NAME}}" \
-                    #                                  pgsqlPetClinicDbName="${{secrets.PET_CLINIC_DB_NAME}}" \
-                    #                                  petClinicCustsSvcDbUserName="${{secrets.PET_CLINIC_CUSTS_SVC_DB_USER_NAME}}" \
-                    #                                  petClinicVetsSvcDbUserName="${{secrets.PET_CLINIC_VETS_SVC_DB_USER_NAME}}" \
-                    #                                  petClinicVisitsSvcDbUserName="${{secrets.PET_CLINIC_VISITS_SVC_DB_USER_NAME}}" \
-                    #                                  pgsqlTags="${{vars.PGSQL_RESOURCE_TAGS}}" \
-                    #                                  logAnalyticsName="${{secrets.LOG_ANALYTICS_WRKSPC_NAME}}" \
-                    #                                  logAnalyticsSubscriptionId="${{env.LOG_ANALYTICS_WRKSPC_SUBSCRIPTION_ID}}" \
-                    #                                  logAnalyticsRG="${{env.LOG_ANALYTICS_WRKSPC_RESOURCE_GROUP}}" \
-                    #                                  logAnalyticsTags="${{vars.LOG_ANALYTICS_WRKSPC_RESOURCE_TAGS}}" \
-                    #                                  petClinicGitConfigRepoUri="${{secrets.PET_CLINIC_GIT_CONFIG_REPO_URI}}" \
-                    #                                  petClinicGitConfigRepoUserName="${{secrets.PET_CLINIC_GIT_CONFIG_REPO_USERNAME}}" \
-                    #                                  petClinicGitConfigRepoPassword="${{secrets.PET_CLINIC_GIT_CONFIG_REPO_PASSWORD}}" \
-                    #                                  location="${{secrets.AZURE_LOCATION}}" `
+          
           echo "Deployment output:"
           echo "===================================================="
           echo "$deploymentOutput"
