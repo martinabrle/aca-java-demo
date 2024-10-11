@@ -70,6 +70,9 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
          '${todoAppUserManagedIdentity.id}': {}
       }
    }
+   dependsOn: [
+      dnsRecordTXT
+   ]
    properties: {
       environmentId: acaEnvironment.id
       configuration: {
@@ -207,7 +210,7 @@ module dnsRecordTXT './components/dns-record-txt.bicep' = {
   params: {
     dnsZoneName: '${dnsZoneName}.${parentDnsZoneName}'
     dnsRecordName: 'asuid.${appName}'
-    dnsRecordValue: acaApp.properties.customDomainVerificationId
+    dnsRecordValue: acaEnvironment.properties.customDomainConfiguration.customDomainVerificationId
   }
 }
 
