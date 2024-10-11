@@ -30,7 +30,7 @@ jobs:
       DB: ''
       USER_IDENTITY_NAME: ${{secrets.ACA_NAME}}-pet-clinic-config-identity
       DB_USER_NAME: ''
-      CONTAINER_REGISTRY_SUBSCRIPTION_ID: ${{secrets.CONTAINER_REGISTRY_SUBSCRIPTION_ID}}
+      CONTAINER_REGISTRY_SUBSCRIPTION_ID: ${{secrets.CONTAINER_REGISTRY_SUBSCRIPTION_ID || secrets.ACA_SUBSCRIPTION_ID}}
       CONTAINER_REGISTRY_NAME: ${{secrets.CONTAINER_REGISTRY_NAME}}
     outputs:
       VERSION: ${{steps.versions.outputs.VERSION}}
