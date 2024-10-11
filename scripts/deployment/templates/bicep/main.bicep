@@ -7,27 +7,27 @@ param pgsqlAADAdminGroupName string
 param pgsqlAADAdminGroupObjectId string
 param pgsqlTodoAppDbName string
 param pgsqlPetClinicDbName string
-param petClinicCustsSvcDbUserName string // = 'pet_clinic_custs_svc'
-param petClinicVetsSvcDbUserName string // = 'pet_clinic_vets_svc'
-param petClinicVisitsSvcDbUserName string // = 'pet_clinic_visits_svc'
+// param petClinicCustsSvcDbUserName string // = 'pet_clinic_custs_svc'
+// param petClinicVetsSvcDbUserName string // = 'pet_clinic_vets_svc'
+// param petClinicVisitsSvcDbUserName string // = 'pet_clinic_visits_svc'
 
 param pgsqlSubscriptionId string = subscription().id
 param pgsqlRG string = resourceGroup().name
 param pgsqlTags string = acaTags
 
-param petClinicAppUserManagedIdentityName string = '${acaName}-pet-clinic-app-identity'
-param petClinicConfigSvcUserManagedIdentityName string = '${acaName}-pet-clinic-config-identity'
-param petClinicCustsSvcUserManagedIdentityName string = '${acaName}-pet-clinic-custs-identity'
-param petClinicVetsSvcUserManagedIdentityName string = '${acaName}-pet-clinic-vets-identity'
-param petClinicVisitsSvcUserManagedIdentityName string = '${acaName}-pet-clinic-visits-identity'
+// param petClinicAppUserManagedIdentityName string = '${acaName}-pet-clinic-app-identity'
+// param petClinicConfigSvcUserManagedIdentityName string = '${acaName}-pet-clinic-config-identity'
+// param petClinicCustsSvcUserManagedIdentityName string = '${acaName}-pet-clinic-custs-identity'
+// param petClinicVetsSvcUserManagedIdentityName string = '${acaName}-pet-clinic-vets-identity'
+// param petClinicVisitsSvcUserManagedIdentityName string = '${acaName}-pet-clinic-visits-identity'
 
-@description('URI of the GitHub config repo, for example: https://github.com/spring-petclinic/spring-petclinic-microservices-config')
-param petClinicGitConfigRepoUri string
-@description('User name used to access the GitHub config repo')
-param petClinicGitConfigRepoUserName string
-@secure()
-@description('Password (PAT) used to access the GitHub config repo')
-param petClinicGitConfigRepoPassword string
+// @description('URI of the GitHub config repo, for example: https://github.com/spring-petclinic/spring-petclinic-microservices-config')
+// param petClinicGitConfigRepoUri string
+// @description('User name used to access the GitHub config repo')
+// param petClinicGitConfigRepoUserName string
+// @secure()
+// @description('Password (PAT) used to access the GitHub config repo')
+// param petClinicGitConfigRepoPassword string
 
 @description('Log Analytics Workspace\'s name')
 param logAnalyticsName string = '${replace(acaName, '_', '-')}-${location}'
@@ -77,35 +77,35 @@ var parentDnsZoneTagsArray = json(parentDnsZoneTagsVar)
 
 param location string
 
-resource petClinicAppUserManagedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
-  name: petClinicAppUserManagedIdentityName
-  location: location
-  tags: acaTagsArray
-}
+// resource petClinicAppUserManagedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
+//   name: petClinicAppUserManagedIdentityName
+//   location: location
+//   tags: acaTagsArray
+// }
 
-resource petClinicConfigSvcUserManagedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
-  name: petClinicConfigSvcUserManagedIdentityName
-  location: location
-  tags: acaTagsArray
-}
+// resource petClinicConfigSvcUserManagedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
+//   name: petClinicConfigSvcUserManagedIdentityName
+//   location: location
+//   tags: acaTagsArray
+// }
 
-resource petClinicCustsSvcUserManagedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
-  name: petClinicCustsSvcUserManagedIdentityName
-  location: location
-  tags: acaTagsArray
-}
+// resource petClinicCustsSvcUserManagedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
+//   name: petClinicCustsSvcUserManagedIdentityName
+//   location: location
+//   tags: acaTagsArray
+// }
 
-resource petClinicVetsSvcUserManagedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
-  name: petClinicVetsSvcUserManagedIdentityName
-  location: location
-  tags: acaTagsArray
-}
+// resource petClinicVetsSvcUserManagedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
+//   name: petClinicVetsSvcUserManagedIdentityName
+//   location: location
+//   tags: acaTagsArray
+// }
 
-resource petClinicVisitsSvcUserManagedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
-  name: petClinicVisitsSvcUserManagedIdentityName
-  location: location
-  tags: acaTagsArray
-}
+// resource petClinicVisitsSvcUserManagedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
+//   name: petClinicVisitsSvcUserManagedIdentityName
+//   location: location
+//   tags: acaTagsArray
+// }
 
 module logAnalytics 'components/log-analytics.bicep' = {
   name: 'log-analytics'
@@ -173,68 +173,68 @@ module keyVault 'components/kv.bicep' = {
   }
 }
 
-module kvSecretPetClinicConfigRepoURI 'components/kv-secret.bicep' = {
-  name: 'kv-secret-pet-clinic-config-repo-uri'
-  params: {
-    keyVaultName: keyVault.outputs.keyVaultName
-    secretName: 'PET-CLINIC-CONFIG-SVC-GIT-REPO-URI'
-    secretValue: petClinicGitConfigRepoUri
-  }
-}
+// module kvSecretPetClinicConfigRepoURI 'components/kv-secret.bicep' = {
+//   name: 'kv-secret-pet-clinic-config-repo-uri'
+//   params: {
+//     keyVaultName: keyVault.outputs.keyVaultName
+//     secretName: 'PET-CLINIC-CONFIG-SVC-GIT-REPO-URI'
+//     secretValue: petClinicGitConfigRepoUri
+//   }
+// }
 
-module kvSecretPetClinicConfigRepoUserName 'components/kv-secret.bicep' = {
-  name: 'kv-secret-pet-clinic-config-repo-usern-ame'
-  params: {
-    keyVaultName: keyVault.outputs.keyVaultName
-    secretName: 'PET-CLINIC-CONFIG-SVC-GIT-REPO-USERNAME'
-    secretValue: petClinicGitConfigRepoUserName
-  }
-}
+// module kvSecretPetClinicConfigRepoUserName 'components/kv-secret.bicep' = {
+//   name: 'kv-secret-pet-clinic-config-repo-usern-ame'
+//   params: {
+//     keyVaultName: keyVault.outputs.keyVaultName
+//     secretName: 'PET-CLINIC-CONFIG-SVC-GIT-REPO-USERNAME'
+//     secretValue: petClinicGitConfigRepoUserName
+//   }
+// }
 
-module kvSecretPetClinicConfigRepoPassword 'components/kv-secret.bicep' = {
-  name: 'kv-secret-pet-clinic-config-repo-password'
-  params: {
-    keyVaultName: keyVault.outputs.keyVaultName
-    secretName: 'PET-CLINIC-CONFIG-SVC-GIT-REPO-PASSWORD'
-    secretValue: petClinicGitConfigRepoPassword
-  }
-}
+// module kvSecretPetClinicConfigRepoPassword 'components/kv-secret.bicep' = {
+//   name: 'kv-secret-pet-clinic-config-repo-password'
+//   params: {
+//     keyVaultName: keyVault.outputs.keyVaultName
+//     secretName: 'PET-CLINIC-CONFIG-SVC-GIT-REPO-PASSWORD'
+//     secretValue: petClinicGitConfigRepoPassword
+//   }
+// }
 
-module kvSecretPetClinicAppSpringDSURL 'components/kv-secret.bicep' = {
-  name: 'kv-secret-pet-clinic-app-ds-url'
-  params: {
-    keyVaultName: keyVault.outputs.keyVaultName
-    secretName: 'PET-CLINIC-APP-SPRING-DATASOURCE-URL'
-    secretValue: 'jdbc:postgresql://${pgsqlName}.postgres.database.azure.com:5432/${pgsqlPetClinicDbName}'
-  }
-}
+// module kvSecretPetClinicAppSpringDSURL 'components/kv-secret.bicep' = {
+//   name: 'kv-secret-pet-clinic-app-ds-url'
+//   params: {
+//     keyVaultName: keyVault.outputs.keyVaultName
+//     secretName: 'PET-CLINIC-APP-SPRING-DATASOURCE-URL'
+//     secretValue: 'jdbc:postgresql://${pgsqlName}.postgres.database.azure.com:5432/${pgsqlPetClinicDbName}'
+//   }
+// }
 
-module kvSecretPetClinicCustsSvcDbUserName 'components/kv-secret.bicep' = {
-  name: 'kv-secret-pet-clinic-custs-svc-ds-username'
-  params: {
-    keyVaultName: keyVault.outputs.keyVaultName
-    secretName: 'PET-CLINIC-CUSTS-SVC-SPRING-DS-USER'
-    secretValue: petClinicCustsSvcDbUserName
-  }
-}
+// module kvSecretPetClinicCustsSvcDbUserName 'components/kv-secret.bicep' = {
+//   name: 'kv-secret-pet-clinic-custs-svc-ds-username'
+//   params: {
+//     keyVaultName: keyVault.outputs.keyVaultName
+//     secretName: 'PET-CLINIC-CUSTS-SVC-SPRING-DS-USER'
+//     secretValue: petClinicCustsSvcDbUserName
+//   }
+// }
 
-module kvSecretPetClinicVetsSvcDbUserName 'components/kv-secret.bicep' = {
-  name: 'kv-secret-pet-clinic-vets-svc-ds-username'
-  params: {
-    keyVaultName: keyVault.outputs.keyVaultName
-    secretName: 'PET-CLINIC-VETS-SVC-SPRING-DS-USER'
-    secretValue: petClinicVetsSvcDbUserName
-  }
-}
+// module kvSecretPetClinicVetsSvcDbUserName 'components/kv-secret.bicep' = {
+//   name: 'kv-secret-pet-clinic-vets-svc-ds-username'
+//   params: {
+//     keyVaultName: keyVault.outputs.keyVaultName
+//     secretName: 'PET-CLINIC-VETS-SVC-SPRING-DS-USER'
+//     secretValue: petClinicVetsSvcDbUserName
+//   }
+// }
 
-module kvSecretPetClinicVisitsSvcDbUserName 'components/kv-secret.bicep' = {
-  name: 'kv-secret-pet-clinic-visits-svc-ds-username'
-  params: {
-    keyVaultName: keyVault.outputs.keyVaultName
-    secretName: 'PET-CLINIC-VISITS-SVC-SPRING-DS-USER'
-    secretValue: petClinicVisitsSvcDbUserName
-  }
-}
+// module kvSecretPetClinicVisitsSvcDbUserName 'components/kv-secret.bicep' = {
+//   name: 'kv-secret-pet-clinic-visits-svc-ds-username'
+//   params: {
+//     keyVaultName: keyVault.outputs.keyVaultName
+//     secretName: 'PET-CLINIC-VISITS-SVC-SPRING-DS-USER'
+//     secretValue: petClinicVisitsSvcDbUserName
+//   }
+// }
 
 module kvSecretPetClinicAppInsightsConnectionString 'components/kv-secret.bicep' = {
   name: 'kv-secret-pet-clinic-ai-connection-string'
@@ -251,6 +251,24 @@ module kvSecretPetClinicAppInsightsInstrumentationKey 'components/kv-secret.bice
     keyVaultName: keyVault.outputs.keyVaultName
     secretName: 'PET-CLINIC-APP-INSIGHTS-INSTRUMENTATION-KEY'
     secretValue: petClinicAppInsights.outputs.appInsightsInstrumentationKey
+  }
+}
+
+module kvSecretTodoAppInsightsConnectionString 'components/kv-secret.bicep' = {
+  name: 'kv-secret-todo-app-ai-connection-string'
+  params: {
+    keyVaultName: keyVault.name
+    secretName: 'TODO-APP-INSIGHTS-CONNECTION-STRING'
+    secretValue: todoAppInsights.outputs.appInsightsConnectionString
+  }
+}
+
+module kvSecretTodoAppInsightsInstrumentationKey 'components/kv-secret.bicep' = {
+  name: 'kv-secret-todo-app-ai-instrumentation-key'
+  params: {
+    keyVaultName: keyVault.name
+    secretName: 'TODO-APP-INSIGHTS-INSTRUMENTATION-KEY'
+    secretValue: todoAppInsights.outputs.appInsightsInstrumentationKey
   }
 }
 
@@ -290,25 +308,25 @@ module dnsZonePetClinic 'components/dns-zone.bicep' = if (!empty(dnsZoneName) &&
   }
 }
 
-output petClinicAppUserManagedIdentityName string = petClinicAppUserManagedIdentity.name
-output petClinicAppUserManagedIdentityPrincipalId string = petClinicAppUserManagedIdentity.properties.principalId
-output petClinicAppUserManagedIdentityClientId string = petClinicAppUserManagedIdentity.properties.clientId
+// output petClinicAppUserManagedIdentityName string = petClinicAppUserManagedIdentity.name
+// output petClinicAppUserManagedIdentityPrincipalId string = petClinicAppUserManagedIdentity.properties.principalId
+// output petClinicAppUserManagedIdentityClientId string = petClinicAppUserManagedIdentity.properties.clientId
 
-output petClinicConfigSvcUserManagedIdentityName string = petClinicConfigSvcUserManagedIdentity.name
-output petClinicConfigSvcUserManagedIdentityPrincipalId string = petClinicConfigSvcUserManagedIdentity.properties.principalId
-output petClinicConfigSvcUserManagedIdentityClientId string = petClinicConfigSvcUserManagedIdentity.properties.clientId
+// output petClinicConfigSvcUserManagedIdentityName string = petClinicConfigSvcUserManagedIdentity.name
+// output petClinicConfigSvcUserManagedIdentityPrincipalId string = petClinicConfigSvcUserManagedIdentity.properties.principalId
+// output petClinicConfigSvcUserManagedIdentityClientId string = petClinicConfigSvcUserManagedIdentity.properties.clientId
 
-output petClinicCustsSvcUserManagedIdentityName string = petClinicCustsSvcUserManagedIdentity.name
-output petClinicCustsSvcUserManagedIdentityPrincipalId string = petClinicCustsSvcUserManagedIdentity.properties.principalId
-output petClinicCustsSvcUserManagedIdentityClientId string = petClinicCustsSvcUserManagedIdentity.properties.clientId
-output petClinicCustsSvcDbUserName string = petClinicCustsSvcDbUserName
+// output petClinicCustsSvcUserManagedIdentityName string = petClinicCustsSvcUserManagedIdentity.name
+// output petClinicCustsSvcUserManagedIdentityPrincipalId string = petClinicCustsSvcUserManagedIdentity.properties.principalId
+// output petClinicCustsSvcUserManagedIdentityClientId string = petClinicCustsSvcUserManagedIdentity.properties.clientId
+// output petClinicCustsSvcDbUserName string = petClinicCustsSvcDbUserName
 
-output petClinicVetsSvcUserManagedIdentityName string = petClinicVetsSvcUserManagedIdentity.name
-output petClinicVetsSvcUserManagedIdentityPrincipalId string = petClinicVetsSvcUserManagedIdentity.properties.principalId
-output petClinicVetsSvcUserManagedIdentityClientId string = petClinicVetsSvcUserManagedIdentity.properties.clientId
-output petClinicVetsSvcDbUserName string = petClinicVetsSvcDbUserName
+// output petClinicVetsSvcUserManagedIdentityName string = petClinicVetsSvcUserManagedIdentity.name
+// output petClinicVetsSvcUserManagedIdentityPrincipalId string = petClinicVetsSvcUserManagedIdentity.properties.principalId
+// output petClinicVetsSvcUserManagedIdentityClientId string = petClinicVetsSvcUserManagedIdentity.properties.clientId
+// output petClinicVetsSvcDbUserName string = petClinicVetsSvcDbUserName
 
-output petClinicVisitsSvcUserManagedIdentityName string = petClinicVisitsSvcUserManagedIdentity.name
-output petClinicVisitsSvcUserManagedIdentityPrincipalId string = petClinicVisitsSvcUserManagedIdentity.properties.principalId
-output petClinicVisitsSvcUserManagedIdentityClientId string = petClinicVisitsSvcUserManagedIdentity.properties.clientId
-output petClinicVisitsSvcDbUserName string = petClinicVisitsSvcDbUserName
+// output petClinicVisitsSvcUserManagedIdentityName string = petClinicVisitsSvcUserManagedIdentity.name
+// output petClinicVisitsSvcUserManagedIdentityPrincipalId string = petClinicVisitsSvcUserManagedIdentity.properties.principalId
+// output petClinicVisitsSvcUserManagedIdentityClientId string = petClinicVisitsSvcUserManagedIdentity.properties.clientId
+// output petClinicVisitsSvcDbUserName string = petClinicVisitsSvcDbUserName
