@@ -69,20 +69,10 @@ resource acaEnvironment 'Microsoft.App/managedEnvironments@2024-03-01' existing 
   name: acaName
 }
 
-module dnsRecordTXT './components/dns-record-txt.bicep' = {
-  name: 'dns-record-txt'
-  params: {
-    dnsZoneName: '${petClinicDnsZoneName}.${dnsZoneName}.${parentDnsZoneName}'
-    dnsRecordName: 'asuid.${appName}'
-    dnsRecordValue: acaEnvironment.properties.customDomainConfiguration.customDomainVerificationId
-  }
-}
-
 resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
    name: appName
    tags: acaTagsArray
    dependsOn: [
-    dnsRecordTXT
    ]
    identity: {
       type: 'UserAssigned'
@@ -244,7 +234,6 @@ resource acaManagedCertificate 'Microsoft.App/managedEnvironments/managedCertifi
   name: 'managed-certificate-${appName}'
   dependsOn: [
     dnsRecordCname
-    dnsRecordTXT
   ]
   tags: acaTagsArray
   properties: {
