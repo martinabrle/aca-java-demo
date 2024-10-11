@@ -70,9 +70,6 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
          '${todoAppUserManagedIdentity.id}': {}
       }
    }
-   dependsOn: [
-      dnsRecordTXT
-   ]
    properties: {
       environmentId: acaEnvironment.id
       configuration: {
@@ -204,16 +201,6 @@ resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
     location: location
 }
 
-
-module dnsRecordTXT './components/dns-record-txt.bicep' = {
-  name: 'dns-record-txt'
-  params: {
-    dnsZoneName: '${dnsZoneName}.${parentDnsZoneName}'
-    dnsRecordName: 'asuid.${appName}'
-    dnsRecordValue: acaEnvironment.properties.customDomainConfiguration.customDomainVerificationId
-  }
-}
-
 module dnsRecordCname './components/dns-record-cname.bicep' = {
   name: 'dns-record-cname'
   params: {
@@ -228,7 +215,6 @@ resource acaManagedCertificate 'Microsoft.App/managedEnvironments/managedCertifi
   name: 'managed-certificate-${appName}'
   dependsOn: [
     dnsRecordCname
-    dnsRecordTXT
   ]
   tags: json(acaTags)
   properties: {
