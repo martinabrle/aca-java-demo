@@ -3,6 +3,11 @@ name: 00-Init-Repository-Todo-App
 on:
   workflow_dispatch:
 
+permissions:
+  contents: write
+  packages: write
+  id-token: write
+    
 jobs:
     todo-app:
         uses: ./.github/workflows/71-continuous-integration-todo-app.yml

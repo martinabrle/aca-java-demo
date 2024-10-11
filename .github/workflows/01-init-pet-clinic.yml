@@ -3,6 +3,11 @@ name: 00-Init-Repository-Pet-Clinic
 on:
   workflow_dispatch:
 
+permissions:
+    contents: write
+    packages: write
+    id-token: write
+      
 jobs:
     pets-config-svc:
         uses: ./.github/workflows/72-continuous-integration-pets-config-srv.yml
