@@ -55,6 +55,15 @@ param petClinicDnsZoneName string = ''
 
 param todoAppName string = 'todo-app'
 param petClinicConfigSvcName string = 'config-service'
+param petClinicCustsSvcName string = 'customers-service'
+param petClinicVetsSvcName string = 'vets-service'
+param petClinicVisitsSvcName string = 'visits-service'
+param petClinicAdminSvcName string = 'admin-server'
+param petClinicApiGatewayName string = 'api-gateway'
+param petClinicDiscoveryServer string = 'discovery-server'
+param petClinicTracingServer string = 'tracing-server'
+param petClinicPrometheusServer string = 'prometheus'
+param petClinicGrafanaServer string = 'grafana'
 
 var acaTagsVar = (acaTags == '') ? '{ "CostCentre": "DEV", "Department": "RESEARCH", "WorkloadType": "TEST" }' : acaTags
 
@@ -216,6 +225,96 @@ module kvSecretPetClinicCustsSvcDbUserName 'components/kv-secret.bicep' = {
     secretName: 'PET-CLINIC-CUSTS-SVC-SPRING-DS-USER'
     secretValue: petClinicCustsSvcDbUserName
 
+  }
+}
+
+module kvSecretPetClinicConfigRepoURI 'components/kv-secret.bicep' = {
+  name: 'kv-secret-pet-clinic-config-repo-uri'
+  params: {
+    keyVaultName: keyVault.outputs.keyVaultName
+    secretName: 'PET-CLINIC-CONFIG-SVC-GIT-REPO-URI'
+    secretValue: petClinicGitConfigRepoUri
+  }
+}
+
+module kvSecretPetClinicConfigRepoUserName 'components/kv-secret.bicep' = {
+  name: 'kv-secret-pet-clinic-config-repo-user-name'
+  params: {
+    keyVaultName: keyVault.outputs.keyVaultName
+    secretName: 'PET-CLINIC-CONFIG-SVC-GIT-REPO-USERNAME'
+    secretValue: petClinicGitConfigRepoUserName
+  }
+}
+
+module kvSecretPetClinicConfigRepoPassword 'components/kv-secret.bicep' = {
+  name: 'kv-secret-pet-clinic-config-repo-password'
+  params: {
+    keyVaultName: keyVault.outputs.keyVaultName
+    secretName: 'PET-CLINIC-CONFIG-SVC-GIT-REPO-PASSWORD'
+    secretValue: petClinicGitConfigRepoPassword
+  }
+}
+
+module kvSecretPetClinicAppSpringDSURL 'components/kv-secret.bicep' = {
+  name: 'kv-secret-pet-clinic-app-ds-url'
+  params: {
+    keyVaultName: keyVault.outputs.keyVaultName
+    secretName: 'PET-CLINIC-APP-SPRING-DATASOURCE-URL'
+    secretValue: 'jdbc:postgresql://${pgsqlName}.postgres.database.azure.com:5432/${pgsqlPetClinicDbName}'
+  }
+}
+
+module kvSecretPetClinicVetsSvcDbUserName 'components/kv-secret.bicep' = {
+  name: 'kv-secret-pet-clinic-vets-svc-ds-username'
+  params: {
+    keyVaultName: keyVault.outputs.keyVaultName
+    secretName: 'PET-CLINIC-VETS-SVC-SPRING-DS-USER'
+    secretValue: petClinicVetsSvcDbUserName
+  }
+}
+
+module kvSecretPetClinicVisitsSvcDbUserName 'components/kv-secret.bicep' = {
+  name: 'kv-secret-pet-clinic-visits-svc-ds-username'
+  params: {
+    keyVaultName: keyVault.outputs.keyVaultName
+    secretName: 'PET-CLINIC-VISITS-SVC-SPRING-DS-USER'
+    secretValue: petClinicVisitsSvcDbUserName
+  }
+}
+
+module kvSecretPetClinicAppInsightsConnectionString 'components/kv-secret.bicep' = {
+  name: 'kv-secret-pet-clinic-ai-connection-string'
+  params: {
+    keyVaultName: keyVault.outputs.keyVaultName
+    secretName: 'PET-CLINIC-APP-INSIGHTS-CONNECTION-STRING'
+    secretValue: petClinicAppInsights.outputs.appInsightsConnectionString
+  }
+}
+
+module kvSecretPetClinicAppInsightsInstrumentationKey 'components/kv-secret.bicep' = {
+  name: 'kv-secret-pet-clinic-ai-instrumentation-key'
+  params: {
+    keyVaultName: keyVault.outputs.keyVaultName
+    secretName: 'PET-CLINIC-APP-INSIGHTS-INSTRUMENTATION-KEY'
+    secretValue: petClinicAppInsights.outputs.appInsightsInstrumentationKey
+  }
+}
+
+module kvSecretTodoAppInsightsConnectionString 'components/kv-secret.bicep' = {
+  name: 'kv-secret-todo-app-ai-connection-string'
+  params: {
+    keyVaultName: keyVault.outputs.keyVaultName
+    secretName: 'TODO-APP-INSIGHTS-CONNECTION-STRING'
+    secretValue: todoAppInsights.outputs.appInsightsConnectionString
+  }
+}
+
+module kvSecretTodoAppInsightsInstrumentationKey 'components/kv-secret.bicep' = {
+  name: 'kv-secret-todo-app-ai-instrumentation-key'
+  params: {
+    keyVaultName: keyVault.outputs.keyVaultName
+    secretName: 'TODO-APP-INSIGHTS-INSTRUMENTATION-KEY'
+    secretValue: todoAppInsights.outputs.appInsightsInstrumentationKey
   }
 }
 
@@ -539,96 +638,6 @@ module rbacContainerRegistryPetAppACRPull 'components/role-assignment-container-
   }
 }
 
-module kvSecretPetClinicConfigRepoURI 'components/kv-secret.bicep' = {
-  name: 'kv-secret-pet-clinic-config-repo-uri'
-  params: {
-    keyVaultName: keyVault.outputs.keyVaultName
-    secretName: 'PET-CLINIC-CONFIG-SVC-GIT-REPO-URI'
-    secretValue: petClinicGitConfigRepoUri
-  }
-}
-
-module kvSecretPetClinicConfigRepoUserName 'components/kv-secret.bicep' = {
-  name: 'kv-secret-pet-clinic-config-repo-user-name'
-  params: {
-    keyVaultName: keyVault.outputs.keyVaultName
-    secretName: 'PET-CLINIC-CONFIG-SVC-GIT-REPO-USERNAME'
-    secretValue: petClinicGitConfigRepoUserName
-  }
-}
-
-module kvSecretPetClinicConfigRepoPassword 'components/kv-secret.bicep' = {
-  name: 'kv-secret-pet-clinic-config-repo-password'
-  params: {
-    keyVaultName: keyVault.outputs.keyVaultName
-    secretName: 'PET-CLINIC-CONFIG-SVC-GIT-REPO-PASSWORD'
-    secretValue: petClinicGitConfigRepoPassword
-  }
-}
-
-module kvSecretPetClinicAppSpringDSURL 'components/kv-secret.bicep' = {
-  name: 'kv-secret-pet-clinic-app-ds-url'
-  params: {
-    keyVaultName: keyVault.outputs.keyVaultName
-    secretName: 'PET-CLINIC-APP-SPRING-DATASOURCE-URL'
-    secretValue: 'jdbc:postgresql://${pgsqlName}.postgres.database.azure.com:5432/${pgsqlPetClinicDbName}'
-  }
-}
-
-module kvSecretPetClinicVetsSvcDbUserName 'components/kv-secret.bicep' = {
-  name: 'kv-secret-pet-clinic-vets-svc-ds-username'
-  params: {
-    keyVaultName: keyVault.outputs.keyVaultName
-    secretName: 'PET-CLINIC-VETS-SVC-SPRING-DS-USER'
-    secretValue: petClinicVetsSvcDbUserName
-  }
-}
-
-module kvSecretPetClinicVisitsSvcDbUserName 'components/kv-secret.bicep' = {
-  name: 'kv-secret-pet-clinic-visits-svc-ds-username'
-  params: {
-    keyVaultName: keyVault.outputs.keyVaultName
-    secretName: 'PET-CLINIC-VISITS-SVC-SPRING-DS-USER'
-    secretValue: petClinicVisitsSvcDbUserName
-  }
-}
-
-module kvSecretPetClinicAppInsightsConnectionString 'components/kv-secret.bicep' = {
-  name: 'kv-secret-pet-clinic-ai-connection-string'
-  params: {
-    keyVaultName: keyVault.outputs.keyVaultName
-    secretName: 'PET-CLINIC-APP-INSIGHTS-CONNECTION-STRING'
-    secretValue: petClinicAppInsights.outputs.appInsightsConnectionString
-  }
-}
-
-module kvSecretPetClinicAppInsightsInstrumentationKey 'components/kv-secret.bicep' = {
-  name: 'kv-secret-pet-clinic-ai-instrumentation-key'
-  params: {
-    keyVaultName: keyVault.outputs.keyVaultName
-    secretName: 'PET-CLINIC-APP-INSIGHTS-INSTRUMENTATION-KEY'
-    secretValue: petClinicAppInsights.outputs.appInsightsInstrumentationKey
-  }
-}
-
-module kvSecretTodoAppInsightsConnectionString 'components/kv-secret.bicep' = {
-  name: 'kv-secret-todo-app-ai-connection-string'
-  params: {
-    keyVaultName: keyVault.outputs.keyVaultName
-    secretName: 'TODO-APP-INSIGHTS-CONNECTION-STRING'
-    secretValue: todoAppInsights.outputs.appInsightsConnectionString
-  }
-}
-
-module kvSecretTodoAppInsightsInstrumentationKey 'components/kv-secret.bicep' = {
-  name: 'kv-secret-todo-app-ai-instrumentation-key'
-  params: {
-    keyVaultName: keyVault.outputs.keyVaultName
-    secretName: 'TODO-APP-INSIGHTS-INSTRUMENTATION-KEY'
-    secretValue: todoAppInsights.outputs.appInsightsInstrumentationKey
-  }
-}
-
 module acaEnvironment 'components/aca-environment.bicep' = {
   name: 'aca-environment'
   params: {
@@ -675,10 +684,91 @@ module dnsRecordTXT './components/dns-record-txt.bicep' = {
 }
 
 module dnsRecordTXTPetClinicConfigSvc './components/dns-record-txt.bicep' = {
-  name: 'dns-record-txt-pet-clinic'
+  name: 'dns-record-txt-pet-clinic-config-svc'
   params: {
     dnsZoneName: '${petClinicDnsZoneName}.${dnsZoneName}.${parentDnsZoneName}'
     dnsRecordName: 'asuid.${petClinicConfigSvcName}'
+    dnsRecordValue: acaEnvironment.outputs.acaCustomDomainVerificationId
+  }
+}
+
+module dnsRecordTXTPetClinicAdminSvc './components/dns-record-txt.bicep' = {
+  name: 'dns-record-txt-pet-clinic-admin-svc'
+  params: {
+    dnsZoneName: '${petClinicDnsZoneName}.${dnsZoneName}.${parentDnsZoneName}'
+    dnsRecordName: 'asuid.${petClinicAdminSvcName}'
+    dnsRecordValue: acaEnvironment.outputs.acaCustomDomainVerificationId
+  }
+}
+
+module dnsRecordTXTPetClinicCustsSvc './components/dns-record-txt.bicep' = {
+  name: 'dns-record-txt-pet-clinic-custs-svc'
+  params: {
+    dnsZoneName: '${petClinicDnsZoneName}.${dnsZoneName}.${parentDnsZoneName}'
+    dnsRecordName: 'asuid.${petClinicCustsSvcName}'
+    dnsRecordValue: acaEnvironment.outputs.acaCustomDomainVerificationId
+  }
+}
+
+module dnsRecordTXTPetClinicVetsSvc './components/dns-record-txt.bicep' = {
+  name: 'dns-record-txt-pet-clinic-vets-svc'
+  params: {
+    dnsZoneName: '${petClinicDnsZoneName}.${dnsZoneName}.${parentDnsZoneName}'
+    dnsRecordName: 'asuid.${petClinicVetsSvcName}'
+    dnsRecordValue: acaEnvironment.outputs.acaCustomDomainVerificationId
+  }
+}
+
+module dnsRecordTXTPetClinicVisitsSvc './components/dns-record-txt.bicep' = {
+  name: 'dns-record-txt-pet-clinic-visits-svc'
+  params: {
+    dnsZoneName: '${petClinicDnsZoneName}.${dnsZoneName}.${parentDnsZoneName}'
+    dnsRecordName: 'asuid.${petClinicVisitsSvcName}'
+    dnsRecordValue: acaEnvironment.outputs.acaCustomDomainVerificationId
+  }
+}
+
+module dnsRecordTXTPetClinicApiGateway './components/dns-record-txt.bicep' = {
+  name: 'dns-record-txt-pet-clinic-api-gw'
+  params: {
+    dnsZoneName: '${petClinicDnsZoneName}.${dnsZoneName}.${parentDnsZoneName}'
+    dnsRecordName: 'asuid.${petClinicApiGatewayName}'
+    dnsRecordValue: acaEnvironment.outputs.acaCustomDomainVerificationId
+  }
+}
+
+module dnsRecordTXTPetClinicDiscoSvc './components/dns-record-txt.bicep' = {
+  name: 'dns-record-txt-pet-clinic-disco-svc'
+  params: {
+    dnsZoneName: '${petClinicDnsZoneName}.${dnsZoneName}.${parentDnsZoneName}'
+    dnsRecordName: 'asuid.${petClinicDiscoveryServer}'
+    dnsRecordValue: acaEnvironment.outputs.acaCustomDomainVerificationId
+  }
+}
+
+module dnsRecordTXTPetClinicTracingSvc './components/dns-record-txt.bicep' = {
+  name: 'dns-record-txt-pet-clinic-tracing-svc'
+  params: {
+    dnsZoneName: '${petClinicDnsZoneName}.${dnsZoneName}.${parentDnsZoneName}'
+    dnsRecordName: 'asuid.${petClinicTracingServer}'
+    dnsRecordValue: acaEnvironment.outputs.acaCustomDomainVerificationId
+  }
+}
+
+module dnsRecordTXTPetClinicPrometheusSvc './components/dns-record-txt.bicep' = {
+  name: 'dns-record-txt-pet-clinic-prometheus-svc'
+  params: {
+    dnsZoneName: '${petClinicDnsZoneName}.${dnsZoneName}.${parentDnsZoneName}'
+    dnsRecordName: 'asuid.${petClinicPrometheusServer}'
+    dnsRecordValue: acaEnvironment.outputs.acaCustomDomainVerificationId
+  }
+}
+
+module dnsRecordTXTPetClinicGrafanaSvc './components/dns-record-txt.bicep' = {
+  name: 'dns-record-txt-pet-clinic-grafana-svc'
+  params: {
+    dnsZoneName: '${petClinicDnsZoneName}.${dnsZoneName}.${parentDnsZoneName}'
+    dnsRecordName: 'asuid.${petClinicGrafanaServer}'
     dnsRecordValue: acaEnvironment.outputs.acaCustomDomainVerificationId
   }
 }
