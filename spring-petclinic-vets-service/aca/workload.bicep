@@ -18,6 +18,8 @@ param dnsZoneName string = ''
 param petClinicDnsZoneName string = ''
 param parentDnsZoneName string = ''
 
+var acaTagsArray = json(empty(acaTags) ? '{ "CostCentre": "DEV", "Department": "RESEARCH", "WorkloadType": "TEST" }' : acaTags)
+
 var containerRegistrySubscriptionIdVar = (containerRegistrySubscriptionId == '')
   ? subscription().id
   : containerRegistrySubscriptionId
