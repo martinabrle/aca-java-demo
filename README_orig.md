@@ -2,21 +2,11 @@ Clone of the original spring-petclinic-microservices GitHub Repo: [https://githu
 
 # Distributed version of the Spring PetClinic Sample Application built with Spring Cloud 
 
-[![70-Continuous-Integration](https://github.com/martinabrle/aca-java-demo/actions/workflows/70-continuous-integration.yml/badge.svg)](https://github.com/martinabrle/aca-java-demo/actions/workflows/70-continuous-integration.yml)
-
-[![99-Continuous-Delivery](https://github.com/martinabrle/aca-java-demo/actions/workflows/99-continuous-delivery.yml/badge.svg)](https://github.com/martinabrle/aca-java-demo/actions/workflows/99-continuous-delivery.yml)
-
-[![Deployment status](https://github.com/martinabrle/aca-java-demo/actions/workflows/98-infra.yml/badge.svg)](https://github.com/martinabrle/aca-java-demo/actions/workflows/98-infra.yml)
-
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 This microservices branch was initially derived from [AngularJS version](https://github.com/spring-petclinic/spring-petclinic-angular1) to demonstrate how to split sample Spring application into [microservices](http://www.martinfowler.com/articles/microservices.html).
 To achieve that goal, we use Spring Cloud Gateway, Spring Cloud Circuit Breaker, Spring Cloud Config, Micrometer Tracing, Resilience4j, Open Telemetry 
 and the Eureka Service Discovery from the [Spring Cloud Netflix](https://github.com/spring-cloud/spring-cloud-netflix) technology stack.
-
-## Deploying into Azure Container Apps (ACA)
-Follow these [docs](./docs/README_AZURE.md) to deploy the application into Azure Container Apps (ACA).
-
 
 ## Starting services locally without Docker
 
