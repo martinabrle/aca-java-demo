@@ -1,6 +1,6 @@
 # Distributed version of the Spring PetClinic Sample Application built with Spring Cloud 
 
-Clone of the  spring-petclinic-microservices GitHub Repo: [https://github.com/spring-petclinic/spring-petclinic-microservices](https://github.com/spring-petclinic/spring-petclinic-microservices), used to demonstrate deploying a distributed Spring Boot App into Azure Container Apps (ACA), while usilising other services like a managed PostgreSQL database, Application Gateway (WAF), and Azure Key Vault.
+Clone of the  spring-petclinic-microservices GitHub Repo: [https://github.com/spring-petclinic/spring-petclinic-microservices](https://github.com/spring-petclinic/spring-petclinic-microservices), used to demonstrate deploying a distributed Spring Boot App into Azure Container Apps (ACA), while usilising other services as managed PostgreSQL database, Application Insights, Azure Key Vaults etc..
 
 Application architecture and the original description of this Spring Boot app can be found [here](./README_orig.md).
 
