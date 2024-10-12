@@ -4,7 +4,7 @@ param acaTags string = '{ "CostCentre": "DEV", "Department": "RESEARCH", "Worklo
 param appVersion string
 
 param petClinicCustsSvcUserManagedIdentityName string = '${acaName}-pet-clinic-custs-identity'
-param appName string = 'customers-service'
+param appName string = 'vets-service'
 param appClientId string
 param containerImage string
 
