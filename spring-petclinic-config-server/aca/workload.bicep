@@ -48,12 +48,12 @@ resource kvSecretPetClinicConfigRepoURI 'Microsoft.KeyVault/vaults/secrets@2024-
 
 resource kvSecretPetClinicConfigRepoUserName 'Microsoft.KeyVault/vaults/secrets@2024-04-01-preview' existing = {
   parent: keyVault
-  name: 'PET-CLINIC-CONFIG-SVC-GIT-REPO-USER'
+  name: 'PET-CLINIC-CONFIG-SVC-GIT-REPO-USERNAME'
 }
 
 resource kvSecretPetClinicConfigRepoPassword 'Microsoft.KeyVault/vaults/secrets@2024-04-01-preview' existing = {
   parent: keyVault
-  name: 'PET-CLINIC-CONFIG-SVC-GIT-REPO-PWD'
+  name: 'PET-CLINIC-CONFIG-SVC-GIT-REPO-PASSWORD'
 }
 
 resource keyVault 'Microsoft.KeyVault/vaults@2024-04-01-preview' existing = {
