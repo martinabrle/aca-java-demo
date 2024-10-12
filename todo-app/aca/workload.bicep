@@ -1,5 +1,5 @@
 param acaName string
-param acaTags string
+param acaTags string = '{ "CostCentre": "DEV", "Department": "RESEARCH", "WorkloadType": "TEST" }'
 
 param appVersion string
 
@@ -16,6 +16,8 @@ param containerRegistryRG string = resourceGroup().name
 
 param dnsZoneName string = ''
 param parentDnsZoneName string = ''
+
+var acaTagsArray = json(empty(acaTags) ? '{ "CostCentre": "DEV", "Department": "RESEARCH", "WorkloadType": "TEST" }' : acaTags)
 
 var containerRegistrySubscriptionIdVar = (containerRegistrySubscriptionId == '')
   ? subscription().id
@@ -63,7 +65,7 @@ resource acaEnvironment 'Microsoft.App/managedEnvironments@2024-03-01' existing 
 
 resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
    name: appName
-   tags: json(acaTags)
+   tags: acaTagsArray
    identity: {
       type: 'UserAssigned'
       userAssignedIdentities: {
@@ -216,7 +218,7 @@ resource acaManagedCertificate 'Microsoft.App/managedEnvironments/managedCertifi
   dependsOn: [
     dnsRecordCname
   ]
-  tags: json(acaTags)
+  tags: acaTagsArray
   properties: {
     domainControlValidation: 'CNAME'
     subjectName: '${appName}.${dnsZoneName}.${parentDnsZoneName}'

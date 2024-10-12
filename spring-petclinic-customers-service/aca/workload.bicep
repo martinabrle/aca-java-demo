@@ -66,7 +66,7 @@ resource acaEnvironment 'Microsoft.App/managedEnvironments@2024-03-01' existing 
 
 resource acaApp 'Microsoft.App/containerApps@2024-03-01' = {
    name: appName
-   tags: json(acaTags)
+   tags: acaTagsArray
    identity: {
       type: 'UserAssigned'
       userAssignedIdentities: {
