@@ -161,28 +161,6 @@ jobs:
           az acr build ./ -r ${{env.CONTAINER_REGISTRY_NAME}} -t "${{env.ARTIFACT_NAME}}:${{env.VERSION}}" --file ./Dockerfile --subscription "${{env.CONTAINER_REGISTRY_SUBSCRIPTION_ID}}"
           cd ..
 
-      # - name: Deploy app specific infrastructure (managed identities, RBAC etc.)
-      #   id: deployment
-      #   env:
-      #     RELEASE_DIR_NAME: ${{steps.versions.outputs.RELEASE_DIR_NAME}}
-      #   run: |
-      #     deploymentOutput=`az deployment group create \
-      #                                   --resource-group ${{env.ACA_RESOURCE_GROUP}} \
-      #                                   --template-file ./${{env.RELEASE_DIR_NAME}}/aca/infra.bicep \
-      #                                   --parameters acaName="${{env.ACA_NAME}}" \
-      #                                                acaTags="${{vars.ACA_RESOURCE_TAGS}}" \
-      #                                                petClinicConfigSvcUserManagedIdentityName="${{env.USER_IDENTITY_NAME}}" \
-      #                                                petClinicGitConfigRepoUri="${{secrets.PET_CLINIC_GIT_CONFIG_REPO_URI}}" \
-      #                                                petClinicGitConfigRepoUserName="${{secrets.PET_CLINIC_GIT_CONFIG_REPO_USERNAME}}" \
-      #                                                petClinicGitConfigRepoPassword="${{secrets.PET_CLINIC_GIT_CONFIG_REPO_PASSWORD}}" \
-      #                                                containerRegistryName="${{secrets.CONTAINER_REGISTRY_NAME}}" \
-      #                                                containerRegistrySubscriptionId="${{env.CONTAINER_REGISTRY_SUBSCRIPTION_ID}}" \
-      #                                                containerRegistryRG="${{env.CONTAINER_REGISTRY_RESOURCE_GROUP}}" \
-      #                                                location="${{secrets.AZURE_LOCATION}}" `
-      #     echo "Deployment output:"
-      #     echo "=================="
-      #     echo "$deploymentOutput"
-
       - name: Synchronize DB Schema
         if: ${{ env.DB != '' }}
         env:
