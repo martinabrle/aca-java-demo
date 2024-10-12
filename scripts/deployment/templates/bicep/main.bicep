@@ -54,7 +54,7 @@ param parentDnsZoneTags string = ''
 param petClinicDnsZoneName string = ''
 
 param todoAppName string = 'todo-app'
-param petClinicConfigSvcName string = 'config-service'
+param petClinicConfigSvcName string = 'config-server'
 param petClinicCustsSvcName string = 'customers-service'
 param petClinicVetsSvcName string = 'vets-service'
 param petClinicVisitsSvcName string = 'visits-service'
