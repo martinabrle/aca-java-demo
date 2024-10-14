@@ -248,6 +248,6 @@
     ```
 
 * Test the Todo application:
-    If you have chosen to integrate with Azure DNS, point the browser to the custom URL of the Todo App, e.g. ```https://todoapp.aca-java-demo.petclinic.DEVELOPMENT_ENVI.MY_COMPANY_DOMAIN.com``` - you cab cchecck the DNS records created. Alternatively, navigate to the newly created resource group and find the toto ACA App service, and click on the URL in the overview blade.
+    If you have chosen to integrate with Azure DNS, point the browser to the custom URL of the Todo App, e.g. ```https://todoapp.aca-java-demo.petclinic.DEVELOPMENT_ENVI.MY_COMPANY_DOMAIN.com``` - you cab check the DNS records created. Alternatively, navigate to the newly created resource group and find the toto ACA App service, and click on the URL in the overview blade.
 
 * Now you can repeat the steps above for each Pet Clinic microservice (Customers, Vets, Visits, ApiGateway, AdminServer, DiscoveryServer, Zipkin, Grafana, Prometheus) and deploy them into ACA as well. This is, however, a significant amount of work, so you might want to automate this process with CI/CD pipelines ([defined here](https://github.com/martinabrle/aca-java-demo/tree/main/.github/workflows)). Folow the steps in the [Pet Clinic App on Azure Container Apps (ACA)](./aca-java-demo.md) document to deploy both Pet Clinic App and Todo App into ACA.
