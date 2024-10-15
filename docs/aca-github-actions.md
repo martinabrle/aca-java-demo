@@ -8,17 +8,41 @@
 * Copy pet clinic app's config repo content from [this](https://github.com/martinabrle/aks-java-demo-config) repo into your personal or organizational GitHub Account
 * *Note: This limited example is not utilising GitHub->Settings->Environments. It would make sense to have separated DEVE, TEST, UAT and PRODUCTION environments*
 * Click on *GitHub->Settings->Secrets and Variables* and set the following GitHub action secrets:
+
 ```bash
-AAD_CLIENT_ID="00000000-0000-0000-0000-000000000000" # <-- replace with the client Id of a Microsoft Entra ID registered application, used for deploying Azure resources
-AAD_TENANT_ID="00000000-0000-0000-0000-000000000000" # <-- replace with Azure tenantId for deploying resources
-```
+    AZURE_LOCATION: "switzerlandnorth" # <-- azure region for deploying resources
+
+    AAD_CLIENT_ID="00000000-0000-0000-0000-000000000000" # <-- replace with the client Id of a Microsoft Entra ID registered application, used for deploying Azure resources (see below)
+    AAD_TENANT_ID="00000000-0000-0000-0000-000000000000" # <-- replace with Azure tenantId for deploying resources
+    ACA_SUBSCRIPTION_ID="00000000-0000-0000-0000-000000000000" # <-- replace with azure subscription for deploying resources
+
+    ACA_NAME=aca-aks-java-demo # <-- name of the ACA cluster
+    ACA_RESOURCE_GROUP: aca-rg # <-- resource group for deploying resources (will be created)
+
+    PGSQL_NAME="{{{REPLACE_WITH_PGSQL_NAME}}}" # <--PGSQL Server name, needs to be unique
+    DBA_GROUP_NAME="All TEST PGSQL Admins" # <--Entra ID group of users with permissions to manage the PGSQL server
+    DBA_GROUP_ID="00000000-0000-0000-0000-000000000000"  # Id of the Entra ID group of users with permissions to manage the PGSQL server, obtain from Portal's UI or by running 'az ad group show --group "${DBA_GROUP_NAME}" --query '[id]' -o tsv'
+
+    CONTAINER_REGISTRY_NAME="{{{REPLACE_WITH_APP_SERVICE_NAME}}}" # <--needs to be unique
+    LOG_ANALYTICS_WRKSPC_NAME="{{{REPLACE_WITH_LOG_WORKSPACE_NAME}}}" # <--needs to be unique
+
+    PET_CLINIC_GIT_CONFIG_REPO_URI="https://github.com/martinabrle/aks-java-demo-config" # <--URI of YOUR Git repository with Pet Clinic Java Spring Boot configurations
+    PET_CLINIC_GIT_CONFIG_REPO_USERNAME="martinabrle" # <--Username to access the Git repository with Pet Clinic Java Spring Boot configurations - in this case my GH handle
+    PET_CLINIC_GIT_CONFIG_REPO_PASSWORD="PAT_TOKEN" # <--Token to access the Git repository with Pet Clinic Java Spring Boot configurations
+
+    TODO_APP_DB_NAME="tododb" # <--Name of the database for the Todo App
+    PET_CLINIC_DB_NAME="petclinicdb" # <--Name of the database for the Pet Clinic App
+
+    TODO_APP_DB_USER_NAME="todoapp" # <--Name of database the user for the Todo App
+    PET_CLINIC_CUSTS_SVC_DB_USER_NAME="custssvc" # <--Name of the database user for the Pet Clinic Customers Service
+    PET_CLINIC_VETS_SVC_DB_USER_NAME="vetssvc" # <--Name of the database user for the Pet Clinic Vets Service
+    PET_CLINIC_VISITS_SVC_DB_USER_NAME="visitssvc" # <--Name of database the user for the Pet Clinic Visits Service
+    ```
 
 * Optionaly, for a greater control over the names of deployed resources, separating deployment of stateless and statefull workloads, or governance (tagging), set the following GitHub action secrets: 
+
 ```bash
-ACA_NAME=aca-aks-java-demo # <-- name of the ACA cluster
-ACA_RESOURCE_GROUP: aca-rg # <-- resource group for deploying resources (will be created)
-ACA_SUBSCRIPTION_ID="00000000-0000-0000-0000-000000000000" # <-- replace with azure subscription for deploying resources
-AZURE_LOCATION: "switzerlandnorth" # <-- azure region for deploying resources
+
 CONTAINER_REGISTRY_NAME="uniquelowercasename" # <-- name of the container registry
 CONTAINER_REGISTRY_RESOURCE_GROUP="acr-rg" # <-- OPTIONAL: container registry resource group
 CONTAINER_REGISTRY_SUBSCRIPTION_ID="00000000-0000-0000-0000-000000000000" # <-- OPTIONAL: replace with the container registry resource group
@@ -38,15 +62,16 @@ PET_CLINIC_GIT_CONFIG_REPO_URI
 PET_CLINIC_GIT_CONFIG_REPO_USERNAME
 PET_CLINIC_VETS_SVC_DB_USER_NAME
 PET_CLINIC_VISITS_SVC_DB_USER_NAME
-PGSQL_NAME
+
 PGSQL_RESOURCE_GROUP
 PGSQL_SUBSCRIPTION_ID
 TODO_APP_DB_NAME
 TODO_APP_DB_USER_NAME
 ```
 
-* Click on *GitHub->Settings->Secrets and Variables* and set the following GitHub action variables:
-```
+* Optionally, you can set some or all of the following environment variables under *GitHub->Settings->Secrets and Variables* in order to tag resources for better governance:
+
+```bash
 ACA_RESOURCE_TAGS: { \"Department\": \"RESEARCH\", \"CostCentre\": \"DEVELOPMENT\", \"DeleteWeekly\": \"true\", \"Workload\": \"DEVELOPMENT\", \"StopNightly\": \"true\"}
 CONTAINER_REGISTRY_RESOURCE_TAGS: { \"Department\": \"RESEARCH\", \"CostCentre\": \"DEVELOPMENT\", \"DeleteWeekly\": \"false\", \"Workload\": \"DEVELOPMENT\"}
 LOG_ANALYTICS_WRKSPC_RESOURCE_TAGS: { \"Department\": \"RESEARCH\", \"CostCentre\": \"DEVELOPMENT\", \"DeleteWeekly\": \"false\", \"Workload\": \"DEVELOPMENT\"}
