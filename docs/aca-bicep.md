@@ -178,6 +178,7 @@
     ```
 
 * Synchronize the DB schema and load the demo data into the PGSQL server:
+
     ```bash
     export PGPASSWORD=`az account get-access-token --resource-type oss-rdbms --query "[accessToken]" --output tsv`
     echo "Token: ${PGPASSWORD}"
@@ -206,7 +207,7 @@
     ```
 
 * Deploy the TODO APP container image into ACA:
-    
+
     ```bash
     certificateId=''
     if [[ ! -z ${secrets.DNS_ZONE_NAME} ]]; then

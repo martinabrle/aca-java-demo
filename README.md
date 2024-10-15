@@ -12,10 +12,9 @@ Application architecture and the original description of this Spring Boot app ca
 
 [![00-Init-Repository-Pet-Clinic - Init Repo](https://github.com/martinabrle/aca-java-demo/actions/workflows/01-init-pet-clinic.yml/badge.svg)](https://github.com/martinabrle/aca-java-demo/actions/workflows/01-init-pet-clinic.yml)
 
-
-## !!!Currently the docs are broken, under development!!!
-
 ## Different ways of deploying the app into Azure Container Apps (ACA)
 
-* [Deploying apps using Command Line Interface (AZ CLI) and Bicep templates](./docsaca-bicep.md)
+![Architecture Diagram](./aca-java-demo-architecture.drawio.png)
+
+* [Deploying apps using Command Line Interface (AZ CLI) and Bicep templates](./docs/aca-bicep.md)
 * [Deploying the app using GitHub Actions (CI/CD pipelines)](./docs/aca-github-actions.md)
