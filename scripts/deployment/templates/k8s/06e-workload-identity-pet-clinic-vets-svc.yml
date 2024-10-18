@@ -1,7 +1,0 @@
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  annotations:
-    azure.workload.identity/client-id: ${VETS_SVC_CLIENT_ID}
-  name: pet-clinic-vets-service-account
-  namespace: pet-clinic
