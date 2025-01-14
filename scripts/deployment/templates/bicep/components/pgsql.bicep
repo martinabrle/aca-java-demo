@@ -32,7 +32,7 @@ resource postgreSQLServer 'Microsoft.DBforPostgreSQL/flexibleServers@2022-12-01'
       geoRedundantBackup: 'Disabled'
     }
     createMode: 'Default'
-    version: '14'
+    version: '16.4'
     storage: {
       storageSizeGB: 32
     }
